@@ -1,7 +1,7 @@
 type Asn1Tag = u64;
 
 type Asn1Data = Vec<u8>;
-type Asn1Slice = &[u8];
+type Asn1Slice<'a> = &'a [u8];
 
 enum Asn1Type {
   // Universal types here ...
