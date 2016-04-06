@@ -1,4 +1,5 @@
 type Asn1Tag = u64;
+type Asn1Len = u64;
 
 type Asn1Data = Vec<u8>;
 type Asn1Slice<'a> = &'a [u8];
