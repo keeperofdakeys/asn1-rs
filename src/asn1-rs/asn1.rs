@@ -4,11 +4,33 @@ type Asn1Len = u64;
 type Asn1Data = Vec<u8>;
 type Asn1Slice<'a> = &'a [u8];
 
-enum Asn1Type {
+enum Asn1Tag {
   // Universal types here ...
-  AplicationTag(Asn1Tag, String),
-  PrivateTag(Asn1Tag, String),
+  UniversalTag(u64)
+  AplicationTag(u64),
+  PrivateTag(u64),
+  ContextSpecificTag(u64),
 }
+
+impl Asn1Tag {
+  /// Returns true when this is a structured type.
+  fn is_structured(&self) -> bool {
+    if let Asn1Tag::UniversalTag(tag) == *self {
+      match tag {
+        // SEQUENCE (OF)
+        16 => true,
+        // SET (OF)
+        17 => true,
+        _ => false,
+
+      }
+    } else {
+      false
+    }
+  }
+}
+
+type Asn1Type = String;
 
 trait Asn1Data {
   fn get_asn1_type() -> Asn1Type;
