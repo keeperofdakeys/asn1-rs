@@ -1,15 +1,15 @@
-type Asn1Tag = u64;
 type Asn1Len = u64;
+type Asn1TagNum = u64;
 
 type Asn1Data = Vec<u8>;
 type Asn1Slice<'a> = &'a [u8];
 
 enum Asn1Tag {
   // Universal types here ...
-  UniversalTag(u64)
-  AplicationTag(u64),
-  PrivateTag(u64),
-  ContextSpecificTag(u64),
+  UniversalTag(Asn1TagNum)
+  AplicationTag(Asn1TagNum),
+  PrivateTag(Asn1TagNum),
+  ContextSpecificTag(Asn1TagNum),
 }
 
 impl Asn1Tag {
