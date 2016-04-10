@@ -1,3 +1,5 @@
+type Asn1LenNum;
+
 /// An enum representing the length of an ASN.1 element.
 enum Asn1Len {
   /// A Definite length element.
@@ -6,8 +8,8 @@ enum Asn1Len {
   pub Indefinite,
 }
 
-impl From<u64> for Asn1Len {
-  fn from(len: u64) -> Self {
+impl From<Asn1LenNum> for Asn1Len {
+  fn from(len: Asn1LenNum) -> Self {
     match len {
       l => Asn1Len::Def(l),
       0 => Asn1Len::Indef,
@@ -67,8 +69,6 @@ impl Asn1Tag {
     }
   }
 }
-
-type Asn1Type = String;
 
 trait Asn1Data {
   fn get_asn1_type() -> Asn1Type;
