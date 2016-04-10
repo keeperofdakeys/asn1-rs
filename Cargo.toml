@@ -4,3 +4,6 @@ version = "0.1.0"
 authors = ["Josh <keeperofdakeys@gmail.com>"]
 
 [dependencies]
+
+[lib]
+path="src/asn1-rs/lib.rs"

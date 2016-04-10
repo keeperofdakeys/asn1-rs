@@ -1,18 +1,19 @@
-type Asn1LenNum;
+pub type Asn1LenNum = u64;
 
+#[derive(PartialEq, Debug)]
 /// An enum representing the length of an ASN.1 element.
-enum Asn1Len {
+pub enum Asn1Len {
   /// A Definite length element.
-  pub Definite(u64),
+  Def(u64),
   /// An Indefinite length element, not known before decoding.
-  pub Indefinite,
+  Indef,
 }
 
 impl From<Asn1LenNum> for Asn1Len {
   fn from(len: Asn1LenNum) -> Self {
     match len {
-      l => Asn1Len::Def(l),
       0 => Asn1Len::Indef,
+      l => Asn1Len::Def(l),
     }
   }
 }
@@ -27,22 +28,35 @@ impl From<Asn1Len> for u64 {
 }
 
 /// An ASN.1 tag number.
-type Asn1TagNum = u64;
+pub type Asn1TagNum = u64;
 
+#[derive(PartialEq, Debug)]
 /// An ASN.1 Class.
-enum Asn1Class {
+pub enum Asn1Class {
   /// Universal class.
   Universal,
   /// Application class.
-  Aplication,
-  /// Private class.
-  Private,
+  Application,
   /// Context-specific class.
   ContextSpecific,
+  /// Private class.
+  Private,
+}
+
+impl From<u8> for Asn1Class {
+  fn from(len: u8) -> Self {
+    match len {
+      0 => Asn1Class::Universal,
+      1 => Asn1Class::Application,
+      2 => Asn1Class::ContextSpecific,
+      3 => Asn1Class::Private,
+      _ => unreachable!()
+    }
+  }
 }
 
 /// A struct representing an ASN.1 element.
-struct Asn1Tag {
+pub struct Asn1Tag {
   /// The class of the ASN.1 element.
   pub class: Asn1Class,
   /// The tag number of the ASN.1 element.
@@ -56,7 +70,7 @@ struct Asn1Tag {
 impl Asn1Tag {
   /// Returns true when this is a structured type.
   fn is_structured(&self) -> bool {
-    if let Asn1Class::Universal == *self.class {
+    if self.class == Asn1Class::Universal {
       match self.tagnum {
         // SEQUENCE (OF)
         16 => true,
@@ -70,15 +84,17 @@ impl Asn1Tag {
   }
 }
 
+type Asn1Type = String;
+
 trait Asn1Data {
   fn get_asn1_type() -> Asn1Type;
 
-  /// Create ASN.1 data from this struct.
+  // /// Create ASN.1 data from this struct.
   // FIXME: Should this use &self?
-  fn into_asn1(&self) -> Result<Asn1Data, Asn1Error>;
+  // fn into_asn1(&self) -> Result<Asn1Data, Asn1Error>;
 
-  /// Create this struct from ASN.1 data.
-  fn from_asn1(slice: Asn1Slice) -> Result<Self, Asn1Error>;
+  // /// Create this struct from ASN.1 data.
+  // fn from_asn1(slice: Asn1Slice) -> Result<Self, Asn1Error>;
 }
 
 /// A macro to generate a generic Asn1Data trait implementation for a struct.
@@ -108,9 +124,9 @@ impl Asn1Data for $impl_type {
 /// A list of errors that can occur decoding or encoding Asn1 data.
 enum Asn1Error {
   /// Invalid Asn1 data.
-  InvalidAsn1
+  InvalidAsn1,
   /// An error occured while encoding Asn1 data.
-  EncodingError
+  EncodingError,
   /// An invalid tag was decoded
-  InvalidTag(Asn1Tag)
+  InvalidTag(Asn1Tag),
 }
