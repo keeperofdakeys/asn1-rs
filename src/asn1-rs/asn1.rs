@@ -1,28 +1,66 @@
-type Asn1Len = u64;
+/// An enum representing the length of an ASN.1 element.
+enum Asn1Len {
+  /// A Definite length element.
+  pub Definite(u64),
+  /// An Indefinite length element, not known before decoding.
+  pub Indefinite,
+}
+
+impl From<u64> for Asn1Len {
+  fn from(len: u64) -> Self {
+    match len {
+      l => Asn1Len::Def(l),
+      0 => Asn1Len::Indef,
+    }
+  }
+}
+
+impl From<Asn1Len> for u64 {
+  fn from(len: Asn1Len) -> Self {
+    match len {
+      Asn1Len::Def(l) => l,
+      Asn1Len::Indef => 0,
+    }
+  }
+}
+
+/// An ASN.1 tag number.
 type Asn1TagNum = u64;
 
-type Asn1Data = Vec<u8>;
-type Asn1Slice<'a> = &'a [u8];
+/// An ASN.1 Class.
+enum Asn1Class {
+  /// Universal class.
+  Universal,
+  /// Application class.
+  Aplication,
+  /// Private class.
+  Private,
+  /// Context-specific class.
+  ContextSpecific,
+}
 
-enum Asn1Tag {
-  // Universal types here ...
-  UniversalTag(Asn1TagNum)
-  AplicationTag(Asn1TagNum),
-  PrivateTag(Asn1TagNum),
-  ContextSpecificTag(Asn1TagNum),
+/// A struct representing an ASN.1 element.
+struct Asn1Tag {
+  /// The class of the ASN.1 element.
+  pub class: Asn1Class,
+  /// The tag number of the ASN.1 element.
+  pub tagnum: Asn1TagNum,
+  /// The length of the ASN.1 element.
+  pub len: Asn1Len,
+  /// A flag indicating whether an element is constructed.
+  pub constructed: bool,
 }
 
 impl Asn1Tag {
   /// Returns true when this is a structured type.
   fn is_structured(&self) -> bool {
-    if let Asn1Tag::UniversalTag(tag) == *self {
-      match tag {
+    if let Asn1Class::Universal == *self.class {
+      match self.tagnum {
         // SEQUENCE (OF)
         16 => true,
         // SET (OF)
         17 => true,
         _ => false,
-
       }
     } else {
       false
