@@ -58,6 +58,15 @@ impl PartialOrd<Asn1LenNum> for Asn1Len {
   }
 }
 
+impl fmt::Display for Asn1Len {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    match *self {
+      Asn1Len::Def(ref l) => write!(f, "{}", l),
+      Asn1Len::Indef => write!(f, "Indefinite Length"),
+    }
+  }
+}
+
 /// An ASN.1 tag number.
 pub type Asn1TagNum = u64;
 

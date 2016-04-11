@@ -20,7 +20,7 @@ pub fn decode_tag<R: io::Read>(reader: &mut R) -> Result<asn1::Asn1Tag, Asn1Read
   }
   let mut len_byte = try!(bytes.read());
   let mut len = len_byte as asn1::Asn1TagNum;
-  if (len_byte & 0x80) == 0x00 {
+  if (len_byte & 0x80) == 0x80 {
     let byte_count = len_byte & 0x7f;
     for _ in 0..byte_count {
       len_byte = try!(bytes.read());
