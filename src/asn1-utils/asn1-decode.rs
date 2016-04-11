@@ -41,7 +41,6 @@ fn _decode_stream<R: io::Read>(reader: &mut R, indent: usize) -> Result<asn1::As
     loop {
       // Sum child length's.
       child_len += try!(_decode_stream(reader, indent + 1));
-      println!("{:?} {:?}", tag.len, child_len);
       // Compare deoded length with tag length.
       match tag.len.partial_cmp(&child_len) {
         // Return an error when decoded length is greater.
