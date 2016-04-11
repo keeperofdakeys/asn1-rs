@@ -1,9 +1,14 @@
 [package]
-name = "a"
+name = "asn1-rs"
 version = "0.1.0"
 authors = ["Josh <keeperofdakeys@gmail.com>"]
 
 [dependencies]
+argparse = "0.2"
 
 [lib]
 path="src/asn1-rs/lib.rs"
+
+[[bin]]
+path="src/asn1-utils/asn1-decode.rs"
+name="asn1-decode"

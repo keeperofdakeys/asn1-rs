@@ -1,2 +1,2 @@
-mod asn1;
-mod decode;
+pub mod asn1;
+pub mod decode;

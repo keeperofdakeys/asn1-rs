@@ -1,3 +1,6 @@
+use std::fmt;
+use std::cmp::Ordering;
+
 pub type Asn1LenNum = u64;
 
 #[derive(PartialEq, Debug)]
@@ -18,11 +21,39 @@ impl From<Asn1LenNum> for Asn1Len {
   }
 }
 
-impl From<Asn1Len> for u64 {
+impl From<Asn1Len> for Asn1LenNum {
   fn from(len: Asn1Len) -> Self {
     match len {
       Asn1Len::Def(l) => l,
       Asn1Len::Indef => 0,
+    }
+  }
+}
+
+impl PartialOrd<Asn1Len> for Asn1Len {
+  fn partial_cmp(&self, other: &Asn1Len) -> Option<Ordering> {
+    match (self, other) {
+      (&Asn1Len::Def(ref l),
+        &Asn1Len::Def(ref r)) => Some(l.cmp(r)),
+      _ => None,
+    }
+  }
+}
+
+impl PartialEq<Asn1LenNum> for Asn1Len {
+  fn eq(&self, other: &Asn1LenNum) -> bool {
+    match *self {
+      Asn1Len::Def(ref l) => l.eq(other),
+      Asn1Len::Indef => false,
+    }
+  }
+}
+
+impl PartialOrd<Asn1LenNum> for Asn1Len {
+  fn partial_cmp(&self, other: &Asn1LenNum) -> Option<Ordering> {
+    match *self {
+      Asn1Len::Def(ref l) => Some(l.cmp(other)),
+      Asn1Len::Indef => None,
     }
   }
 }
@@ -55,6 +86,17 @@ impl From<u8> for Asn1Class {
   }
 }
 
+impl fmt::Display for Asn1Class {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    write!(f, "{}", match *self {
+      Asn1Class::Universal => "Universal",
+      Asn1Class::Application => "Application",
+      Asn1Class::ContextSpecific => "Context-specific",
+      Asn1Class::Private => "Private",
+    })
+  }
+}
+
 /// A struct representing an ASN.1 element.
 pub struct Asn1Tag {
   /// The class of the ASN.1 element.
@@ -69,7 +111,7 @@ pub struct Asn1Tag {
 
 impl Asn1Tag {
   /// Returns true when this is a structured type.
-  fn is_structured(&self) -> bool {
+  pub fn is_structured(&self) -> bool {
     if self.class == Asn1Class::Universal {
       match self.tagnum {
         // SEQUENCE (OF)

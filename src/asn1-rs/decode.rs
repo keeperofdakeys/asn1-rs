@@ -2,7 +2,7 @@ use std::io;
 use asn1;
 
 /// Decode an ASN.1 tag from a stream.
-fn decode_tag<R: io::Read>(reader: &mut R) -> Result<asn1::Asn1Tag, Asn1ReadError> {
+pub fn decode_tag<R: io::Read>(reader: &mut R) -> Result<asn1::Asn1Tag, Asn1ReadError> {
   let mut bytes = ByteReader::new(reader);
 
   let tag_byte = try!(bytes.read());
@@ -58,10 +58,13 @@ impl<'a, R: io::Read + 'a> ByteReader<'a, R> {
   }
 }
 
+#[derive(Debug)]
 /// Errors that can occur reading an ASN.1 element.
-enum Asn1ReadError {
+pub enum Asn1ReadError {
   /// Generic IO Error.
   IO(io::Error),
+  /// Decoded child element(s) had greater length than parent's len.
+  GreaterLen,
 }
 
 impl From<io::Error> for Asn1ReadError {
