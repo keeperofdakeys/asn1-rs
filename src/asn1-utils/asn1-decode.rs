@@ -6,15 +6,14 @@ use asn1_rs::asn1;
 
 use std::io;
 use std::fs;
-use std::path::PathBuf;
+use std::path::Path;
 use std::cmp::Ordering;
 use argparse::{ArgumentParser, StoreTrue, StoreOption};
 
 fn main() {
   let opts = parse_args();
 
-  let path = PathBuf::new();
-  path.join(opts.file.unwrap());
+  let path = Path::new(opts.file.as_ref().unwrap());
   if !path.is_file() {
     panic!("Supplied file does not exist");
   }
