@@ -23,40 +23,49 @@ fn main() {
   decode_stream(&mut reader).unwrap();
 }
 
-fn decode_stream<R: io::Read>(reader: &mut R) -> Result<asn1::Asn1LenNum, Asn1ReadError> {
+fn decode_stream<R: io::Read>(reader: &mut R) -> Result<(asn1::Asn1Tag, asn1::Asn1LenNum), Asn1ReadError> {
   _decode_stream(reader, 0)
 }
 
-fn _decode_stream<R: io::Read>(reader: &mut R, indent: usize) -> Result<asn1::Asn1LenNum, Asn1ReadError> {
+fn _decode_stream<R: io::Read>(reader: &mut R, indent: usize) -> Result<(asn1::Asn1Tag, asn1::Asn1LenNum), Asn1ReadError> {
   let tag = try!(decode_tag(reader));
 
-  if tag.len == asn1::Asn1Len::Indef {
-    panic!("Cowardly refusing to handle indefinite length");
-  }
-
+  let mut decoded_len: asn1::Asn1LenNum = 0;
   println!("{:>width$}TagNum: {}, Class: {}, Len: {}", "", tag.tagnum, tag.class, tag.len, width=indent);
   // If this type is structured (SEQUENCE or SET), decode child elements.
   if tag.is_structured() {
-    let mut child_len = 0;
     loop {
-      // Sum child length's.
-      child_len += try!(_decode_stream(reader, indent + 1));
+      let (child_tag, child_len) = try!(_decode_stream(reader, indent + 1));
+      decoded_len += child_len;
+
+      // Identify end of indefinite length.
+      if child_tag.len == asn1::Asn1Len::Def(0) &&
+         child_tag.class == asn1::Asn1Class::Universal &&
+         child_tag.tagnum == 0 {
+        break;
+      }
+
       // Compare deoded length with tag length.
       match tag.len.partial_cmp(&child_len) {
         // Return an error when decoded length is greater.
         Some(Ordering::Less) => return Err(Asn1ReadError::GreaterLen),
-        // Return decoded length when equal.
+        // Finish loop when equal.
         Some(Ordering::Equal) => break,
-        // Keep going when less than.
-        Some(Ordering::Greater) => continue,
-        _ => unimplemented!(),
+        // Keep going when less than, or indefinite length.
+        _ => continue,
       };
     }
-    Ok(child_len)
   } else {
+    let len_num: asn1::Asn1LenNum = match tag.len {
+      asn1::Asn1Len::Def(l) => l,
+      asn1::Asn1Len::Indef => 
+        panic!("I don't know how to handle unstructured, indefinite length encoding"),
+    };
+
     print!("{:>width$}", "", width=indent);
     let mut buf = [0u8; 1];
-    let len_num: asn1::Asn1LenNum = From::from(tag.len);
+    // FIXME: This assumes definite length
+    decoded_len += len_num;
     for _ in 0..len_num {
       let count = try!(reader.read(&mut buf));
       if count == 0 {
@@ -65,8 +74,8 @@ fn _decode_stream<R: io::Read>(reader: &mut R, indent: usize) -> Result<asn1::As
       print!("{:x}", buf[0]);
     }
     print!("\n");
-    Ok(len_num)
   }
+  Ok((tag, decoded_len))
 }
 
 struct ProgOpts {

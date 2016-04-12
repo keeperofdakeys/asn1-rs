@@ -7,7 +7,7 @@ pub fn decode_tag<R: io::Read>(reader: &mut R) -> Result<asn1::Asn1Tag, Asn1Read
 
   let tag_byte = try!(bytes.read());
   let class_num = (tag_byte & 0xc0) >> 6;
-  let constructed = tag_byte & 0x40 != 0x00;
+  let constructed = tag_byte & 0x40 == 0x40;
   let mut tag_num = (tag_byte & 0x1f) as asn1::Asn1TagNum;
   if tag_num == 0x1F {
     loop {
@@ -19,12 +19,13 @@ pub fn decode_tag<R: io::Read>(reader: &mut R) -> Result<asn1::Asn1Tag, Asn1Read
     }
   }
   let mut len_byte = try!(bytes.read());
-  let mut len = len_byte as asn1::Asn1TagNum;
+  let mut len = (len_byte & 0x7f) as asn1::Asn1TagNum;
   if (len_byte & 0x80) == 0x80 {
-    let byte_count = len_byte & 0x7f;
+    let byte_count = len;
+    len = 0;
     for _ in 0..byte_count {
       len_byte = try!(bytes.read());
-      len = (len << 7) + len_byte as asn1::Asn1TagNum;
+      len = (len << 8) + len_byte as asn1::Asn1TagNum;
     }
   }
 
