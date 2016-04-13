@@ -93,6 +93,8 @@ pub enum Asn1ReadError {
   IO(io::Error),
   /// Decoded child element(s) had greater length than parent's len.
   GreaterLen,
+  /// Decoded primitive value used indefinite length encoding.
+  PrimIndef,
 }
 
 impl From<io::Error> for Asn1ReadError {
