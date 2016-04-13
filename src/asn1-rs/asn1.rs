@@ -106,6 +106,7 @@ impl fmt::Display for Asn1Class {
   }
 }
 
+#[derive(Debug)]
 /// A struct representing an ASN.1 element.
 pub struct Asn1Tag {
   /// The class of the ASN.1 element.

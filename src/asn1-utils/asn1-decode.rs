@@ -28,12 +28,19 @@ fn decode_stream<R: io::Read>(reader: &mut R) -> Result<(asn1::Asn1Tag, asn1::As
 }
 
 fn _decode_stream<R: io::Read>(reader: &mut R, indent: usize) -> Result<(asn1::Asn1Tag, asn1::Asn1LenNum), Asn1ReadError> {
-  let tag = try!(decode_tag(reader));
+  let (tag, tag_len) = try!(decode_tag(reader));
+
+  println!("{:>width$}TagNum: {}, Class: {}, Len: {}, Constructed: {}", "",
+           tag.tagnum, tag.class, tag.len, tag.constructed, width=indent);
+
+  if tag.len == asn1::Asn1Len::Def(0) {
+    return Ok((tag, tag_len));
+  }
 
   let mut decoded_len: asn1::Asn1LenNum = 0;
-  println!("{:>width$}TagNum: {}, Class: {}, Len: {}", "", tag.tagnum, tag.class, tag.len, width=indent);
-  // If this type is structured (SEQUENCE or SET), decode child elements.
-  if tag.is_structured() {
+
+  // If this type is constructed, decode child asn1.
+  if tag.constructed {
     loop {
       let (child_tag, child_len) = try!(_decode_stream(reader, indent + 1));
       decoded_len += child_len;
@@ -45,14 +52,14 @@ fn _decode_stream<R: io::Read>(reader: &mut R, indent: usize) -> Result<(asn1::A
         break;
       }
 
-      // Compare deoded length with tag length.
-      match tag.len.partial_cmp(&child_len) {
+      // Compare decoded length with tag length.
+      match tag.len.partial_cmp(&decoded_len) {
         // Return an error when decoded length is greater.
         Some(Ordering::Less) => return Err(Asn1ReadError::GreaterLen),
         // Finish loop when equal.
         Some(Ordering::Equal) => break,
         // Keep going when less than, or indefinite length.
-        _ => continue,
+        _ => {},
       };
     }
   } else {
@@ -75,7 +82,8 @@ fn _decode_stream<R: io::Read>(reader: &mut R, indent: usize) -> Result<(asn1::A
     }
     print!("\n");
   }
-  Ok((tag, decoded_len))
+  println!("{:>width$}{}", "", "End.", width=indent);
+  Ok((tag, decoded_len + tag_len))
 }
 
 struct ProgOpts {

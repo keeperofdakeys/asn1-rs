@@ -2,26 +2,30 @@ use std::io;
 use asn1;
 
 /// Decode an ASN.1 tag from a stream.
-pub fn decode_tag<R: io::Read>(reader: &mut R) -> Result<asn1::Asn1Tag, Asn1ReadError> {
+pub fn decode_tag<R: io::Read>(reader: &mut R) -> Result<(asn1::Asn1Tag, asn1::Asn1LenNum), Asn1ReadError> {
   let mut bytes = ByteReader::new(reader);
 
   // Decode tag byte, which includes class, constructed flag, and tag number.
   let tag_byte = try!(bytes.read());
   let class_num = (tag_byte & 0xc0) >> 6;
-  let constructed = tag_byte & 0x40 == 0x40;
-  let mut tag_num = (tag_byte & 0x1f) as asn1::Asn1TagNum;
+  let constructed = tag_byte & 0x20 == 0x20;
   // If tag is 0x1F, use extended decode format.
-  if tag_num == 0x1F {
+  let tag = if (tag_byte & 0x1f) == 0x1f {
+    let mut tag: asn1::Asn1TagNum = 0;
     loop {
       // Incrementatlly read bytes, adding base-128 to tag.
       let tag_more = try!(bytes.read());
-      tag_num = (tag_num << 7) + (tag_more & 0x7f) as asn1::Asn1TagNum;
+      tag = (tag << 7) + (tag_more & 0x7f) as asn1::Asn1TagNum;
       // Stop looping when 0x80 bit is set.
-      if tag_more & 0x80 == 0x80 {
+      if tag_more & 0x80 == 0x00 {
         break;
       }
     }
-  }
+    tag
+  // Otherwise it's just bits 5-1.
+  } else {
+    (tag_byte & 0x1f) as asn1::Asn1TagNum
+  };
 
   // Decode len byte.
   let len_byte = try!(bytes.read());
@@ -45,22 +49,26 @@ pub fn decode_tag<R: io::Read>(reader: &mut R) -> Result<asn1::Asn1Tag, Asn1Read
       },
   };
 
-  Ok(asn1::Asn1Tag {
+  Ok((asn1::Asn1Tag {
     class: asn1::Asn1Class::from(class_num),
-    tagnum: tag_num,
+    tagnum: tag,
     len: len,
     constructed: constructed,
-  })
+  }, bytes.count))
 }
 
 /// A reader to easily read a byte from a reader.
 struct ByteReader<'a, R: io::Read + 'a> {
   reader: &'a mut R,
+  pub count: u64,
 }
 
 impl<'a, R: io::Read + 'a> ByteReader<'a, R> {
   fn new(reader: &'a mut R) -> ByteReader<'a, R> {
-    ByteReader { reader: reader }
+    ByteReader {
+      reader: reader,
+      count: 0
+    }
   }
 
   /// Read a byte from a reader.
@@ -69,7 +77,10 @@ impl<'a, R: io::Read + 'a> ByteReader<'a, R> {
     // FIXME: Should retry on the Interrupted Error, and perhaps another error.
     match try!(self.reader.read(&mut buf)) {
       0 => Err(io::Error::new(io::ErrorKind::Other, "Read zero bytes")),
-      1 => Ok(buf[0]),
+      1 => {
+        self.count += 1;
+        Ok(buf[0])
+      },
       _ => Err(io::Error::new(io::ErrorKind::Other, "Read more than one byte")),
     }
   }
