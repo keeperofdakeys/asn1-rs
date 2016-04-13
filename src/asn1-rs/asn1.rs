@@ -12,20 +12,20 @@ pub enum Asn1Len {
   Indef,
 }
 
-impl From<Asn1LenNum> for Asn1Len {
-  fn from(len: Asn1LenNum) -> Self {
+impl From<Option<Asn1LenNum>> for Asn1Len {
+  fn from(len: Option<Asn1LenNum>) -> Self {
     match len {
-      0 => Asn1Len::Indef,
-      l => Asn1Len::Def(l),
+      None => Asn1Len::Indef,
+      Some(l) => Asn1Len::Def(l),
     }
   }
 }
 
-impl From<Asn1Len> for Asn1LenNum {
+impl From<Asn1Len> for Option<Asn1LenNum> {
   fn from(len: Asn1Len) -> Self {
     match len {
-      Asn1Len::Def(l) => l,
-      Asn1Len::Indef => 0,
+      Asn1Len::Def(l) => Some(l),
+      Asn1Len::Indef => None,
     }
   }
 }

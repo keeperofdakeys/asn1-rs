@@ -5,34 +5,50 @@ use asn1;
 pub fn decode_tag<R: io::Read>(reader: &mut R) -> Result<asn1::Asn1Tag, Asn1ReadError> {
   let mut bytes = ByteReader::new(reader);
 
+  // Decode tag byte, which includes class, constructed flag, and tag number.
   let tag_byte = try!(bytes.read());
   let class_num = (tag_byte & 0xc0) >> 6;
   let constructed = tag_byte & 0x40 == 0x40;
   let mut tag_num = (tag_byte & 0x1f) as asn1::Asn1TagNum;
+  // If tag is 0x1F, use extended decode format.
   if tag_num == 0x1F {
     loop {
+      // Incrementatlly read bytes, adding base-128 to tag.
       let tag_more = try!(bytes.read());
       tag_num = (tag_num << 7) + (tag_more & 0x7f) as asn1::Asn1TagNum;
+      // Stop looping when 0x80 bit is set.
       if tag_more & 0x80 == 0x80 {
         break;
       }
     }
   }
-  let mut len_byte = try!(bytes.read());
-  let mut len = (len_byte & 0x7f) as asn1::Asn1TagNum;
-  if (len_byte & 0x80) == 0x80 {
-    let byte_count = len;
-    len = 0;
-    for _ in 0..byte_count {
-      len_byte = try!(bytes.read());
-      len = (len << 8) + len_byte as asn1::Asn1TagNum;
-    }
-  }
+
+  // Decode len byte.
+  let len_byte = try!(bytes.read());
+  let len = match len_byte {
+    // When byte is 0x80, this is the start of indefinite length encoding.
+    0x80 => asn1::Asn1Len::Indef,
+    // If 0x80 is set, then other bits indicate the number of len bytes.
+    l => if (l & 0x80) == 0x80 {
+        let mut len: asn1::Asn1LenNum = 0;
+        let byte_count = l & 0x7f;
+        // Loop through number of len bytes.
+        for _ in 0..byte_count {
+          let len_more = try!(bytes.read());
+          // Add up each byte base-256.
+          len = (len << 8) + len_more as asn1::Asn1TagNum;
+        }
+        asn1::Asn1Len::Def(len)
+      // If 0x80 bit is not set, just decode the value.
+      } else {
+        asn1::Asn1Len::Def(l as asn1::Asn1LenNum)
+      },
+  };
 
   Ok(asn1::Asn1Tag {
     class: asn1::Asn1Class::from(class_num),
     tagnum: tag_num,
-    len: asn1::Asn1Len::from(len),
+    len: len,
     constructed: constructed,
   })
 }
