@@ -1,5 +1,6 @@
 use std::fmt;
 use std::cmp::Ordering;
+use std::io;
 
 pub type Asn1LenNum = u64;
 
@@ -134,6 +135,62 @@ impl Asn1Tag {
       false
     }
   }
+
+  /// Decode an ASN.1 tag from a stream.
+  pub fn decode_tag<R: io::Read>(reader: &mut R) -> Result<(Self, Asn1LenNum), Asn1DecodeError> {
+    let mut bytes = ByteReader::new(reader);
+
+    // Decode tag byte, which includes class, constructed flag, and tag number.
+    let tag_byte = try!(bytes.read());
+    let class_num = (tag_byte & 0xc0) >> 6;
+    let constructed = tag_byte & 0x20 == 0x20;
+    // If tag is 0x1F, use extended decode format.
+    let tag = if (tag_byte & 0x1f) == 0x1f {
+      let mut tag: Asn1TagNum = 0;
+      loop {
+        // Incrementatlly read bytes, adding base-128 to tag.
+        let tag_more = try!(bytes.read());
+        tag = (tag << 7) + (tag_more & 0x7f) as Asn1TagNum;
+        // Stop looping when 0x80 bit is set.
+        if tag_more & 0x80 == 0x00 {
+          break;
+        }
+      }
+      tag
+    // Otherwise it's just bits 5-1.
+    } else {
+      (tag_byte & 0x1f) as Asn1TagNum
+    };
+
+    // Decode len byte.
+    let len_byte = try!(bytes.read());
+    let len = match len_byte {
+      // When byte is 0x80, this is the start of indefinite length encoding.
+      0x80 => Asn1Len::Indef,
+      // If 0x80 is set, then other bits indicate the number of len bytes.
+      l => if (l & 0x80) == 0x80 {
+          let mut len: Asn1LenNum = 0;
+          let byte_count = l & 0x7f;
+          // Loop through number of len bytes.
+          for _ in 0..byte_count {
+            let len_more = try!(bytes.read());
+            // Add up each byte base-256.
+            len = (len << 8) + len_more as Asn1TagNum;
+          }
+          Asn1Len::Def(len)
+        // If 0x80 bit is not set, just decode the value.
+        } else {
+          Asn1Len::Def(l as Asn1LenNum)
+        },
+    };
+
+    Ok((Asn1Tag {
+      class: Asn1Class::from(class_num),
+      tagnum: tag,
+      len: len,
+      constructed: constructed,
+    }, bytes.count))
+  }
 }
 
 type Asn1Type = String;
@@ -173,6 +230,35 @@ impl Asn1Data for $impl_type {
 )
 }
 
+/// A reader to easily read a byte from a reader.
+struct ByteReader<'a, R: io::Read + 'a> {
+  reader: &'a mut R,
+  pub count: u64,
+}
+
+impl<'a, R: io::Read + 'a> ByteReader<'a, R> {
+  fn new(reader: &'a mut R) -> ByteReader<'a, R> {
+    ByteReader {
+      reader: reader,
+      count: 0
+    }
+  }
+
+  /// Read a byte from a reader.
+  fn read(&mut self) -> io::Result<u8> {
+    let mut buf = [0u8; 1];
+    // FIXME: Should retry on the Interrupted Error, and perhaps another error.
+    match try!(self.reader.read(&mut buf)) {
+      0 => Err(io::Error::new(io::ErrorKind::Other, "Read zero bytes")),
+      1 => {
+        self.count += 1;
+        Ok(buf[0])
+      },
+      _ => Err(io::Error::new(io::ErrorKind::Other, "Read more than one byte")),
+    }
+  }
+}
+
 /// A list of errors that can occur decoding or encoding Asn1 data.
 enum Asn1Error {
   /// Invalid Asn1 data.
@@ -181,4 +267,21 @@ enum Asn1Error {
   EncodingError,
   /// An invalid tag was decoded
   InvalidTag(Asn1Tag),
+}
+
+#[derive(Debug)]
+/// Errors that can occur reading an ASN.1 element.
+pub enum Asn1DecodeError {
+  /// Generic IO Error.
+  IO(io::Error),
+  /// Child element(s) decoded to greater length than the parent's tag.
+  GreaterLen,
+  /// Primitive value encoded with an indefinite length.
+  PrimIndef,
+}
+
+impl From<io::Error> for Asn1DecodeError {
+  fn from(err: io::Error) -> Self {
+    Asn1DecodeError::IO(err)
+  }
 }

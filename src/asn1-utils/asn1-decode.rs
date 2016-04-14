@@ -1,7 +1,6 @@
 extern crate asn1_rs;
 extern crate argparse;
 
-use asn1_rs::decode::{decode_tag, Asn1ReadError};
 use asn1_rs::asn1;
 
 use std::io;
@@ -23,13 +22,13 @@ fn main() {
   decode_stream(&mut reader).unwrap();
 }
 
-fn decode_stream<R: io::Read>(reader: &mut R) -> Result<(asn1::Asn1Tag, asn1::Asn1LenNum), Asn1ReadError> {
+fn decode_stream<R: io::Read>(reader: &mut R) -> Result<(asn1::Asn1Tag, asn1::Asn1LenNum), asn1::Asn1DecodeError> {
   _decode_stream(reader, 0)
 }
 
-fn _decode_stream<R: io::Read>(reader: &mut R, indent: usize) -> Result<(asn1::Asn1Tag, asn1::Asn1LenNum), Asn1ReadError> {
+fn _decode_stream<R: io::Read>(reader: &mut R, indent: usize) -> Result<(asn1::Asn1Tag, asn1::Asn1LenNum), asn1::Asn1DecodeError> {
   // Get tag and decoded tag length.
-  let (tag, tag_len) = try!(decode_tag(reader));
+  let (tag, tag_len) = try!(asn1::Asn1Tag::decode_tag(reader));
 
   // Print tag info.
   println!("{:>width$}TagNum: {}, Class: {}, Len: {}, Constructed: {}", "",
@@ -61,7 +60,7 @@ fn _decode_stream<R: io::Read>(reader: &mut R, indent: usize) -> Result<(asn1::A
       // Compare decoded length with length in tag.
       match tag.len.partial_cmp(&decoded_len) {
         // Return an error when tag length is less.
-        Some(Ordering::Less) => return Err(Asn1ReadError::GreaterLen),
+        Some(Ordering::Less) => return Err(asn1::Asn1DecodeError::GreaterLen),
         // Finish loop when equal.
         Some(Ordering::Equal) => break,
         // Keep going when less than, or indefinite length.
@@ -72,7 +71,7 @@ fn _decode_stream<R: io::Read>(reader: &mut R, indent: usize) -> Result<(asn1::A
   } else {
     let len_num: asn1::Asn1LenNum = match tag.len {
       asn1::Asn1Len::Def(l) => l,
-      asn1::Asn1Len::Indef => return Err(Asn1ReadError::PrimIndef),
+      asn1::Asn1Len::Indef => return Err(asn1::Asn1DecodeError::PrimIndef),
     };
     // Since we're decoding an element, we use add tag length.
     decoded_len += len_num;
