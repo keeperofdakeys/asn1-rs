@@ -85,13 +85,24 @@ pub enum Asn1Class {
 }
 
 impl From<u8> for Asn1Class {
-  fn from(len: u8) -> Self {
-    match len {
+  fn from(class: u8) -> Self {
+    match class {
       0 => Asn1Class::Universal,
       1 => Asn1Class::Application,
       2 => Asn1Class::ContextSpecific,
       3 => Asn1Class::Private,
       _ => unreachable!()
+    }
+  }
+}
+
+impl From<Asn1Class> for u8 {
+  fn from(class: Asn1Class) -> Self {
+    match class {
+      Asn1Class::Universal => 0,
+      Asn1Class::Application => 1,
+      Asn1Class::ContextSpecific => 2,
+      Asn1Class::Private => 3,
     }
   }
 }
@@ -191,6 +202,30 @@ impl Asn1Tag {
       constructed: constructed,
     }, bytes.count))
   }
+
+  /// Encode an ASN.1 stream from a tag.
+  pub fn encode_tag<W: io::Write>(self, writer: &mut W) -> Result<Asn1LenNum, Asn1EncodeError> {
+    let mut bytes = ByteWriter::new(writer);
+    let (class, tagnum, len, constructed) =
+      (self.class, self.tagnum, self.len, self.constructed);
+
+    // Create first tag_byte from class, constructed and tag number.
+    let mut tag_byte = u8::from(class) << 6;
+    if constructed {
+      tag_byte += 0x20;
+    }
+    // If tag number is <31, add to single byte.
+    if tagnum < 31 {
+      tag_byte += tagnum as u8 & 0x1f;
+      try!(bytes.write(tag_byte));
+    // Otherwise build additional tag bytes.
+    } else {
+      tag_byte += 0x1f;
+      try!(bytes.write(tag_byte));
+    }
+
+    Ok(bytes.count)
+  }
 }
 
 type Asn1Type = String;
@@ -259,6 +294,34 @@ impl<'a, R: io::Read + 'a> ByteReader<'a, R> {
   }
 }
 
+/// A writer to easily write a byte to a writer.
+struct ByteWriter<'a, W: io::Write + 'a> {
+  writer: &'a mut W,
+  pub count: u64,
+}
+
+impl<'a, W: io::Write + 'a> ByteWriter<'a, W> {
+  fn new(writer: &'a mut W) -> ByteWriter<'a, W> {
+    ByteWriter {
+      writer: writer,
+      count: 0
+    }
+  }
+
+  /// Write a byte to a writer.
+  fn write(&mut self, byte: u8) -> io::Result<()> {
+    let buf = [byte];
+    match try!(self.writer.write(&buf)) {
+      0 => Err(io::Error::new(io::ErrorKind::Other, "Wrote zero bytes")),
+      1 => {
+        self.count += 1;
+        Ok(())
+      },
+      _ => Err(io::Error::new(io::ErrorKind::Other, "Wrote more than one byte")),
+    }
+  }
+}
+
 /// A list of errors that can occur decoding or encoding Asn1 data.
 enum Asn1Error {
   /// Invalid Asn1 data.
@@ -270,7 +333,7 @@ enum Asn1Error {
 }
 
 #[derive(Debug)]
-/// Errors that can occur reading an ASN.1 element.
+/// Errors that can occur while decoding an ASN.1 element.
 pub enum Asn1DecodeError {
   /// Generic IO Error.
   IO(io::Error),
@@ -283,5 +346,18 @@ pub enum Asn1DecodeError {
 impl From<io::Error> for Asn1DecodeError {
   fn from(err: io::Error) -> Self {
     Asn1DecodeError::IO(err)
+  }
+}
+
+#[derive(Debug)]
+/// Errors that can occur while encoding an ASN.1 element.
+pub enum Asn1EncodeError {
+  /// Generic IO Error.
+  IO(io::Error),
+}
+
+impl From<io::Error> for Asn1EncodeError {
+  fn from(err: io::Error) -> Self {
+    Asn1EncodeError::IO(err)
   }
 }
