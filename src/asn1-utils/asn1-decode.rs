@@ -22,25 +22,25 @@ fn main() {
   decode_stream(&mut reader).unwrap();
 }
 
-fn decode_stream<R: io::Read>(reader: &mut R) -> Result<(asn1::Asn1Tag, asn1::Asn1LenNum), asn1::Asn1DecodeError> {
+fn decode_stream<R: io::Read>(reader: &mut R) -> Result<(asn1::Tag, asn1::LenNum), asn1::DecodeError> {
   _decode_stream(reader, 0)
 }
 
-fn _decode_stream<R: io::Read>(reader: &mut R, indent: usize) -> Result<(asn1::Asn1Tag, asn1::Asn1LenNum), asn1::Asn1DecodeError> {
+fn _decode_stream<R: io::Read>(reader: &mut R, indent: usize) -> Result<(asn1::Tag, asn1::LenNum), asn1::DecodeError> {
   // Get tag and decoded tag length.
-  let (tag, tag_len) = try!(asn1::Asn1Tag::decode_tag(reader));
+  let (tag, tag_len) = try!(asn1::Tag::decode_tag(reader));
 
   // Print tag info.
   println!("{:>width$}TagNum: {}, Class: {}, Len: {}, Constructed: {}", "",
            tag.tagnum, tag.class, tag.len, tag.constructed, width=indent);
 
   // Don't decode zero length elements.
-  if tag.len == asn1::Asn1Len::Def(0) {
+  if tag.len == asn1::Len::Def(0) {
     return Ok((tag, tag_len));
   }
 
   // Decoded length of this element.
-  let mut decoded_len: asn1::Asn1LenNum = 0;
+  let mut decoded_len: asn1::LenNum = 0;
 
   // If this type is constructed, decode child element..
   if tag.constructed {
@@ -51,8 +51,8 @@ fn _decode_stream<R: io::Read>(reader: &mut R, indent: usize) -> Result<(asn1::A
       decoded_len += child_len;
 
       // If applicable, identify end of indefinite length encoding.
-      if child_tag.len == asn1::Asn1Len::Def(0) &&
-         child_tag.class == asn1::Asn1Class::Universal &&
+      if child_tag.len == asn1::Len::Def(0) &&
+         child_tag.class == asn1::Class::Universal &&
          child_tag.tagnum == 0 {
         break;
       }
@@ -60,7 +60,7 @@ fn _decode_stream<R: io::Read>(reader: &mut R, indent: usize) -> Result<(asn1::A
       // Compare decoded length with length in tag.
       match tag.len.partial_cmp(&decoded_len) {
         // Return an error when tag length is less.
-        Some(Ordering::Less) => return Err(asn1::Asn1DecodeError::GreaterLen),
+        Some(Ordering::Less) => return Err(asn1::DecodeError::GreaterLen),
         // Finish loop when equal.
         Some(Ordering::Equal) => break,
         // Keep going when less than, or indefinite length.
@@ -69,9 +69,9 @@ fn _decode_stream<R: io::Read>(reader: &mut R, indent: usize) -> Result<(asn1::A
     }
   // Otherwise decode primitive value.
   } else {
-    let len_num: asn1::Asn1LenNum = match tag.len {
-      asn1::Asn1Len::Def(l) => l,
-      asn1::Asn1Len::Indef => return Err(asn1::Asn1DecodeError::PrimIndef),
+    let len_num: asn1::LenNum = match tag.len {
+      asn1::Len::Def(l) => l,
+      asn1::Len::Indef => return Err(asn1::DecodeError::PrimIndef),
     };
     // Since we're decoding an element, we use add tag length.
     decoded_len += len_num;
