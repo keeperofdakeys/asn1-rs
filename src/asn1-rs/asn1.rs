@@ -278,18 +278,33 @@ impl<'a, R: io::Read + 'a> ByteReader<'a, R> {
       count: 0
     }
   }
+}
 
-  /// Read a byte from a reader.
-  fn read(&mut self) -> io::Result<u8> {
-    let mut buf = [0u8; 1];
-    // FIXME: Should retry on the Interrupted Error, and perhaps another error.
-    match try!(self.reader.read(&mut buf)) {
-      0 => Err(io::Error::new(io::ErrorKind::Other, "Read zero bytes")),
-      1 => {
-        self.count += 1;
-        Ok(buf[0])
-      },
-      _ => Err(io::Error::new(io::ErrorKind::Other, "Read more than one byte")),
+impl Iterator<Item=u8> for ByteReader {
+  fn next(&mut self) -> Option<Result<u8>> {
+    let mut buf = [0];
+    match self.reader.read(&mut buf) {
+      Ok(1) => Some(Ok(1)),
+      Err(e) => Some(Err(e)),
+      _ => None,
+    }
+  }
+}
+
+impl From<&mut io::Read> for ByteReader {
+  fn from(reader: &mut io::Read) -> Self {
+    ByteReader {
+      count: 0,
+      reader: reader,
+    }
+  }
+}
+
+impl<I: Iterator<Item=u8>> From<I> for ByteReader {
+  fn from(reader: I) -> Self {
+    ByteReader {
+      count: 0,
+      reader: reader,
     }
   }
 }
