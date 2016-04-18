@@ -30,9 +30,10 @@ trait StreamDecodee {
 /// A decoder that calls into an object implementing the StreamDecodee
 /// trait.
 struct StreamDecoder<S: StreamDecodee> {
+  /// Internal reader with an included byte counter.
   reader: ByteReader,
+  /// Object implementing StreamDecodee trait, called into during decoding.
   decodee: S,
-  indent: u32,
 }
 
 impl<S: StreamDecodee> StreamDecoder<S> {
