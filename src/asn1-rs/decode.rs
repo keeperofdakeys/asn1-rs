@@ -1,16 +1,19 @@
 use asn1;
 
+use std::cmp::Ordering;
+use std::io;
+
 trait StreamDecodee {
   /// This function is called when an ASN.1 tag is encountered. In other
   /// words, at the start of an ASN.1 element.
-  fn start_element(tag: asn::Tag) -> ParseResult {
+  fn start_element(&mut self, tag: asn1::Tag) -> ParseResult {
     ParseResult::Ok
   }
 
   /// This function is called when an ASN.1 element has finished decoding.
   /// Specifically, this is called for both constructed, and un-constructed
   /// elements.
-  fn end_element() -> ParseResult {
+  fn end_element(&mut self) -> ParseResult {
     ParseResult::Ok
   }
 
@@ -19,7 +22,7 @@ trait StreamDecodee {
   // the only way.
   /// This is called when a primitve element is encountered. The start_element
   /// function is always called before this.
-  fn primitive(reader: asn1::ByteReader, len: asn1::LenNum) -> ParseResult {
+  fn primitive<R: io::Read>(&mut self, reader: asn1::ByteReader<R>, len: asn1::LenNum) -> ParseResult {
     for x in 0..len {
       try!(reader.read());
     }
@@ -29,17 +32,17 @@ trait StreamDecodee {
 
 /// A decoder that calls into an object implementing the StreamDecodee
 /// trait.
-struct StreamDecoder<S: StreamDecodee> {
+struct StreamDecoder<'a, R: io::Read + 'a, S: StreamDecodee> {
   /// Internal reader with an included byte counter.
-  reader: ByteReader,
+  reader: asn1::ByteReader<'a, R>,
   /// Object implementing StreamDecodee trait, called into during decoding.
   decodee: S,
 }
 
-impl<S: StreamDecodee> StreamDecoder<S> {
-  fn new<R: Into<asn1::ByteReader>>(reader: R, decodee: S) -> Self {
+impl<'a, R: io::Read, S: StreamDecodee> StreamDecoder<'a, R, S> {
+  fn new<T: Into<asn1::ByteReader<'a, R>>>(reader: T, decodee: S) -> Self {
     StreamDecoder {
-      reader: reader::into(),
+      reader: reader.into(),
       decodee: decodee,
     }
   }
@@ -97,7 +100,7 @@ impl<S: StreamDecodee> StreamDecoder<S> {
       }
     // Otherwise decode primitive value.
     } else {
-      let len_num = tag.len::into().or_ok(asn1::DecodeError::PrimIndef);
+      let len_num = tag.len.into().or_ok(asn1::DecodeError::PrimIndef);
 
       // Call decodee primitive decode callback.
       self.decodee.primitive(self.reader, len_num);
@@ -122,6 +125,8 @@ enum ParseResult {
   DecodeError(asn1::DecodeError),
   /// An IO error occured.
   IO(io::Error),
+  /// Early EOF reached.
+  EOF,
 }
 
 impl From<asn1::DecodeError> for ParseResult {
@@ -130,8 +135,8 @@ impl From<asn1::DecodeError> for ParseResult {
   }
 }
 
-impl From<asn1::IO> for ParseResult {
-  fn from(err: asn1::IO) -> Self {
+impl From<io::Error> for ParseResult {
+  fn from(err: io::Error) -> Self {
     ParseResult::IO(err)
   }
 }
