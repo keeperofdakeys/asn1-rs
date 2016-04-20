@@ -266,13 +266,13 @@ impl Data for $impl_type {
 }
 
 /// A reader to easily read a byte from a reader.
-pub struct ByteReader<'a, R: io::Read + 'a> {
-  reader: &'a mut R,
+pub struct ByteReader<I: Iterator<Item=io::Result<u8>>> {
+  reader: I,
   pub count: u64,
 }
 
-impl<'a, R: io::Read + 'a> ByteReader<'a, R> {
-  fn new(reader: &'a mut R) -> ByteReader<'a, R> {
+impl <I> ByteReader<I> {
+  fn new(reader: I) -> ByteReader<'a, R> {
     ByteReader {
       reader: reader,
       count: 0
@@ -280,25 +280,15 @@ impl<'a, R: io::Read + 'a> ByteReader<'a, R> {
   }
 }
 
-impl<'a, R: io::Read + 'a> Iterator for ByteReader<'a, R> {
+impl<I> Iterator for ByteReader<I} {
   type Item = io::Result<u8>;
 
   fn next(&mut self) -> Option<Self::Item> {
-    let mut buf = [0];
-    match self.reader.read(&mut buf) {
-      Ok(1) => Some(Ok(1)),
-      Err(e) => Some(Err(e)),
-      _ => None,
+    let val = self.reader.next();
+    if val.is_some() {
+      self.count++;
     }
-  }
-}
-
-impl<'a, R: io::Read + 'a> From<&'a mut R> for ByteReader<'a, R> {
-  fn from(reader: &'a mut R) -> Self {
-    ByteReader {
-      count: 0,
-      reader: reader,
-    }
+    val
   }
 }
 
