@@ -3,7 +3,7 @@ use asn1;
 use std::cmp::Ordering;
 use std::io;
 
-trait StreamDecodee {
+pub trait StreamDecodee {
   /// This function is called when an ASN.1 tag is encountered. In other
   /// words, at the start of an ASN.1 element.
   fn start_element(&mut self, tag: asn1::Tag) -> ParseResult {
@@ -36,7 +36,7 @@ trait StreamDecodee {
 
 /// A decoder that calls into an object implementing the StreamDecodee
 /// trait.
-struct StreamDecoder<I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> {
+pub struct StreamDecoder<I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> {
   /// Internal reader with an included byte counter.
   reader: asn1::ByteReader<I>,
   /// Object implementing StreamDecodee trait, called into during decoding.
@@ -44,7 +44,7 @@ struct StreamDecoder<I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> {
 }
 
 impl<I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<I, S> {
-  fn new<T: Into<asn1::ByteReader<I>>>(reader: T, decodee: S) -> Self {
+  pub fn new<T: Into<asn1::ByteReader<I>>>(reader: T, decodee: S) -> Self {
     StreamDecoder {
       reader: reader.into(),
       decodee: decodee,
@@ -52,8 +52,8 @@ impl<I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<I, S> {
   }
 
   /// Decode an asn1 element.
-  pub fn decode(&mut self) {
-    let _ = self._decode();
+  pub fn decode(&mut self) -> Result<(), asn1::DecodeError> {
+    self._decode().and(Ok(()))
   }
 
   // FIXME: Convert explicit decoded_len to use diff of internal reader count.
@@ -68,15 +68,25 @@ impl<I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<I, S> {
     // Call the decodee start element callback;
     self.decodee.start_element(tag);
 
-    // Don't decode zero length elements.
-    if tag.len == asn1::Len::Def(0) {
-      return Ok(tag);
-    }
 
     // If this type is constructed, decode child element..
     if tag.constructed {
       // Loop over child elements.
       loop {
+        let decoded_len = self.reader.count - post_tag_count;
+        // Compare decoded length with length in tag.
+        // Put this first to handle zero-length elements.
+        match tag.len.partial_cmp(&decoded_len) {
+          // Return an error when we've decoded too much.
+          Some(Ordering::Less) => return Err(asn1::DecodeError::GreaterLen),
+          // Finish loop when equal, we must be finished.
+          Some(Ordering::Equal) => break,
+          // Continue when we are still decoding.
+          Some(Ordering::Greater) => {},
+          // Continue when using indefinite length encoding.
+          None => {},
+        };
+
         // Decode each child element.
         let child_tag = try!(self._decode());
 
@@ -88,19 +98,6 @@ impl<I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<I, S> {
            child_tag.tagnum == 0 {
           break;
         }
-
-        let decoded_len = self.reader.count - post_tag_count;
-        // Compare decoded length with length in tag.
-        match tag.len.partial_cmp(&decoded_len) {
-          // Return an error when we've decoded too much.
-          Some(Ordering::Less) => return Err(asn1::DecodeError::GreaterLen),
-          // Finish loop when equal, we must be finished.
-          Some(Ordering::Equal) => break,
-          // Continue when we are still decoding.
-          Some(Ordering::Greater) => {},
-          // Continue when using indefinite length encoding.
-          None => {},
-        };
       }
     // Otherwise decode primitive value.
     } else {
@@ -127,7 +124,7 @@ impl<I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<I, S> {
 }
 
 /// The result of a parsing function.
-enum ParseResult {
+pub enum ParseResult {
   /// Everything went okay.
   Ok,
   /// An error occured decoding an element.

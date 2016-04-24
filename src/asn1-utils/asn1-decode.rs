@@ -5,6 +5,7 @@ use asn1_rs::asn1;
 use asn1_rs::decode;
 
 use std::io;
+use std::io::Read;
 use std::fs;
 use std::path::Path;
 use std::cmp::Ordering;
@@ -19,13 +20,13 @@ fn main() {
   }
 
   // Create a buffered reader from the file.
-  let mut reader = io::BufReader::new(fs::File::open(path).unwrap());
-  let decoder = decode::StreamDecoder(reader, StreamDumper::new());
-  decoder.decode();
+  let reader = io::BufReader::new(fs::File::open(path).unwrap()).bytes();
+  let mut decoder = decode::StreamDecoder::new(reader, StreamDumper::new());
+  decoder.decode().unwrap();
 }
 
 struct StreamDumper {
-  indent: u32,
+  indent: usize,
 }
 
 impl StreamDumper {
@@ -34,7 +35,7 @@ impl StreamDumper {
   }
 }
 
-impl StreamDecodee for StreamDumper {
+impl decode::StreamDecodee for StreamDumper {
   fn start_element(&mut self, tag: asn1::Tag) -> decode::ParseResult {
     // Print tag info.
     println!("{:>width$}TagNum: {}, Class: {}, Len: {}, Constructed: {}", "",
@@ -49,20 +50,22 @@ impl StreamDecodee for StreamDumper {
     decode::ParseResult::Ok
   }
 
-  fn primitive(&mut self, reader: asn1::ByteReader, len: asn1::LenNum) -> decode::ParseResult {
+  fn primitive<I: Iterator<Item=io::Result<u8>>>(&mut self, reader: &mut asn1::ByteReader<I>, len: asn1::LenNum) ->
+    decode::ParseResult {
     // Indent line
     print!("{:>width$}", "", width=self.indent);
 
     // Extract contents
-    for _ in 0..len_num {
-      let byte = match reader.next() {
-        Some(b) => try!(b),
-        None => return decode::ParseResult::EOF,
+    for _ in 0..len {
+      let byte = match reader.read() {
+        Ok(b) => b,
+        Err(e) => return e.into(),
       };
       print!("{:x}", byte);
     }
     print!("\n");
     decode::ParseResult::Ok
+  }
 }
 
 struct ProgOpts {

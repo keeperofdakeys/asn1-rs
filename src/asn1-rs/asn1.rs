@@ -289,7 +289,7 @@ impl<I: Iterator<Item=io::Result<u8>>> ByteReader<I> {
 
   /// Read a byte, and translate Eof into an UnxpectedEof error.
   pub fn read(&mut self) -> io::Result<u8> {
-    read_byte(&mut self.reader)
+    read_byte(self)
   }
 }
 
