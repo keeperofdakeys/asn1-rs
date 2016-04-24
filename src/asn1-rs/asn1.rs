@@ -4,7 +4,7 @@ use std::io;
 
 pub type LenNum = u64;
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone, Copy)]
 /// An enum representing the length of an ASN.1 element.
 pub enum Len {
   /// A Definite length element.
@@ -71,7 +71,7 @@ impl fmt::Display for Len {
 /// An ASN.1 tag number.
 pub type TagNum = u64;
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone, Copy)]
 /// An ASN.1 Class.
 pub enum Class {
   /// Universal class.
@@ -118,7 +118,7 @@ impl fmt::Display for Class {
   }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 /// A struct representing an ASN.1 element.
 pub struct Tag {
   /// The class of the ASN.1 element.
@@ -148,11 +148,10 @@ impl Tag {
   }
 
   /// Decode an ASN.1 tag from a stream.
-  pub fn decode_tag<R: io::Read>(reader: &mut R) -> Result<(Self, LenNum), DecodeError> {
-    let mut bytes = ByteReader::new(reader);
-
+  pub fn decode_tag<I: Iterator<Item=io::Result<u8>>>(bytes: &mut I) ->
+    Result<Self, DecodeError> {
     // Decode tag byte, which includes class, constructed flag, and tag number.
-    let tag_byte = try!(bytes.read());
+    let tag_byte = try!(read_byte(bytes));
     let class_num = (tag_byte & 0xc0) >> 6;
     let constructed = tag_byte & 0x20 == 0x20;
     // If tag is 0x1F, use extended decode format.
@@ -160,7 +159,7 @@ impl Tag {
       let mut tag: TagNum = 0;
       loop {
         // Incrementatlly read bytes, adding base-128 to tag.
-        let tag_more = try!(bytes.read());
+        let tag_more = try!(read_byte(bytes));
         tag = (tag << 7) + (tag_more & 0x7f) as TagNum;
         // Stop looping when 0x80 bit is set.
         if tag_more & 0x80 == 0x00 {
@@ -174,7 +173,7 @@ impl Tag {
     };
 
     // Decode len byte.
-    let len_byte = try!(bytes.read());
+    let len_byte = try!(read_byte(bytes));
     let len = match len_byte {
       // When byte is 0x80, this is the start of indefinite length encoding.
       0x80 => Len::Indef,
@@ -184,7 +183,7 @@ impl Tag {
           let byte_count = l & 0x7f;
           // Loop through number of len bytes.
           for _ in 0..byte_count {
-            let len_more = try!(bytes.read());
+            let len_more = try!(read_byte(bytes));
             // Add up each byte base-256.
             len = (len << 8) + len_more as TagNum;
           }
@@ -195,12 +194,12 @@ impl Tag {
         },
     };
 
-    Ok((Tag {
+    Ok(Tag {
       class: Class::from(class_num),
       tagnum: tag,
       len: len,
       constructed: constructed,
-    }, bytes.count))
+    })
   }
 
   /// Encode an ASN.1 stream from a tag.
@@ -265,30 +264,50 @@ impl Data for $impl_type {
 )
 }
 
+/// Read a byte from an iterator, and translate Eof into an UnexpectedEof error.
+pub fn read_byte<I: Iterator<Item=io::Result<u8>>>(iter: &mut I) -> io::Result<u8> {
+  match iter.next() {
+    Some(res) => res,
+    None => Err(io::Error::new(io::ErrorKind::UnexpectedEof, "Got unexpected EOF while reading stream")),
+  }
+}
+
 /// A reader to easily read a byte from a reader.
 pub struct ByteReader<I: Iterator<Item=io::Result<u8>>> {
   reader: I,
   pub count: u64,
 }
 
-impl <I> ByteReader<I> {
-  fn new(reader: I) -> ByteReader<'a, R> {
+impl<I: Iterator<Item=io::Result<u8>>> ByteReader<I> {
+  /// Create a new ByteReader from an Iterator.
+  pub fn new(reader: I) -> ByteReader<I> {
     ByteReader {
       reader: reader,
       count: 0
     }
   }
+
+  /// Read a byte, and translate Eof into an UnxpectedEof error.
+  pub fn read(&mut self) -> io::Result<u8> {
+    read_byte(&mut self.reader)
+  }
 }
 
-impl<I> Iterator for ByteReader<I} {
+impl<I: Iterator<Item=io::Result<u8>>> Iterator for ByteReader<I> {
   type Item = io::Result<u8>;
 
   fn next(&mut self) -> Option<Self::Item> {
     let val = self.reader.next();
     if val.is_some() {
-      self.count++;
+      self.count += 1;
     }
     val
+  }
+}
+
+impl<I: Iterator<Item=io::Result<u8>>> From<I> for ByteReader<I> {
+  fn from(iter: I) -> Self {
+    ByteReader::new(iter)
   }
 }
 

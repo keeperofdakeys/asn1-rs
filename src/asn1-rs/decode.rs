@@ -22,9 +22,13 @@ trait StreamDecodee {
   // the only way.
   /// This is called when a primitve element is encountered. The start_element
   /// function is always called before this.
-  fn primitive<R: io::Read>(&mut self, reader: asn1::ByteReader<R>, len: asn1::LenNum) -> ParseResult {
-    for x in 0..len {
-      try!(reader.read());
+  fn primitive<I: Iterator<Item=io::Result<u8>>>(&mut self, reader: &mut asn1::ByteReader<I>,
+      len: asn1::LenNum) -> ParseResult {
+    for _ in 0..len {
+      match reader.read() {
+        Err(e) => return e.into(),
+        _ => {},
+      }
     }
     ParseResult::Ok
   }
@@ -32,15 +36,15 @@ trait StreamDecodee {
 
 /// A decoder that calls into an object implementing the StreamDecodee
 /// trait.
-struct StreamDecoder<'a, R: io::Read + 'a, S: StreamDecodee> {
+struct StreamDecoder<I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> {
   /// Internal reader with an included byte counter.
-  reader: asn1::ByteReader<'a, R>,
+  reader: asn1::ByteReader<I>,
   /// Object implementing StreamDecodee trait, called into during decoding.
   decodee: S,
 }
 
-impl<'a, R: io::Read, S: StreamDecodee> StreamDecoder<'a, R, S> {
-  fn new<T: Into<asn1::ByteReader<'a, R>>>(reader: T, decodee: S) -> Self {
+impl<I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<I, S> {
+  fn new<T: Into<asn1::ByteReader<I>>>(reader: T, decodee: S) -> Self {
     StreamDecoder {
       reader: reader.into(),
       decodee: decodee,
@@ -48,34 +52,33 @@ impl<'a, R: io::Read, S: StreamDecodee> StreamDecoder<'a, R, S> {
   }
 
   /// Decode an asn1 element.
-  pub fn decode(&self) {
+  pub fn decode(&mut self) {
     let _ = self._decode();
   }
 
   // FIXME: Convert explicit decoded_len to use diff of internal reader count.
   /// Internal decode function.
-  fn _decode(&self) -> Result<asn1::Tag, asn1::LenNum> {
-    // Get tag and decoded tag length.
-    let (tag, tag_len) = try!(asn1::Tag::decode_tag(self.reader));
+  fn _decode(&mut self) -> Result<asn1::Tag, asn1::DecodeError> {
+    let pre_tag_count: asn1::LenNum = self.reader.count;
+
+    // Decode tag.
+    let tag = try!(asn1::Tag::decode_tag(&mut self.reader));
+    let post_tag_count: asn1::LenNum  = self.reader.count;
 
     // Call the decodee start element callback;
     self.decodee.start_element(tag);
 
     // Don't decode zero length elements.
     if tag.len == asn1::Len::Def(0) {
-      return Ok((tag, tag_len));
+      return Ok(tag);
     }
-
-    // Decoded length of this element.
-    let mut decoded_len: asn1::LenNum = 0;
 
     // If this type is constructed, decode child element..
     if tag.constructed {
       // Loop over child elements.
       loop {
-        // Decode each child element, add to decoded length.
-        let (child_tag, child_len) = try!(self._decode());
-        decoded_len += child_len;
+        // Decode each child element.
+        let child_tag = try!(self._decode());
 
         // If applicable, identify end of indefinite length encoding.
         // When decoding indefinite length encoding, stop on '00 00'
@@ -86,34 +89,40 @@ impl<'a, R: io::Read, S: StreamDecodee> StreamDecoder<'a, R, S> {
           break;
         }
 
+        let decoded_len = self.reader.count - post_tag_count;
         // Compare decoded length with length in tag.
         match tag.len.partial_cmp(&decoded_len) {
           // Return an error when we've decoded too much.
           Some(Ordering::Less) => return Err(asn1::DecodeError::GreaterLen),
           // Finish loop when equal, we must be finished.
           Some(Ordering::Equal) => break,
-          // Continue when less, we're still decoding.
-          Some(Ordering::Less) => {},
+          // Continue when we are still decoding.
+          Some(Ordering::Greater) => {},
           // Continue when using indefinite length encoding.
           None => {},
         };
       }
     // Otherwise decode primitive value.
     } else {
-      let len_num = tag.len.into().or_ok(asn1::DecodeError::PrimIndef);
+      let len_num = try!(match tag.len {
+        asn1::Len::Def(l) => Ok(l),
+        asn1::Len::Indef =>
+          Err(asn1::DecodeError::PrimIndef),
+      });
 
       // Call decodee primitive decode callback.
-      self.decodee.primitive(self.reader, len_num);
-
-      // Since we're decoding an element, we use add tag length.
-      decoded_len += len_num;
+      self.decodee.primitive(&mut self.reader, len_num);
     }
+
+    let post_decode_count = self.reader.count;
+
+    // FIXME: If decoded length is larger than tag length, error here.
 
     // Call decodee end element callback.
     self.decodee.end_element();
 
     // Return decoded + tag_len, which is total decoded length.
-    Ok((tag, decoded_len + tag_len))
+    Ok(tag)
   }
 }
 
