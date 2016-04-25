@@ -8,7 +8,6 @@ use std::io;
 use std::io::Read;
 use std::fs;
 use std::path::Path;
-use std::cmp::Ordering;
 use argparse::{ArgumentParser, StoreTrue, StoreOption};
 
 fn main() {

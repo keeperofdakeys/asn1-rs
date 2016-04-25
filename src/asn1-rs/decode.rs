@@ -32,6 +32,10 @@ pub trait StreamDecodee {
     }
     ParseResult::Ok
   }
+
+  /// This is called when a decoding error occurs.
+  fn error(err: asn1::DecodeError) {
+  }
 }
 
 /// A decoder that calls into an object implementing the StreamDecodee
@@ -131,8 +135,6 @@ pub enum ParseResult {
   DecodeError(asn1::DecodeError),
   /// An IO error occured.
   IO(io::Error),
-  /// Early EOF reached.
-  EOF,
 }
 
 impl From<asn1::DecodeError> for ParseResult {
