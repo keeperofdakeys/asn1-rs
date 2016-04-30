@@ -33,7 +33,11 @@ pub trait StreamDecodee {
     ParseResult::Ok
   }
 
-  /// This is called when a decoding error occurs.
+  fn warning(err: asn1::DecodeError) -> ParseResult {
+    ParseResult::Stop
+  }
+
+  /// This is called when a fatal decoding error occurs.
   fn error(err: asn1::DecodeError) {
   }
 }
@@ -127,10 +131,15 @@ impl<I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<I, S> {
   }
 }
 
+// FIXME: This seems to have two mixed meanings, perhaps split it?
 /// The result of a parsing function.
 pub enum ParseResult {
   /// Everything went okay.
   Ok,
+  /// Decoding should stop.
+  Stop,
+  /// Decoding should skip next element.
+  Skip,
   /// An error occured decoding an element.
   DecodeError(asn1::DecodeError),
   /// An IO error occured.

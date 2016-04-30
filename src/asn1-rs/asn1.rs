@@ -204,7 +204,6 @@ impl Tag {
 
   /// Encode an ASN.1 stream from a tag.
   pub fn encode_tag<W: io::Write>(self, writer: &mut W) -> Result<LenNum, EncodeError> {
-    let mut bytes = ByteWriter::new(writer);
     let (class, tagnum, len, constructed) =
       (self.class, self.tagnum, self.len, self.constructed);
 
@@ -216,11 +215,13 @@ impl Tag {
     // If tag number is <31, add to single byte.
     if tagnum < 31 {
       tag_byte += tagnum as u8 & 0x1f;
-      try!(bytes.write(tag_byte));
+      try!(write_byte(writer, tag_byte));
     // Otherwise build additional tag bytes.
     } else {
       tag_byte += 0x1f;
-      try!(bytes.write(tag_byte));
+      try!(write_byte(writer, tag_byte));
+
+
     }
 
     Ok(bytes.count)
@@ -264,6 +265,7 @@ impl Data for $impl_type {
 )
 }
 
+#[inline]
 /// Read a byte from an iterator, and translate Eof into an UnexpectedEof error.
 pub fn read_byte<I: Iterator<Item=io::Result<u8>>>(iter: &mut I) -> io::Result<u8> {
   match iter.next() {
@@ -272,7 +274,7 @@ pub fn read_byte<I: Iterator<Item=io::Result<u8>>>(iter: &mut I) -> io::Result<u
   }
 }
 
-/// A reader to easily read a byte from a reader.
+/// A reader to easily read a byte from a reader, while keeping a read count.
 pub struct ByteReader<I: Iterator<Item=io::Result<u8>>> {
   reader: I,
   pub count: u64,
@@ -311,31 +313,50 @@ impl<I: Iterator<Item=io::Result<u8>>> From<I> for ByteReader<I> {
   }
 }
 
-/// A writer to easily write a byte to a writer.
-struct ByteWriter<'a, W: io::Write + 'a> {
-  writer: &'a mut W,
+#[inline]
+/// Write a byte to a writer, and return an error when nothing was written.
+pub fn write_byte<W: io::Write>(writer: &mut W, byte: u8) -> io::Result<()> {
+  let buf = [byte];
+  match try!(writer.write(&buf)) {
+    0 => Err(io::Error::new(io::ErrorKind::Other, "Wrote zero bytes")),
+    1 => {
+      Ok(())
+    },
+    _ => Err(io::Error::new(io::ErrorKind::Other, "Wrote more than one byte")),
+  }
+}
+
+/// A writer to easily write a byte to a writer, while keeping a write count.
+struct ByteWriter<W: io::Write> {
+  writer: W,
   pub count: u64,
 }
 
-impl<'a, W: io::Write + 'a> ByteWriter<'a, W> {
-  fn new(writer: &'a mut W) -> ByteWriter<'a, W> {
+impl<W: io::Write> ByteWriter<W> {
+  pub fn new(writer: W) -> ByteWriter<W> {
     ByteWriter {
       writer: writer,
       count: 0
     }
   }
 
-  /// Write a byte to a writer.
-  fn write(&mut self, byte: u8) -> io::Result<()> {
-    let buf = [byte];
-    match try!(self.writer.write(&buf)) {
-      0 => Err(io::Error::new(io::ErrorKind::Other, "Wrote zero bytes")),
-      1 => {
-        self.count += 1;
-        Ok(())
-      },
-      _ => Err(io::Error::new(io::ErrorKind::Other, "Wrote more than one byte")),
+  /// Write a byte, failing if no data was written.
+  pub fn write_byte(&mut self, byte: u8) -> io::Result<()> {
+    write_byte(self, byte)
+  }
+}
+
+impl<W: io::Write> io::Write for ByteWriter<W> {
+  fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+    let res = self.writer.write(buf);
+    if let Ok(c) = res {
+      self.count += c as u64;
     }
+    res
+  }
+
+  fn flush(&mut self) -> io::Result<()> {
+    self.writer.flush()
   }
 }
 
