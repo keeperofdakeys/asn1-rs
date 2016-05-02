@@ -1,6 +1,7 @@
 use std::fmt;
 use std::cmp::Ordering;
 use std::io;
+use std::io::Read;
 
 pub type LenNum = u64;
 
@@ -118,7 +119,7 @@ impl fmt::Display for Class {
   }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(PartialEq, Debug, Clone, Copy)]
 /// A struct representing an ASN.1 element.
 pub struct Tag {
   /// The class of the ASN.1 element.
@@ -203,7 +204,7 @@ impl Tag {
   }
 
   /// Encode an ASN.1 stream from a tag.
-  pub fn encode_tag<W: io::Write>(self, writer: &mut W) -> Result<LenNum, EncodeError> {
+  pub fn encode_tag<W: io::Write>(self, writer: &mut W) -> Result<(), EncodeError> {
     let (class, tagnum, len, constructed) =
       (self.class, self.tagnum, self.len, self.constructed);
 
@@ -218,13 +219,51 @@ impl Tag {
       try!(write_byte(writer, tag_byte));
     // Otherwise build additional tag bytes.
     } else {
-      tag_byte += 0x1f;
-      try!(write_byte(writer, tag_byte));
+      if tagnum & 0x8000000000000000 == 0 {
+        panic!("Bit 63 set on asn1 tag. Not handling, since this is \
+                impractically huge, and it messes up my nice little algorithm.");
+      }
+      let mut started = false;
+      // Take 7 bit slices eg. 62-55, ..., 6-0.
+      // The first non-zero slice marks the start of the int.
+      for offset in (0..9).rev() {
+        // Get 7 bit slice.
+        let mut tag_part: u8 = (tagnum >> (offset * 7)) as u8 & 0x7f;
 
+        if !started {
+          if tag_part == 0 {
+            continue;
+          // TODO: Does tagnum have sign issues like length?
+          // Emit an initial zero byte if slice starts with a 1 bit.
+          } else if tag_part & 0x40 != 0 {
+            try!(write_byte(writer, 0));
+          }
+          // For all slices except the last, set 7th bit.
+          if offset != 0 {
+            tag_part |= 0x80;
+          }
 
+          try!(write_byte(writer, tag_part));
+        }
+        // Skip if its zero and we haven't started.
+        if tag_part == 0 && !started {
+          started = false;
+          continue;
+        }
+      }
     }
 
-    Ok(bytes.count)
+    match len {
+      Len::Indef => try!(write_byte(writer, 0x80)),
+      Len::Def(len_num) => {
+        if len_num < 128 {
+          try!(write_byte(writer, len_num as u8));
+        } else {
+        }
+      },
+    }
+
+    Ok(())
   }
 }
 
@@ -362,7 +401,7 @@ impl<W: io::Write> io::Write for ByteWriter<W> {
 
 /// A list of errors that can occur decoding or encoding  data.
 enum Error {
-  /// Invalid  data.
+  /// Invalid x data.
   Invalid,
   /// An error occured while encoding  data.
   EncodingError,
@@ -398,4 +437,120 @@ impl From<io::Error> for EncodeError {
   fn from(err: io::Error) -> Self {
     EncodeError::IO(err)
   }
+}
+
+#[test]
+fn decode_tag_simple() {
+  assert_eq!(
+    Tag::decode_tag(
+      (b"\x02\x00" as &[u8]).bytes().by_ref()
+    ).unwrap(),
+    Tag {
+      class: 0u8.into(),
+      tagnum: 2u8.into(),
+      len: Some(0u64).into(),
+      constructed: false,
+    }
+  );
+}
+
+#[test]
+fn decode_high_tag_class() {
+  assert_eq!(
+    Tag::decode_tag(
+      (b"\x5f\x01\x10" as &[u8]).bytes().by_ref()
+    ).unwrap(),
+    Tag {
+      class: 1u8.into(),
+      tagnum: 1u8.into(),
+      len: Some(16u64).into(),
+      constructed: false,
+    }
+  );
+
+  // Test low-tag format matches high-tag format.
+  assert_eq!(
+    Tag::decode_tag(
+      (b"\x5f\x01\x10" as &[u8]).bytes().by_ref()
+    ).unwrap(),
+    Tag {
+      class: 1u8.into(),
+      tagnum: 1u8.into(),
+      len: Some(16u64).into(),
+      constructed: false,
+    }
+  );
+}
+
+#[test]
+fn decode_tag_constructed() {
+  assert_eq!(
+    Tag::decode_tag(
+      (b"\x30\x12" as &[u8]).bytes().by_ref()
+    ).unwrap(),
+    Tag {
+      class: 0u8.into(),
+      tagnum: 16u8.into(),
+      len: Some(18u64).into(),
+      constructed: true,
+    }
+  );
+}
+
+#[test]
+fn decode_tag_indefinite() {
+  assert_eq!(
+    Tag::decode_tag(
+      (b"\x30\x80" as &[u8]).bytes().by_ref()
+    ).unwrap(),
+    Tag {
+      class: 0u8.into(),
+      tagnum: 16u8.into(),
+      len: None.into(),
+      constructed: true,
+    }
+  );
+}
+
+#[test]
+fn decode_tag_long_len() {
+  assert_eq!(
+    Tag::decode_tag(
+      (b"\x30\x81\x11" as &[u8]).bytes().by_ref()
+    ).unwrap(),
+    Tag {
+      class: 0u8.into(),
+      tagnum: 16u8.into(),
+      len: Some(17u64).into(),
+      constructed: true,
+    }
+  );
+
+  // Test that short-format matches long-format.
+  assert_eq!(
+    Tag::decode_tag(
+      (b"\x30\x11" as &[u8]).bytes().by_ref()
+    ).unwrap(),
+    Tag {
+      class: 0u8.into(),
+      tagnum: 16u8.into(),
+      len: Some(17u64).into(),
+      constructed: true,
+    }
+  );
+}
+
+#[test]
+fn decode_tag_ridiculous() {
+  assert_eq!(
+    Tag::decode_tag(
+      (b"\x7f\x81\x80\x01\x85\x80\x00\x00\x00\x01" as &[u8]).bytes().by_ref()
+    ).unwrap(),
+    Tag {
+      class: 1u8.into(),
+      tagnum: 16u8.into(),
+      len: Some(17u64).into(),
+      constructed: true,
+    }
+  );
 }
