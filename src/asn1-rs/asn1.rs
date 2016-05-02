@@ -443,7 +443,7 @@ impl From<io::Error> for EncodeError {
 fn decode_tag_simple() {
   assert_eq!(
     Tag::decode_tag(
-      (b"\x02\x00" as &[u8]).bytes().by_ref()
+      b"\x02\x00".bytes().by_ref()
     ).unwrap(),
     Tag {
       class: 0u8.into(),
@@ -458,7 +458,7 @@ fn decode_tag_simple() {
 fn decode_high_tag_class() {
   assert_eq!(
     Tag::decode_tag(
-      (b"\x5f\x01\x10" as &[u8]).bytes().by_ref()
+      b"\x5f\x01\x10".bytes().by_ref()
     ).unwrap(),
     Tag {
       class: 1u8.into(),
@@ -471,7 +471,7 @@ fn decode_high_tag_class() {
   // Test low-tag format matches high-tag format.
   assert_eq!(
     Tag::decode_tag(
-      (b"\x5f\x01\x10" as &[u8]).bytes().by_ref()
+      b"\x5f\x01\x10".bytes().by_ref()
     ).unwrap(),
     Tag {
       class: 1u8.into(),
@@ -486,7 +486,7 @@ fn decode_high_tag_class() {
 fn decode_tag_constructed() {
   assert_eq!(
     Tag::decode_tag(
-      (b"\x30\x12" as &[u8]).bytes().by_ref()
+      b"\x30\x12".bytes().by_ref()
     ).unwrap(),
     Tag {
       class: 0u8.into(),
@@ -501,7 +501,7 @@ fn decode_tag_constructed() {
 fn decode_tag_indefinite() {
   assert_eq!(
     Tag::decode_tag(
-      (b"\x30\x80" as &[u8]).bytes().by_ref()
+      b"\x30\x80".bytes().by_ref()
     ).unwrap(),
     Tag {
       class: 0u8.into(),
@@ -516,7 +516,7 @@ fn decode_tag_indefinite() {
 fn decode_tag_long_len() {
   assert_eq!(
     Tag::decode_tag(
-      (b"\x30\x81\x11" as &[u8]).bytes().by_ref()
+      b"\x30\x81\x11".bytes().by_ref()
     ).unwrap(),
     Tag {
       class: 0u8.into(),
@@ -529,7 +529,7 @@ fn decode_tag_long_len() {
   // Test that short-format matches long-format.
   assert_eq!(
     Tag::decode_tag(
-      (b"\x30\x11" as &[u8]).bytes().by_ref()
+      b"\x30\x11".bytes().by_ref()
     ).unwrap(),
     Tag {
       class: 0u8.into(),
@@ -544,7 +544,7 @@ fn decode_tag_long_len() {
 fn decode_tag_ridiculous() {
   assert_eq!(
     Tag::decode_tag(
-      (b"\x7f\x81\x80\x01\x85\x80\x00\x00\x00\x01" as &[u8]).bytes().by_ref()
+      b"\x7f\x81\x80\x01\x85\x80\x00\x00\x00\x01".bytes().by_ref()
     ).unwrap(),
     Tag {
       class: 1u8.into(),
