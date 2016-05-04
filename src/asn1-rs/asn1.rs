@@ -441,116 +441,120 @@ impl From<io::Error> for EncodeError {
 
 #[test]
 fn decode_tag_simple() {
+  let bytes = b"\x02\x00";
+  let tag = Tag {
+    class: 0u8.into(),
+    tagnum: 2u64.into(),
+    len: Some(0u64).into(),
+    constructed: false,
+  };
   assert_eq!(
-    Tag::decode_tag(
-      b"\x02\x00".bytes().by_ref()
-    ).unwrap(),
-    Tag {
-      class: 0u8.into(),
-      tagnum: 2u8.into(),
-      len: Some(0u64).into(),
-      constructed: false,
-    }
+    Tag::decode_tag(bytes.bytes().by_ref()).unwrap(),
+    tag
   );
 }
 
 #[test]
-fn decode_high_tag_class() {
+fn decode_high_tag_class_1() {
+  let bytes = b"\x5f\x01\x10";
+  let tag = Tag {
+    class: 1u8.into(),
+    tagnum: 1u64.into(),
+    len: Some(16u64).into(),
+    constructed: false,
+  };
   assert_eq!(
-    Tag::decode_tag(
-      b"\x5f\x01\x10".bytes().by_ref()
-    ).unwrap(),
-    Tag {
-      class: 1u8.into(),
-      tagnum: 1u8.into(),
-      len: Some(16u64).into(),
-      constructed: false,
-    }
+    Tag::decode_tag(bytes.bytes().by_ref()).unwrap(),
+    tag
   );
+}
 
-  // Test low-tag format matches high-tag format.
+#[test]
+fn decode_high_tag_class_2() {
+  let bytes = b"\x5f\x01\x10";
+  let tag = Tag {
+    class: 1u8.into(),
+    tagnum: 1u64.into(),
+    len: Some(16u64).into(),
+    constructed: false,
+  };
   assert_eq!(
-    Tag::decode_tag(
-      b"\x5f\x01\x10".bytes().by_ref()
-    ).unwrap(),
-    Tag {
-      class: 1u8.into(),
-      tagnum: 1u8.into(),
-      len: Some(16u64).into(),
-      constructed: false,
-    }
+    Tag::decode_tag(bytes.bytes().by_ref()).unwrap(),
+    tag
   );
 }
 
 #[test]
 fn decode_tag_constructed() {
+  let bytes = b"\x30\x12";
+  let tag = Tag {
+    class: 0u8.into(),
+    tagnum: 16u64.into(),
+    len: Some(18u64).into(),
+    constructed: true,
+  };
   assert_eq!(
-    Tag::decode_tag(
-      b"\x30\x12".bytes().by_ref()
-    ).unwrap(),
-    Tag {
-      class: 0u8.into(),
-      tagnum: 16u8.into(),
-      len: Some(18u64).into(),
-      constructed: true,
-    }
+    Tag::decode_tag(bytes.bytes().by_ref()).unwrap(),
+    tag
   );
 }
 
 #[test]
 fn decode_tag_indefinite() {
+  let bytes = b"\x30\x80";
+  let tag = Tag {
+    class: 0u8.into(),
+    tagnum: 16u64.into(),
+    len: None.into(),
+    constructed: true,
+  };
   assert_eq!(
-    Tag::decode_tag(
-      b"\x30\x80".bytes().by_ref()
-    ).unwrap(),
-    Tag {
-      class: 0u8.into(),
-      tagnum: 16u8.into(),
-      len: None.into(),
-      constructed: true,
-    }
+    Tag::decode_tag(bytes.bytes().by_ref()).unwrap(),
+    tag
   );
 }
 
 #[test]
-fn decode_tag_long_len() {
+fn decode_tag_long_len_1() {
+  let bytes = b"\x30\x81\x11";
+  let tag = Tag {
+    class: 0u8.into(),
+    tagnum: 16u64.into(),
+    len: Some(17u64).into(),
+    constructed: true,
+  };
   assert_eq!(
-    Tag::decode_tag(
-      b"\x30\x81\x11".bytes().by_ref()
-    ).unwrap(),
-    Tag {
-      class: 0u8.into(),
-      tagnum: 16u8.into(),
-      len: Some(17u64).into(),
-      constructed: true,
-    }
+    Tag::decode_tag(bytes.bytes().by_ref()).unwrap(),
+    tag
   );
+}
 
-  // Test that short-format matches long-format.
+#[test]
+fn decode_tag_long_len_2() {
+  let bytes = b"\x30\x11";
+  let tag = Tag {
+    class: 0u8.into(),
+    tagnum: 16u64.into(),
+    len: Some(17u64).into(),
+    constructed: true,
+  };
   assert_eq!(
-    Tag::decode_tag(
-      b"\x30\x11".bytes().by_ref()
-    ).unwrap(),
-    Tag {
-      class: 0u8.into(),
-      tagnum: 16u8.into(),
-      len: Some(17u64).into(),
-      constructed: true,
-    }
+    Tag::decode_tag(bytes.bytes().by_ref()).unwrap(),
+    tag
   );
 }
 
 #[test]
 fn decode_tag_ridiculous() {
+  let bytes = b"\x7f\x81\x80\x01\x85\x80\x00\x00\x00\x01";
+  let tag = Tag {
+    class: 1u8.into(),
+    tagnum: 0x4001u64.into(),
+    len: Some(549755813889u64).into(),
+    constructed: true,
+  };
   assert_eq!(
-    Tag::decode_tag(
-      b"\x7f\x81\x80\x01\x85\x80\x00\x00\x00\x01".bytes().by_ref()
-    ).unwrap(),
-    Tag {
-      class: 1u8.into(),
-      tagnum: 16u8.into(),
-      len: Some(17u64).into(),
-      constructed: true,
-    }
+    Tag::decode_tag(bytes.bytes().by_ref()).unwrap(),
+    tag
   );
 }
