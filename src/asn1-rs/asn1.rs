@@ -641,23 +641,32 @@ fn tag_ridiculous() {
 }
 
 #[test]
-#[should_panic]
 fn tag_missing_bytes() {
-  Tag::decode_tag(b"".bytes().by_ref()).unwrap();
+  let res = Tag::decode_tag(b"".bytes().by_ref());
+  match res {
+    Err(DecodeError::IO(ref err)) if err.kind() == io::ErrorKind::UnexpectedEof => {},
+    _ => panic!("Expected UnexpectedEOf, got {:?}", res.unwrap_err()),
+  }
 }
 
 #[test]
-#[should_panic]
 fn tag_missing_tag_bytes() {
-  Tag::decode_tag(b"\x1f".bytes().by_ref()).unwrap();
-  Tag::decode_tag(b"\x1f\x80".bytes().by_ref()).unwrap();
-  Tag::decode_tag(b"\x1f\x80\x82".bytes().by_ref()).unwrap();
+  let res = Tag::decode_tag(b"\x1f".bytes().by_ref())
+    .or(Tag::decode_tag(b"\x1f\x80".bytes().by_ref()))
+    .or(Tag::decode_tag(b"\x1f\x80\x82".bytes().by_ref()));
+  match res {
+    Err(DecodeError::IO(ref err)) if err.kind() == io::ErrorKind::UnexpectedEof => {},
+    _ => panic!("Expected UnexpectedEOf, got {:?}", res.unwrap_err()),
+  }
 }
 
 #[test]
-#[should_panic]
 fn tag_missing_len_bytes() {
-  Tag::decode_tag(b"\x30".bytes().by_ref()).unwrap();
-  Tag::decode_tag(b"\x30\x81".bytes().by_ref()).unwrap();
-  Tag::decode_tag(b"\x30\x83\x01\x03".bytes().by_ref()).unwrap();
+  let res = Tag::decode_tag(b"\x30".bytes().by_ref())
+    .or(Tag::decode_tag(b"\x30\x81".bytes().by_ref()))
+    .or(Tag::decode_tag(b"\x30\x83\x01\x03".bytes().by_ref()));
+  match res {
+    Err(DecodeError::IO(ref err)) if err.kind() == io::ErrorKind::UnexpectedEof => {},
+    _ => panic!("Expected UnexpectedEOf, got {:?}", res.unwrap_err()),
+  }
 }
