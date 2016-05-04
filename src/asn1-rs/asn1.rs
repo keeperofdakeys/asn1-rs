@@ -209,56 +209,79 @@ impl Tag {
       (self.class, self.tagnum, self.len, self.constructed);
 
     // Create first tag_byte from class, constructed and tag number.
-    let mut tag_byte = u8::from(class) << 6;
+    let mut tag_byte: u8 = (u8::from(class) << 6) & 0xc0;
     if constructed {
-      tag_byte += 0x20;
+      tag_byte |= 0x20;
     }
     // If tag number is <31, add to single byte.
     if tagnum < 31 {
-      tag_byte += tagnum as u8 & 0x1f;
+      tag_byte |= tagnum as u8 & 0x1f;
       try!(write_byte(writer, tag_byte));
     // Otherwise build additional tag bytes.
     } else {
-      if tagnum & 0x8000000000000000 == 0 {
+      if tagnum & 0x8000000000000000 != 0 {
         panic!("Bit 63 set on asn1 tag. Not handling, since this is \
                 impractically huge, and it messes up my nice little algorithm.");
       }
+      tag_byte |= 0x1f;
+      try!(write_byte(writer, tag_byte));
       let mut started = false;
       // Take 7 bit slices eg. 62-55, ..., 6-0.
       // The first non-zero slice marks the start of the int.
       for offset in (0..9).rev() {
         // Get 7 bit slice.
-        let mut tag_part: u8 = (tagnum >> (offset * 7)) as u8 & 0x7f;
+        let mut tag_part = ((tagnum >> (offset * 7)) & 0x7f) as u8;
 
         if !started {
+          // Skip if tag_part is zero and we haven't started.
           if tag_part == 0 {
             continue;
+          }
           // TODO: Does tagnum have sign issues like length?
           // Emit an initial zero byte if slice starts with a 1 bit.
-          } else if tag_part & 0x40 != 0 {
-            try!(write_byte(writer, 0));
-          }
-          // For all slices except the last, set 7th bit.
-          if offset != 0 {
-            tag_part |= 0x80;
-          }
+          // if tag_part & 0x40 != 0 {
+          //   try!(write_byte(writer, 0));
+          // }
+          started = true;
+        }
 
-          try!(write_byte(writer, tag_part));
+        // For all slices except the last, set 7th bit.
+        if offset != 0 {
+          tag_part |= 0x80;
         }
-        // Skip if its zero and we haven't started.
-        if tag_part == 0 && !started {
-          started = false;
-          continue;
-        }
+        try!(write_byte(writer, tag_part));
       }
     }
 
     match len {
       Len::Indef => try!(write_byte(writer, 0x80)),
-      Len::Def(len_num) => {
-        if len_num < 128 {
-          try!(write_byte(writer, len_num as u8));
-        } else {
+      Len::Def(l) if l < 128 =>
+        try!(write_byte(writer, l as u8)),
+      Len::Def(l) => {
+        let mut started = false;
+
+        // Loop through each eight byte slice of l.
+        for offset in (0..8).rev() {
+          let mut len_part: u8 = ((l >> (offset * 8)) & 0xff) as u8;
+
+          if !started {
+            // Skip if len_part is zero and we haven't strated.
+            if len_part == 0 {
+              continue;
+            }
+
+            // TODO: Do we need this?
+            // Work around some decoders using signed ints.
+            // if len_num & 0x80 != 0 {
+            //   try!(write_byte(writer, 0));
+            // }
+            started = true;
+
+            // Write number of len bytes.
+            try!(write_byte(writer, 0x80 | (offset + 1)));
+          }
+
+          try!(write_byte(writer, len_part));
         }
       },
     }
@@ -440,7 +463,7 @@ impl From<io::Error> for EncodeError {
 }
 
 #[test]
-fn decode_tag_simple() {
+fn tag_simple() {
   let bytes = b"\x02\x00";
   let tag = Tag {
     class: 0u8.into(),
@@ -452,11 +475,18 @@ fn decode_tag_simple() {
     Tag::decode_tag(bytes.bytes().by_ref()).unwrap(),
     tag
   );
+  let mut buf: Vec<u8> = Vec::new();
+  tag.encode_tag(&mut buf).unwrap();
+  assert_eq!(
+    &buf,
+    bytes
+  );
 }
 
 #[test]
-fn decode_high_tag_class_1() {
-  let bytes = b"\x5f\x01\x10";
+fn high_tag_class_1() {
+  let short_bytes = b"\x41\x10";
+  let long_bytes = b"\x5f\x01\x10";
   let tag = Tag {
     class: 1u8.into(),
     tagnum: 1u64.into(),
@@ -464,17 +494,27 @@ fn decode_high_tag_class_1() {
     constructed: false,
   };
   assert_eq!(
-    Tag::decode_tag(bytes.bytes().by_ref()).unwrap(),
+    Tag::decode_tag(short_bytes.bytes().by_ref()).unwrap(),
     tag
+  );
+  assert_eq!(
+    Tag::decode_tag(long_bytes.bytes().by_ref()).unwrap(),
+    tag
+  );
+  let mut buf: Vec<u8> = Vec::new();
+  tag.encode_tag(&mut buf).unwrap();
+  assert_eq!(
+    &buf,
+    short_bytes
   );
 }
 
 #[test]
-fn decode_high_tag_class_2() {
-  let bytes = b"\x5f\x01\x10";
+fn high_tag_class_2() {
+  let bytes = b"\x5f\x21\x10";
   let tag = Tag {
     class: 1u8.into(),
-    tagnum: 1u64.into(),
+    tagnum: 33u64.into(),
     len: Some(16u64).into(),
     constructed: false,
   };
@@ -482,10 +522,16 @@ fn decode_high_tag_class_2() {
     Tag::decode_tag(bytes.bytes().by_ref()).unwrap(),
     tag
   );
+  let mut buf: Vec<u8> = Vec::new();
+  tag.encode_tag(&mut buf).unwrap();
+  assert_eq!(
+    &buf,
+    bytes
+  );
 }
 
 #[test]
-fn decode_tag_constructed() {
+fn tag_constructed() {
   let bytes = b"\x30\x12";
   let tag = Tag {
     class: 0u8.into(),
@@ -497,10 +543,16 @@ fn decode_tag_constructed() {
     Tag::decode_tag(bytes.bytes().by_ref()).unwrap(),
     tag
   );
+  let mut buf: Vec<u8> = Vec::new();
+  tag.encode_tag(&mut buf).unwrap();
+  assert_eq!(
+    &buf,
+    bytes
+  );
 }
 
 #[test]
-fn decode_tag_indefinite() {
+fn tag_indefinite() {
   let bytes = b"\x30\x80";
   let tag = Tag {
     class: 0u8.into(),
@@ -512,11 +564,18 @@ fn decode_tag_indefinite() {
     Tag::decode_tag(bytes.bytes().by_ref()).unwrap(),
     tag
   );
+  let mut buf: Vec<u8> = Vec::new();
+  tag.encode_tag(&mut buf).unwrap();
+  assert_eq!(
+    &buf,
+    bytes
+  );
 }
 
 #[test]
-fn decode_tag_long_len_1() {
-  let bytes = b"\x30\x81\x11";
+fn tag_long_len_1() {
+  let long_bytes = b"\x30\x81\x11";
+  let short_bytes = b"\x30\x11";
   let tag = Tag {
     class: 0u8.into(),
     tagnum: 16u64.into(),
@@ -524,28 +583,44 @@ fn decode_tag_long_len_1() {
     constructed: true,
   };
   assert_eq!(
-    Tag::decode_tag(bytes.bytes().by_ref()).unwrap(),
+    Tag::decode_tag(short_bytes.bytes().by_ref()).unwrap(),
     tag
+  );
+  assert_eq!(
+    Tag::decode_tag(long_bytes.bytes().by_ref()).unwrap(),
+    tag
+  );
+  let mut buf: Vec<u8> = Vec::new();
+  tag.encode_tag(&mut buf).unwrap();
+  assert_eq!(
+    &buf,
+    short_bytes
   );
 }
 
 #[test]
-fn decode_tag_long_len_2() {
-  let bytes = b"\x30\x11";
+fn tag_long_len_2() {
+  let bytes = b"\x30\x81\x81";
   let tag = Tag {
     class: 0u8.into(),
     tagnum: 16u64.into(),
-    len: Some(17u64).into(),
+    len: Some(129u64).into(),
     constructed: true,
   };
   assert_eq!(
     Tag::decode_tag(bytes.bytes().by_ref()).unwrap(),
     tag
   );
+  let mut buf: Vec<u8> = Vec::new();
+  tag.encode_tag(&mut buf).unwrap();
+  assert_eq!(
+    &buf,
+    bytes
+  );
 }
 
 #[test]
-fn decode_tag_ridiculous() {
+fn tag_ridiculous() {
   let bytes = b"\x7f\x81\x80\x01\x85\x80\x00\x00\x00\x01";
   let tag = Tag {
     class: 1u8.into(),
@@ -557,4 +632,32 @@ fn decode_tag_ridiculous() {
     Tag::decode_tag(bytes.bytes().by_ref()).unwrap(),
     tag
   );
+  let mut buf: Vec<u8> = Vec::new();
+  tag.encode_tag(&mut buf).unwrap();
+  assert_eq!(
+    &buf,
+    bytes
+  );
+}
+
+#[test]
+#[should_panic]
+fn tag_missing_bytes() {
+  Tag::decode_tag(b"".bytes().by_ref()).unwrap();
+}
+
+#[test]
+#[should_panic]
+fn tag_missing_tag_bytes() {
+  Tag::decode_tag(b"\x1f".bytes().by_ref()).unwrap();
+  Tag::decode_tag(b"\x1f\x80".bytes().by_ref()).unwrap();
+  Tag::decode_tag(b"\x1f\x80\x82".bytes().by_ref()).unwrap();
+}
+
+#[test]
+#[should_panic]
+fn tag_missing_len_bytes() {
+  Tag::decode_tag(b"\x30".bytes().by_ref()).unwrap();
+  Tag::decode_tag(b"\x30\x81".bytes().by_ref()).unwrap();
+  Tag::decode_tag(b"\x30\x83\x01\x03".bytes().by_ref()).unwrap();
 }
