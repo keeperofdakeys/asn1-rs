@@ -1,7 +1,6 @@
 use std::fmt;
 use std::cmp::Ordering;
 use std::io;
-use std::io::Read;
 
 pub type LenNum = u64;
 
@@ -262,7 +261,7 @@ impl Tag {
 
         // Loop through each eight byte slice of l.
         for offset in (0..8).rev() {
-          let mut len_part: u8 = ((l >> (offset * 8)) & 0xff) as u8;
+          let len_part: u8 = ((l >> (offset * 8)) & 0xff) as u8;
 
           if !started {
             // Skip if len_part is zero and we haven't strated.
@@ -439,6 +438,8 @@ pub enum DecodeError {
   IO(io::Error),
   /// Child element(s) decoded to greater length than the parent's tag.
   GreaterLen,
+  /// Child element(s) decoded to smaller length than the parent's tag.
+  SmallerLen,
   /// Primitive value encoded with an indefinite length.
   PrimIndef,
 }

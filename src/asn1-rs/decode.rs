@@ -67,8 +67,6 @@ impl<I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<I, S> {
   // FIXME: Convert explicit decoded_len to use diff of internal reader count.
   /// Internal decode function.
   fn _decode(&mut self) -> Result<asn1::Tag, asn1::DecodeError> {
-    let pre_tag_count: asn1::LenNum = self.reader.count;
-
     // Decode tag.
     let tag = try!(asn1::Tag::decode_tag(&mut self.reader));
     let post_tag_count: asn1::LenNum  = self.reader.count;
@@ -117,11 +115,18 @@ impl<I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<I, S> {
 
       // Call decodee primitive decode callback.
       self.decodee.primitive(&mut self.reader, len_num);
+
+      // Calculate decoded length.
+      let decoded_len = self.reader.count - post_tag_count;
+      // Ensure the exact amout of bytes was decoded.
+      match tag.len.partial_cmp(&decoded_len) {
+        Some(Ordering::Less) => return Err(asn1::DecodeError::GreaterLen),
+        Some(Ordering::Greater) => return Err(asn1::DecodeError::SmallerLen),
+        _ => {},
+      }
     }
 
     let post_decode_count = self.reader.count;
-
-    // FIXME: If decoded length is larger than tag length, error here.
 
     // Call decodee end element callback.
     self.decodee.end_element();
@@ -134,8 +139,7 @@ impl<I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<I, S> {
 /// Ber decoder that allows a client to control the decoding process.
 /// 
 /// Clients are given 
-struct TreeParser {
-}
+struct TreeParser;
 
 enum TreeParserNode {
   Constructed,
