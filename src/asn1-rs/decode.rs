@@ -131,6 +131,38 @@ impl<I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<I, S> {
   }
 }
 
+/// Ber decoder that allows a client to control the decoding process.
+/// 
+/// Clients are given 
+struct TreeParser {
+}
+
+enum TreeParserNode {
+  Constructed,
+  Primitive
+}
+
+// Some kind of api like this:
+//
+// Given either:
+// // SKip this (decode in the background, to consume the bytes).
+// fn next/skip() -> TreeParserNode
+// // Skip all and go back up.
+// fn up/finish() -> ()
+//
+//
+// Given a Constructed, allow:
+// // Go down a level
+// fn into/deeper() -> TreeParserNode
+//
+// Given a Primitive, allow:
+// // Decode this primitive, or return a limited iterator to consume this elemnt.
+// fn decode/reader/slice()
+// fn up/finish()
+//
+// This api should be stack-only. Unlike StreamDecoder, the user won't need to use the heap to store an element stack.
+// This doesn't have any asn1 type info though, so maybe it will be part of a larger system (or perhaps not).
+
 // FIXME: This seems to have two mixed meanings, perhaps split it?
 /// The result of a parsing function.
 pub enum ParseResult {
