@@ -463,6 +463,9 @@ impl From<io::Error> for EncodeError {
   }
 }
 
+#[cfg(test)]
+use std::io::Read;
+
 #[test]
 fn tag_simple() {
   let bytes = b"\x02\x00";
