@@ -118,6 +118,8 @@ impl fmt::Display for Class {
   }
 }
 
+pub type Type = String;
+
 #[derive(PartialEq, Debug, Clone, Copy)]
 /// A struct representing an ASN.1 element.
 pub struct Tag {
@@ -289,43 +291,6 @@ impl Tag {
   }
 }
 
-type Type = String;
-
-trait Data {
-  fn get_asn1_type() -> Type;
-
-  // /// Create ASN.1 data from this struct.
-  // FIXME: Should this use &self?
-  // fn into_asn1(&self) -> Result<Data, Error>;
-
-  // /// Create this struct from ASN.1 data.
-  // fn from_asn1(slice: Slice) -> Result<Self, Error>;
-}
-
-/// A macro to generate a generic Data trait implementation for a struct.
-macro_rules! asn1_impl {
-  ( $impl_type:ident, $asn1_type:expr,
-    $( $name:ident, $rusttype:ident, $asn1type:expr ),*
-  ) =>
-(
-
-impl Data for $impl_type {
-  fn get_asn1_type() -> Type {
-    $asn1_type
-  }
-
-  fn into_asn1(&self) -> Result<Data, Error> {
-    Err(Error::EncodingError)
-  }
-
-  fn from_asn1(slice: Slice) -> Result<Self, Error> {
-    Err(Error::Invalid)
-  }
-}
-
-)
-}
-
 #[inline]
 /// Read a byte from an iterator, and translate Eof into an UnexpectedEof error.
 pub fn read_byte<I: Iterator<Item=io::Result<u8>>>(iter: &mut I) -> io::Result<u8> {
@@ -419,16 +384,6 @@ impl<W: io::Write> io::Write for ByteWriter<W> {
   fn flush(&mut self) -> io::Result<()> {
     self.writer.flush()
   }
-}
-
-/// A list of errors that can occur decoding or encoding  data.
-enum Error {
-  /// Invalid x data.
-  Invalid,
-  /// An error occured while encoding  data.
-  EncodingError,
-  /// An invalid tag was decoded
-  InvalidTag(Tag),
 }
 
 #[derive(Debug)]
