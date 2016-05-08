@@ -141,31 +141,50 @@ impl<I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<I, S> {
 /// Clients are given 
 struct TreeParser;
 
-enum TreeParserNode {
-  Constructed,
-  Primitive
+/// An ASN.1 element located in a tree of ASN.1 elements.
+pub struct Asn1Node<I: Iterator<Item=io::Result<u8>>> {
+  /// ASN.1 tag for this element.
+  pub tag: asn1::Tag,
+  reader: asn1::ByteReader<I>,
+  // State that reader's byte counter should be at
+  // for the next operation.
+  offset: u64,
 }
 
-// Some kind of api like this:
-//
-// Given either:
-// // SKip this (decode in the background, to consume the bytes).
-// fn next/skip() -> TreeParserNode
-// // Skip all and go back up.
-// fn up/finish() -> ()
-//
-//
-// Given a Constructed, allow:
-// // Go down a level
-// fn into/deeper() -> TreeParserNode
-//
-// Given a Primitive, allow:
-// // Decode this primitive, or return a limited iterator to consume this elemnt.
-// fn decode/reader/slice()
-// fn up/finish()
-//
-// This api should be stack-only. Unlike StreamDecoder, the user won't need to use the heap to store an element stack.
-// This doesn't have any asn1 type info though, so maybe it will be part of a larger system (or perhaps not).
+impl<I: Iterator<Item=io::Result<u8>>> Asn1Node<I> {
+  /// Try retreiving the next child of a constructed ASN.1 element.
+  ///
+  /// Given a constructed ASN.1 element node, this function
+  /// will return an ASN.1 node for the next child of this
+  /// element. Once the last child is reached, None is returned.
+  // FIXME: This has real problems with not decoding children,
+  // and how to handle indefinite length encoding.
+  fn next_child(&mut self) -> Option<Self> {
+    if !self.tag.constructed {
+      panic!("Can't call next_child on a primitive element.");
+    }
+    // panic if reader is beyond offset.
+    unimplemented!()
+  }
+
+  /// For a primitive element, return a byte iterator that
+  /// can be used to decode the ASN.1 value. THe returned
+  /// iterator will reach Eof (return None), if more than
+  /// the length of the element is read (as declared in
+  /// the tag).
+  ///
+  /// The returned ByteReader also provides a .read() function
+  /// that will return an appropriate DecodeError when Eof is
+  /// prematurely reached.
+  fn decode<I2: Iterator<Item=io::Result<u8>>>(&mut self) -> asn1::ByteReader<I2> {
+    if self.tag.constructed {
+      panic!("Can't call decode on a non-primitive element.");
+    }
+    let len = Option::<asn1::LenNum>::from(self.tag.len).unwrap();
+
+    asn1::ByteReader::new_limit(self.reader, len)
+  }
+}
 
 // FIXME: This seems to have two mixed meanings, perhaps split it?
 /// The result of a parsing function.

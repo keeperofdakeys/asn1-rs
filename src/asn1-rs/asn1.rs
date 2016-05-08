@@ -304,6 +304,7 @@ pub fn read_byte<I: Iterator<Item=io::Result<u8>>>(iter: &mut I) -> io::Result<u
 pub struct ByteReader<I: Iterator<Item=io::Result<u8>>> {
   reader: I,
   pub count: u64,
+  limit: Option<u64>,
 }
 
 impl<I: Iterator<Item=io::Result<u8>>> ByteReader<I> {
@@ -311,7 +312,18 @@ impl<I: Iterator<Item=io::Result<u8>>> ByteReader<I> {
   pub fn new(reader: I) -> ByteReader<I> {
     ByteReader {
       reader: reader,
-      count: 0
+      count: 0,
+      limit: None
+    }
+  }
+
+  /// Create a new ByteReader from an Iterator, and add
+  /// a maximum length that can be read from it.
+  pub fn new_limit(reader: I, limit: u64) -> ByteReader<I> {
+    ByteReader {
+      reader: reader,
+      count: 0,
+      limit: Some(limit),
     }
   }
 
@@ -328,6 +340,12 @@ impl<I: Iterator<Item=io::Result<u8>>> Iterator for ByteReader<I> {
     let val = self.reader.next();
     if val.is_some() {
       self.count += 1;
+      // Return None if we've exceeded our limit.
+      if let Some(l) = self.limit {
+        if l > self.count {
+          return None;
+        }
+      }
     }
     val
   }
