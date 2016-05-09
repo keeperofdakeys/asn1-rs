@@ -126,8 +126,6 @@ impl<I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<I, S> {
       }
     }
 
-    let post_decode_count = self.reader.count;
-
     // Call decodee end element callback.
     self.decodee.end_element();
 
@@ -136,8 +134,8 @@ impl<I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<I, S> {
   }
 }
 
-/// Ber decoder that allows a client to control the decoding process.
-/// 
+/*
+/// Ber decoder that allows a client to control the decoding process.  
 /// Clients are given 
 struct TreeParser;
 
@@ -185,6 +183,7 @@ impl<I: Iterator<Item=io::Result<u8>>> Asn1Node<I> {
     asn1::ByteReader::new_limit(self.reader, len)
   }
 }
+*/
 
 // FIXME: This seems to have two mixed meanings, perhaps split it?
 /// The result of a parsing function.

@@ -12,3 +12,7 @@ path="src/asn1-rs/lib.rs"
 [[bin]]
 path="src/asn1-utils/asn1-decode.rs"
 name="asn1-decode"
+
+[[bin]]
+path="src/asn1-utils/asn1-decode-json.rs"
+name="asn1-decode-json"
