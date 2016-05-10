@@ -13,14 +13,14 @@ pub trait StreamDecodee {
   /// This function is called when an ASN.1 element has finished decoding.
   /// Specifically, this is called for both constructed, and un-constructed
   /// elements.
-  fn end_element(&mut self) -> ParseResult {
+  fn end_element(&mut self, tag: asn1::Tag) -> ParseResult {
     ParseResult::Ok
   }
 
   // FIXME: Currently it's the function's responsibility to decode the element
   // with the correct amounts of bytes. Without heap allocation, this might be
   // the only way.
-  /// This is called when a primitve element is encountered. The start_element
+  /// This is called when a primitive element is encountered. The start_element
   /// function is always called before this.
   fn primitive<I: Iterator<Item=io::Result<u8>>>(&mut self, reader: &mut asn1::ByteReader<I>,
       len: asn1::LenNum) -> ParseResult {
@@ -127,7 +127,7 @@ impl<I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<I, S> {
     }
 
     // Call decodee end element callback.
-    self.decodee.end_element();
+    self.decodee.end_element(tag);
 
     // Return decoded + tag_len, which is total decoded length.
     Ok(tag)

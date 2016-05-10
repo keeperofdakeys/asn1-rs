@@ -43,7 +43,7 @@ impl decode::StreamDecodee for StreamDumper {
     decode::ParseResult::Ok
   }
 
-  fn end_element(&mut self) -> decode::ParseResult {
+  fn end_element(&mut self, tag: asn1::Tag) -> decode::ParseResult {
     self.indent -= 1;
     println!("{:>width$}{}", "", "End.", width=self.indent);
     decode::ParseResult::Ok
