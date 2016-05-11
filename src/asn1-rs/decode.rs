@@ -44,15 +44,15 @@ pub trait StreamDecodee {
 
 /// A decoder that calls into an object implementing the StreamDecodee
 /// trait.
-pub struct StreamDecoder<I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> {
+pub struct StreamDecoder<'a, I: Iterator<Item=io::Result<u8>>, S: StreamDecodee + 'a> {
   /// Internal reader with an included byte counter.
   reader: asn1::ByteReader<I>,
   /// Object implementing StreamDecodee trait, called into during decoding.
-  decodee: S,
+  decodee: &'a mut S,
 }
 
-impl<I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<I, S> {
-  pub fn new<T: Into<asn1::ByteReader<I>>>(reader: T, decodee: S) -> Self {
+impl<'a, I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<'a, I, S> {
+  pub fn new<T: Into<asn1::ByteReader<I>>>(reader: T, decodee: &'a mut S) -> Self {
     StreamDecoder {
       reader: reader.into(),
       decodee: decodee,

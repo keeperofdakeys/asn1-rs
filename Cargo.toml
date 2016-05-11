@@ -5,14 +5,16 @@ authors = ["Josh <keeperofdakeys@gmail.com>"]
 
 [dependencies]
 argparse = "0.2"
+serde = "0.7"
+serde_json = "0.7"
 
 [lib]
 path="src/asn1-rs/lib.rs"
 
 [[bin]]
-path="src/asn1-utils/asn1-decode.rs"
-name="asn1-decode"
+path="src/asn1-utils/ber-dump.rs"
+name="ber-dump"
 
 [[bin]]
-path="src/asn1-utils/asn1-decode-json.rs"
-name="asn1-decode-json"
+path="src/asn1-utils/ber-json-decode.rs"
+name="ber-json-decode"

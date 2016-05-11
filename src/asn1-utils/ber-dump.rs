@@ -20,7 +20,8 @@ fn main() {
 
   // Create a buffered reader from the file.
   let reader = io::BufReader::new(fs::File::open(path).unwrap()).bytes();
-  let mut decoder = decode::StreamDecoder::new(reader, StreamDumper::new());
+  let mut dumper = StreamDumper::new();
+  let mut decoder = decode::StreamDecoder::new(reader, &mut dumper);
   decoder.decode().unwrap();
 }
 
@@ -36,43 +37,23 @@ impl StreamDumper {
 
 impl decode::StreamDecodee for StreamDumper {
   fn start_element(&mut self, tag: asn1::Tag) -> decode::ParseResult {
-    // Print: {{ tag: 
-    print!("{:>width$}{{\n{:>width2$}\"tag\": ", "", "", width=self.indent*2, width2=(self.indent+1)*2);
-    // Print: { .. tag details .. }
-    print!("{{ \"num\": {}, \"class\": \"{}\", \"constructed\": {}",
-      tag.tagnum, tag.class, tag.constructed
-    ); 
-    match tag.len {
-      asn1::Len::Def(ref l) => print!(", \"len\": {}", l),
-      _ => {},
-    }
-    print!(" }},\n");
-
+    // Print tag info.
+    println!("{:>width$}TagNum: {}, Class: {}, Len: {}, Constructed: {}", "",
+             tag.tagnum, tag.class, tag.len, tag.constructed, width=self.indent);
     self.indent += 1;
-
-    if tag.constructed {
-      println!("{:>width$}\"elements\": [", "", width=self.indent*2);
-      self.indent += 1;
-    }
-
     decode::ParseResult::Ok
   }
 
   fn end_element(&mut self, tag: asn1::Tag) -> decode::ParseResult {
     self.indent -= 1;
-
-    if tag.constructed {
-      println!("{:>width$}]", "", width=self.indent*2);
-      self.indent -= 1;
-    }
-    println!("{:>width$}}},", "", width=self.indent*2);
+    println!("{:>width$}{}", "", "End.", width=self.indent);
     decode::ParseResult::Ok
   }
 
   fn primitive<I: Iterator<Item=io::Result<u8>>>(&mut self, reader: &mut asn1::ByteReader<I>, len: asn1::LenNum) ->
     decode::ParseResult {
     // Indent line
-    print!("{:>width$}\"bytes\": \"", "", width=self.indent*2);
+    print!("{:>width$}", "", width=self.indent);
 
     // Extract contents
     for _ in 0..len {
@@ -82,7 +63,7 @@ impl decode::StreamDecodee for StreamDumper {
       };
       print!("{:x}", byte);
     }
-    println!("\"");
+    print!("\n");
     decode::ParseResult::Ok
   }
 }
