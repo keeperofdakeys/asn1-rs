@@ -1,4 +1,6 @@
-use asn1;
+use tag;
+use err;
+use byte;
 
 use std::cmp::Ordering;
 use std::io;
@@ -6,14 +8,14 @@ use std::io;
 pub trait StreamDecodee {
   /// This function is called when an ASN.1 tag is encountered. In other
   /// words, at the start of an ASN.1 element.
-  fn start_element(&mut self, tag: asn1::Tag) -> ParseResult {
+  fn start_element(&mut self, tag: tag::Tag) -> ParseResult {
     ParseResult::Ok
   }
 
   /// This function is called when an ASN.1 element has finished decoding.
   /// Specifically, this is called for both constructed, and un-constructed
   /// elements.
-  fn end_element(&mut self, tag: asn1::Tag) -> ParseResult {
+  fn end_element(&mut self, tag: tag::Tag) -> ParseResult {
     ParseResult::Ok
   }
 
@@ -22,8 +24,8 @@ pub trait StreamDecodee {
   // the only way.
   /// This is called when a primitive element is encountered. The start_element
   /// function is always called before this.
-  fn primitive<I: Iterator<Item=io::Result<u8>>>(&mut self, reader: &mut asn1::ByteReader<I>,
-      len: asn1::LenNum) -> ParseResult {
+  fn primitive<I: Iterator<Item=io::Result<u8>>>(&mut self, reader: &mut byte::ByteReader<I>,
+      len: tag::LenNum) -> ParseResult {
     for _ in 0..len {
       match reader.read() {
         Err(e) => return e.into(),
@@ -33,12 +35,12 @@ pub trait StreamDecodee {
     ParseResult::Ok
   }
 
-  fn warning(err: asn1::DecodeError) -> ParseResult {
+  fn warning(err: err::DecodeError) -> ParseResult {
     ParseResult::Stop
   }
 
   /// This is called when a fatal decoding error occurs.
-  fn error(err: asn1::DecodeError) {
+  fn error(err: err::DecodeError) {
   }
 }
 
@@ -46,13 +48,13 @@ pub trait StreamDecodee {
 /// trait.
 pub struct StreamDecoder<'a, I: Iterator<Item=io::Result<u8>>, S: StreamDecodee + 'a> {
   /// Internal reader with an included byte counter.
-  reader: asn1::ByteReader<I>,
+  reader: byte::ByteReader<I>,
   /// Object implementing StreamDecodee trait, called into during decoding.
   decodee: &'a mut S,
 }
 
 impl<'a, I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<'a, I, S> {
-  pub fn new<T: Into<asn1::ByteReader<I>>>(reader: T, decodee: &'a mut S) -> Self {
+  pub fn new<T: Into<byte::ByteReader<I>>>(reader: T, decodee: &'a mut S) -> Self {
     StreamDecoder {
       reader: reader.into(),
       decodee: decodee,
@@ -60,16 +62,16 @@ impl<'a, I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<'a, I
   }
 
   /// Decode an asn1 element.
-  pub fn decode(&mut self) -> Result<(), asn1::DecodeError> {
+  pub fn decode(&mut self) -> Result<(), err::DecodeError> {
     self._decode().and(Ok(()))
   }
 
   // FIXME: Convert explicit decoded_len to use diff of internal reader count.
   /// Internal decode function.
-  fn _decode(&mut self) -> Result<asn1::Tag, asn1::DecodeError> {
+  fn _decode(&mut self) -> Result<tag::Tag, err::DecodeError> {
     // Decode tag.
-    let tag = try!(asn1::Tag::decode_tag(&mut self.reader));
-    let post_tag_count: asn1::LenNum  = self.reader.count;
+    let tag = try!(tag::Tag::decode_tag(&mut self.reader));
+    let post_tag_count: tag::LenNum  = self.reader.count;
 
     // Call the decodee start element callback;
     self.decodee.start_element(tag);
@@ -84,7 +86,7 @@ impl<'a, I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<'a, I
         // Put this first to handle zero-length elements.
         match tag.len.partial_cmp(&decoded_len) {
           // Return an error when we've decoded too much.
-          Some(Ordering::Less) => return Err(asn1::DecodeError::GreaterLen),
+          Some(Ordering::Less) => return Err(err::DecodeError::GreaterLen),
           // Finish loop when equal, we must be finished.
           Some(Ordering::Equal) => break,
           // Continue when we are still decoding.
@@ -99,8 +101,8 @@ impl<'a, I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<'a, I
         // If applicable, identify end of indefinite length encoding.
         // When decoding indefinite length encoding, stop on '00 00'
         // tag.
-        if child_tag.len == asn1::Len::Def(0) &&
-           child_tag.class == asn1::Class::Universal &&
+        if child_tag.len == tag::Len::Def(0) &&
+           child_tag.class == tag::Class::Universal &&
            child_tag.tagnum == 0 {
           break;
         }
@@ -108,9 +110,9 @@ impl<'a, I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<'a, I
     // Otherwise decode primitive value.
     } else {
       let len_num = try!(match tag.len {
-        asn1::Len::Def(l) => Ok(l),
-        asn1::Len::Indef =>
-          Err(asn1::DecodeError::PrimIndef),
+        tag::Len::Def(l) => Ok(l),
+        tag::Len::Indef =>
+          Err(err::DecodeError::PrimIndef),
       });
 
       // Call decodee primitive decode callback.
@@ -120,8 +122,8 @@ impl<'a, I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<'a, I
       let decoded_len = self.reader.count - post_tag_count;
       // Ensure the exact amout of bytes was decoded.
       match tag.len.partial_cmp(&decoded_len) {
-        Some(Ordering::Less) => return Err(asn1::DecodeError::GreaterLen),
-        Some(Ordering::Greater) => return Err(asn1::DecodeError::SmallerLen),
+        Some(Ordering::Less) => return Err(err::DecodeError::GreaterLen),
+        Some(Ordering::Greater) => return Err(err::DecodeError::SmallerLen),
         _ => {},
       }
     }
@@ -142,8 +144,8 @@ struct TreeParser;
 /// An ASN.1 element located in a tree of ASN.1 elements.
 pub struct Asn1Node<I: Iterator<Item=io::Result<u8>>> {
   /// ASN.1 tag for this element.
-  pub tag: asn1::Tag,
-  reader: asn1::ByteReader<I>,
+  pub tag: tag::Tag,
+  reader: byte::ByteReader<I>,
   // State that reader's byte counter should be at
   // for the next operation.
   offset: u64,
@@ -171,16 +173,16 @@ impl<I: Iterator<Item=io::Result<u8>>> Asn1Node<I> {
   /// the length of the element is read (as declared in
   /// the tag).
   ///
-  /// The returned ByteReader also provides a .read() function
+  /// The returned byte::ByteReader also provides a .read() function
   /// that will return an appropriate DecodeError when Eof is
   /// prematurely reached.
-  fn decode<I2: Iterator<Item=io::Result<u8>>>(&mut self) -> asn1::ByteReader<I2> {
+  fn decode<I2: Iterator<Item=io::Result<u8>>>(&mut self) -> byte::ByteReader<I2> {
     if self.tag.constructed {
       panic!("Can't call decode on a non-primitive element.");
     }
-    let len = Option::<asn1::LenNum>::from(self.tag.len).unwrap();
+    let len = Option::<tag::LenNum>::from(self.tag.len).unwrap();
 
-    asn1::ByteReader::new_limit(self.reader, len)
+    byte::ByteReader::new_limit(self.reader, len)
   }
 }
 */
@@ -195,13 +197,13 @@ pub enum ParseResult {
   /// Decoding should skip next element.
   Skip,
   /// An error occured decoding an element.
-  DecodeError(asn1::DecodeError),
+  DecodeError(err::DecodeError),
   /// An IO error occured.
   IO(io::Error),
 }
 
-impl From<asn1::DecodeError> for ParseResult {
-  fn from(err: asn1::DecodeError) -> Self {
+impl From<err::DecodeError> for ParseResult {
+  fn from(err: err::DecodeError) -> Self {
     ParseResult::DecodeError(err)
   }
 }

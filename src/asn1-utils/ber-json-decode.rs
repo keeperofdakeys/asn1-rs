@@ -3,8 +3,8 @@ extern crate argparse;
 extern crate serde;
 extern crate serde_json;
 
-use asn1_rs::asn1;
-use asn1_rs::decode;
+use asn1_rs::{tag, byte};
+use asn1_rs::ber::stream;
 
 use std::io;
 use std::io::Read;
@@ -27,7 +27,7 @@ fn main() {
   let reader = io::BufReader::new(fs::File::open(path).unwrap()).bytes();
   let mut dumper = StreamDumper::new();
   {
-    let mut decoder = decode::StreamDecoder::new(reader, &mut dumper);
+    let mut decoder = stream::StreamDecoder::new(reader, &mut dumper);
     decoder.decode().unwrap();
   }
   println!("{}", to_string_pretty(&dumper.stack.last().unwrap().last().unwrap()).unwrap());
@@ -47,28 +47,28 @@ impl StreamDumper {
   }
 }
 
-impl decode::StreamDecodee for StreamDumper {
-  fn start_element(&mut self, tag: asn1::Tag) -> decode::ParseResult {
+impl stream::StreamDecodee for StreamDumper {
+  fn start_element(&mut self, tag: tag::Tag) -> stream::ParseResult {
     if tag.constructed {
       self.stack.push(Vec::new());
     }
 
-    decode::ParseResult::Ok
+    stream::ParseResult::Ok
   }
 
-  fn end_element(&mut self, tag: asn1::Tag) -> decode::ParseResult {
+  fn end_element(&mut self, tag: tag::Tag) -> stream::ParseResult {
     let mut tag_map = BTreeMap::new();
     let mut map = BTreeMap::new();
     tag_map.insert(
       "class",
       match tag.class {
-        asn1::Class::Application => "application",
-        asn1::Class::Universal => "universal",
-        asn1::Class::Private => "private",
-        asn1::Class::ContextSpecific => "context",
+        tag::Class::Application => "application",
+        tag::Class::Universal => "universal",
+        tag::Class::Private => "private",
+        tag::Class::ContextSpecific => "context",
       }.to_owned(),
     );
-    if let asn1::Len::Def(ref l) = tag.len {
+    if let tag::Len::Def(ref l) = tag.len {
       tag_map.insert("length", l.to_string());
     }
     tag_map.insert("num", tag.tagnum.to_string());
@@ -86,11 +86,11 @@ impl decode::StreamDecodee for StreamDumper {
     }
     self.stack.last_mut().unwrap().push(serde_json::to_value(&map));
 
-    decode::ParseResult::Ok
+    stream::ParseResult::Ok
   }
 
-  fn primitive<I: Iterator<Item=io::Result<u8>>>(&mut self, reader: &mut asn1::ByteReader<I>, len: asn1::LenNum) ->
-    decode::ParseResult {
+  fn primitive<I: Iterator<Item=io::Result<u8>>>(&mut self, reader: &mut byte::ByteReader<I>, len: tag::LenNum) ->
+    stream::ParseResult {
     if self.elem.is_some() {
       panic!("elem should not be defined already!");
     }
@@ -106,7 +106,7 @@ impl decode::StreamDecodee for StreamDumper {
     }
     self.elem = Some(serde_json::to_value(&bytes));
 
-    decode::ParseResult::Ok
+    stream::ParseResult::Ok
   }
 }
 
