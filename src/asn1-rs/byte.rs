@@ -82,7 +82,7 @@ pub fn write_byte<W: io::Write>(writer: &mut W, byte: u8) -> io::Result<()> {
 }
 
 /// A writer to easily write a byte to a writer, while keeping a write count.
-struct ByteWriter<W: io::Write> {
+pub struct ByteWriter<W: io::Write> {
   writer: W,
   pub count: u64,
 }

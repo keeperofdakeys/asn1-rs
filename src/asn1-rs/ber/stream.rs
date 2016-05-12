@@ -54,7 +54,7 @@ pub struct StreamDecoder<'a, I: Iterator<Item=io::Result<u8>>, S: StreamDecodee 
 }
 
 impl<'a, I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<'a, I, S> {
-  pub fn new<T: Into<byte::ByteReader<I>>>(reader: T, decodee: &'a mut S) -> Self {
+  pub fn new<R: Into<byte::ByteReader<I>>>(reader: R, decodee: &'a mut S) -> Self {
     StreamDecoder {
       reader: reader.into(),
       decodee: decodee,
@@ -136,56 +136,47 @@ impl<'a, I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<'a, I
   }
 }
 
-/*
-/// Ber decoder that allows a client to control the decoding process.  
-/// Clients are given 
-struct TreeParser;
-
-/// An ASN.1 element located in a tree of ASN.1 elements.
-pub struct Asn1Node<I: Iterator<Item=io::Result<u8>>> {
-  /// ASN.1 tag for this element.
-  pub tag: tag::Tag,
-  reader: byte::ByteReader<I>,
-  // State that reader's byte counter should be at
-  // for the next operation.
-  offset: u64,
+pub struct StreamEncoder<W: io::Write> {
+  writer: byte::ByteWriter<W>
 }
 
-impl<I: Iterator<Item=io::Result<u8>>> Asn1Node<I> {
-  /// Try retreiving the next child of a constructed ASN.1 element.
-  ///
-  /// Given a constructed ASN.1 element node, this function
-  /// will return an ASN.1 node for the next child of this
-  /// element. Once the last child is reached, None is returned.
-  // FIXME: This has real problems with not decoding children,
-  // and how to handle indefinite length encoding.
-  fn next_child(&mut self) -> Option<Self> {
-    if !self.tag.constructed {
-      panic!("Can't call next_child on a primitive element.");
+impl<W: io::Write> StreamEncoder<W> {
+  pub fn new<T: Into<byte::ByteWriter<W>>>(writer: T) -> Self {
+    StreamEncoder {
+      writer: writer.into(),
     }
-    // panic if reader is beyond offset.
-    unimplemented!()
-  }
-
-  /// For a primitive element, return a byte iterator that
-  /// can be used to decode the ASN.1 value. THe returned
-  /// iterator will reach Eof (return None), if more than
-  /// the length of the element is read (as declared in
-  /// the tag).
-  ///
-  /// The returned byte::ByteReader also provides a .read() function
-  /// that will return an appropriate DecodeError when Eof is
-  /// prematurely reached.
-  fn decode<I2: Iterator<Item=io::Result<u8>>>(&mut self) -> byte::ByteReader<I2> {
-    if self.tag.constructed {
-      panic!("Can't call decode on a non-primitive element.");
-    }
-    let len = Option::<tag::LenNum>::from(self.tag.len).unwrap();
-
-    byte::ByteReader::new_limit(self.reader, len)
   }
 }
-*/
+
+impl<W: io::Write> StreamDecodee for StreamEncoder<W> {
+  fn start_element(&mut self, tag: tag::Tag) -> ParseResult {
+    match tag.encode_tag(&mut self.writer) {
+      Err(e) =>  return e.into(),
+      _ => (),
+    };
+    ParseResult::Ok
+  }
+
+  fn end_element(&mut self, tag: tag::Tag) -> ParseResult {
+    ParseResult::Ok
+  }
+
+  fn primitive<I: Iterator<Item=io::Result<u8>>>(&mut self, reader: &mut byte::ByteReader<I>,
+      len: tag::LenNum) -> ParseResult {
+    for _ in 0..len {
+      // Read a byte and write a byte.
+      match reader.read() {
+        Ok(byte) => match self.writer.write_byte(byte) {
+          Err(e) => return e.into(),
+          _ => (),
+        },
+        Err(e) => return e.into(),
+      };
+    }
+    ParseResult::Ok
+  }
+}
+
 
 // FIXME: This seems to have two mixed meanings, perhaps split it?
 /// The result of a parsing function.
@@ -198,6 +189,8 @@ pub enum ParseResult {
   Skip,
   /// An error occured decoding an element.
   DecodeError(err::DecodeError),
+  /// An error occured encoding an element.
+  EncodeError(err::EncodeError),
   /// An IO error occured.
   IO(io::Error),
 }
@@ -205,6 +198,12 @@ pub enum ParseResult {
 impl From<err::DecodeError> for ParseResult {
   fn from(err: err::DecodeError) -> Self {
     ParseResult::DecodeError(err)
+  }
+}
+
+impl From<err::EncodeError> for ParseResult {
+  fn from(err: err::EncodeError) -> Self {
+    ParseResult::EncodeError(err)
   }
 }
 
