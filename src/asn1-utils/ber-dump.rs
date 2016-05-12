@@ -1,8 +1,8 @@
-extern crate asn1_rs;
+extern crate asn1_cereal;
 extern crate argparse;
 
-use asn1_rs::{tag, byte};
-use asn1_rs::ber::stream;
+use asn1_cereal::{tag, byte};
+use asn1_cereal::ber::stream;
 
 use std::io;
 use std::io::Read;

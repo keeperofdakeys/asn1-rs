@@ -1,5 +1,5 @@
 [package]
-name = "asn1-rs"
+name = "asn1-cereal"
 version = "0.1.0"
 authors = ["Josh <keeperofdakeys@gmail.com>"]
 
