@@ -9,21 +9,31 @@ use asn1_cereal::ber::stream;
 // SNMP ASN.1 Definition
 // https://tools.ietf.org/html/rfc1157#page-30
 
+type ObjectIdentifier = u64;
+type NetworkAddress = u64;
+type ObjectName = String;
 
 struct Message {
   version: i32,
   community: String,
-  data: PDU,
+  data: PDUs,
 }
 
-// FIXME: These enum names and types are totally bogus.
-enum PDU {
-  get_request(PDU),
-  get_next_request(PDU),
-  get_response(PDU),
-  set_request(PDU),
+enum PDUs {
+  get_request(GetRequest),
+  get_next_request(GetNextRequest),
+  get_response(GetResponse),
+  set_request(SetRequest),
   trap(TrapPDU),
 }
+
+struct GetRequest(PDU);
+
+struct GetNextRequest(PDU);
+
+struct GetResponse(PDU);
+
+struct SetRequest(PDU);
 
 struct PDU {
   request_id: i32,
