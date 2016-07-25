@@ -3,9 +3,11 @@ use err;
 
 use std::io;
 
-impl Asn1Info for u64 {
+struct OctetString(Vec<u8>);
+
+impl Asn1Info for OctetString {
   fn asn1_type() -> tag::Type {
-    "INTEGER".into()
+    "OCTET STRING".into()
   }
 
   fn asn1_class() -> tag::Class {
@@ -13,7 +15,7 @@ impl Asn1Info for u64 {
   }
 
   fn asn1_tagnum() -> tag::TagNum {
-    0x02.into()
+    0x04.into()
   }
 
   fn asn1_constructed() -> bool {
@@ -21,10 +23,9 @@ impl Asn1Info for u64 {
   }
 }
 
-impl Asn1Serialize for u64 {
-  fn serialize<W: io::Write>(&self, writer: W)
-    -> Result<(), err::EncodeError> {
-    
+impl Asn1Serialize for OctetString {
+  fn serialize<W: io::Write>(&self, writer: W) -> Result<(), err::EncodeError> {
+    try!(writer.write(&self.0));
   }
 }
 
@@ -33,3 +34,4 @@ impl Asn1Deserialize for OctetString {
     unimplemented!();
   }
 }
+
