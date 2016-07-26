@@ -1,13 +1,14 @@
-use tag;
-use err;
-
 use std::io;
 
-struct OctetString(Vec<u8>);
+use tag;
+use err;
+use serial;
 
-impl Asn1Info for OctetString {
+pub struct OctetString(Vec<u8>);
+
+impl serial::traits::Asn1Info for OctetString {
   fn asn1_type() -> tag::Type {
-    "OCTET STRING".into()
+    tag::Type::from("OCTET STRING")
   }
 
   fn asn1_class() -> tag::Class {
@@ -15,7 +16,7 @@ impl Asn1Info for OctetString {
   }
 
   fn asn1_tagnum() -> tag::TagNum {
-    0x04.into()
+    tag::TagNum::from(4u8)
   }
 
   fn asn1_constructed() -> bool {
@@ -23,13 +24,14 @@ impl Asn1Info for OctetString {
   }
 }
 
-impl Asn1Serialize for OctetString {
-  fn serialize<W: io::Write>(&self, writer: W) -> Result<(), err::EncodeError> {
+impl serial::traits::Asn1Serialize for OctetString {
+  fn serialize<W: io::Write>(&self, writer: &mut W) -> Result<(), err::EncodeError> {
     try!(writer.write(&self.0));
+    unimplemented!();
   }
 }
 
-impl Asn1Deserialize for OctetString {
+impl serial::traits::Asn1Deserialize for OctetString {
   fn deserialize<I: Iterator<Item=io::Result<u8>>>(reader: I) -> Result<Self, err::DecodeError> {
     unimplemented!();
   }

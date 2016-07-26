@@ -1,11 +1,11 @@
+use std::io;
+
 use tag;
 use err;
 
-use std::io;
-
 macro_rules! asn1_info {
-  ($type:ty, $asn1_ty:expr, $class:expr, $tagnum:expr, $constructed:expr) => (
-    impl $crate::serial::trait::Asn1Info for $type {
+  ($rs_type:ty, $asn1_ty:expr, $class:expr, $tagnum:expr, $constructed:expr) => (
+    impl $crate::serial::traits::Asn1Info for $rs_type {
       fn asn1_type() -> tag::Type {
         tag::Type::from($asn1_ty)
       }
@@ -26,8 +26,8 @@ macro_rules! asn1_info {
 }
 
 macro_rules! asn1_sequence {
-  ($type:ty, $asn1_ty:expr, $($items:ident),*) => (
-    impl $crate::serial::trait::Asn1Info for $type {
+  ($rs_type:ty, $asn1_ty:expr, $($items:ident),*) => (
+    impl $crate::serial::traits::Asn1Info for $rs_type {
       fn asn1_type() -> tag::Type {
         $asn1_ty.into()
       }

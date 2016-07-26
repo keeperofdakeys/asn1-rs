@@ -1,6 +1,6 @@
-mod trait;
-mod int;
-mod prim;
-mod const;
+pub mod traits;
+pub mod int;
+pub mod prim;
+pub mod seq;
 
-pub use traits::{Asn1Serialize, Asn1Deserialize, Asn1Info};
+pub use self::traits::{Asn1Serialize, Asn1Deserialize, Asn1Info};

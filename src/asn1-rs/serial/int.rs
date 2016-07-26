@@ -1,11 +1,12 @@
-use tag;
-use err;
-
 use std::io;
 
-impl Asn1Info for u64 {
+use tag;
+use err;
+use serial;
+
+impl serial::traits::Asn1Info for u64 {
   fn asn1_type() -> tag::Type {
-    "INTEGER".into()
+    tag::Type::from("INTEGER")
   }
 
   fn asn1_class() -> tag::Class {
@@ -13,7 +14,7 @@ impl Asn1Info for u64 {
   }
 
   fn asn1_tagnum() -> tag::TagNum {
-    0x02.into()
+    tag::TagNum::from(2u8)
   }
 
   fn asn1_constructed() -> bool {
@@ -21,14 +22,13 @@ impl Asn1Info for u64 {
   }
 }
 
-impl Asn1Serialize for u64 {
-  fn serialize<W: io::Write>(&self, writer: W)
-    -> Result<(), err::EncodeError> {
-    
+impl serial::traits::Asn1Serialize for u64 {
+  fn serialize<W: io::Write>(&self, writer: &mut W) -> Result<(), err::EncodeError> {
+    unimplemented!();
   }
 }
 
-impl Asn1Deserialize for OctetString {
+impl serial::traits::Asn1Deserialize for u64 {
   fn deserialize<I: Iterator<Item=io::Result<u8>>>(reader: I) -> Result<Self, err::DecodeError> {
     unimplemented!();
   }

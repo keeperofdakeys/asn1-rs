@@ -1,10 +1,10 @@
+use std::io;
+
 use tag;
 use err;
 
-use std::io;
-
 /// A trait that provides ASN.1 type information for a Rust type.
-trait Asn1Info {
+pub trait Asn1Info {
   /// Get the ASN.1 type for this Rust type.
   fn asn1_type() -> tag::Type;
 
@@ -20,17 +20,17 @@ trait Asn1Info {
 
 /// A trait that provides the plumbing for serializing ASN.1
 /// data from a Rust type.
-trait Asn1Serialize: Asn1Info {
+pub trait Asn1Serialize: Asn1Info {
   /// Serialise ASN.1 data from a value.
-  fn serialize<W: io::Write>(&self, writer: W)
+  fn serialize<W: io::Write>(&self, writer: &mut W)
     -> Result<(), err::EncodeError>;
 }
 
 /// A trait that provides the plumbing for deserializing ASN.1
 /// data into a Rust type.
-trait Asn1Deserialize: Asn1Info + Sized {
+pub trait Asn1Deserialize: Asn1Info + Sized {
 
   /// Deserialise ASN.1 data into a value.
   fn deserialize<I: Iterator<Item=io::Result<u8>>>(reader: I)
-    -> Result<Self, err::DecodeError>;`
+    -> Result<Self, err::DecodeError>;
 }
