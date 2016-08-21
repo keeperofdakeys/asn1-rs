@@ -1,15 +1,20 @@
+#[macro_use]
 extern crate asn1_cereal;
 
-use std::Io;
+use std::io;
 
-use asn1_cereal::serial::{Asn1Serialize, Asn1Deserialize};
+use asn1_cereal::err;
+use asn1_cereal::byte;
+use asn1_cereal::tag;
+use asn1_cereal::serial;
 
 fn main() {
-  let buffer = String::new();
+  let mut buffer: Vec<u8> = Vec::new();
   {
-    let writer = io::BufWriter::new(buffer);
-    Asn1Serialize::deserialize(3u64, writer).unwrap();
+    let mut writer = io::BufWriter::new(&mut buffer);
+    serial::traits::Asn1Serialize::serialize(&3u64, &mut writer).unwrap();
   };
+  println!("{:?}", buffer);
 }
 
 struct IntSequence {
@@ -17,8 +22,13 @@ struct IntSequence {
   b: u64,
 }
 
-asn1_cerealize!(
-  IntSequence, 'SEQUENCE',
+asn1_sequence_info!(
+  IntSequence,
+  "INTSEQ"
+);
+
+asn1_sequence_serialize!(
+  IntSequence,
   a,
-  b,
+  b
 );

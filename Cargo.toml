@@ -19,6 +19,10 @@ name="ber-dump"
 path="src/asn1-utils/ber-json-decode.rs"
 name="ber-json-decode"
 
+[[bin]]
+path="src/asn1-utils/simple.rs"
+name="simple"
+
 # [[bin]]
 # path="src/asn1-utils/snmp-decode.rs"
 # name="snmp-decode"

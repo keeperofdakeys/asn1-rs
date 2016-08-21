@@ -6,16 +6,16 @@ use err;
 /// A trait that provides ASN.1 type information for a Rust type.
 pub trait Asn1Info {
   /// Get the ASN.1 type for this Rust type.
-  fn asn1_type() -> tag::Type;
+  fn asn1_type(&self) -> tag::Type;
 
   /// Get the ASN.1 class for this Rust type.
-  fn asn1_class() -> tag::Class;
+  fn asn1_class(&self) -> tag::Class;
 
   /// Get the ASN.1 tag number for this Rust type.
-  fn asn1_tagnum() -> tag::TagNum;
+  fn asn1_tagnum(&self) -> tag::TagNum;
 
   /// Get the ASN.1 constructed bit for this Rust type.
-  fn asn1_constructed() -> bool;
+  fn asn1_constructed(&self) -> bool;
 }
 
 /// A trait that provides the plumbing for serializing ASN.1
