@@ -3,6 +3,7 @@ use std::io;
 use tag;
 use err;
 use serial;
+use byte::write_byte;
 
 impl serial::traits::Asn1Info for u64 {
   fn asn1_type(&self) -> tag::Type {
@@ -24,7 +25,25 @@ impl serial::traits::Asn1Info for u64 {
 
 impl serial::traits::Asn1Serialize for u64 {
   fn serialize<W: io::Write>(&self, writer: &mut W) -> Result<(), err::EncodeError> {
-    unimplemented!();
+    let mut started = false;
+    // Loop through bytes in int backwards, start writing when first non-zero byte is encounted.
+    for offset in (0..8).rev() {
+      let shifted: u64 = self >> (offset * 8);
+      let byte: u8 = (shifted & 0xff) as u8;
+      if !started {
+        if byte == 0 {
+          continue;
+        }
+        started = true;
+      }
+      try!(write_byte(writer, byte));
+    }
+
+    // If we haven't written anything, write a zero byte.
+    if !started {
+      try!(write_byte(writer, 0 as u8));
+    }
+    Ok(())
   }
 }
 
