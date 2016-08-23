@@ -16,13 +16,37 @@ pub trait Asn1Info {
 
   /// Get the ASN.1 constructed bit for this Rust type.
   fn asn1_constructed(&self) -> bool;
+
+  /// Given a length, get the ASN.1 tag for this Rust type.
+  fn asn1_tag(&self, len: tag::Len) -> tag::Tag {
+    tag::Tag {
+      class: self.asn1_class(),
+      tagnum: self.asn1_tagnum(),
+      len: len,
+      constructed: self.asn1_constructed(),
+    }
+  }
 }
 
 /// A trait that provides the plumbing for serializing ASN.1
 /// data from a Rust type.
 pub trait Asn1Serialize: Asn1Info {
-  /// Serialise ASN.1 data from a value.
-  fn serialize<W: io::Write>(&self, writer: &mut W)
+  /// Serialise an ASN.1 from a value.
+  fn serialize<W: io::Write>(&self, writer: &mut W) -> Result<(), err::EncodeError> {
+    let mut bytes: Vec<u8> = Vec::new();
+    try!(self.serialize_bytes(&mut bytes));
+
+    let len = bytes.len() as tag::LenNum;
+    let tag = self.asn1_tag(tag::Len::from(Some(len)));
+    tag.encode_tag(writer);
+
+    writer.write(&bytes);
+
+    Ok(())
+  }
+
+  /// Serialise ASN.1 bytes from a value.
+  fn serialize_bytes<W: io::Write>(&self, writer: &mut W)
     -> Result<(), err::EncodeError>;
 }
 

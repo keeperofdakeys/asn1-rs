@@ -25,7 +25,7 @@ impl serial::traits::Asn1Info for OctetString {
 }
 
 impl serial::traits::Asn1Serialize for OctetString {
-  fn serialize<W: io::Write>(&self, writer: &mut W) -> Result<(), err::EncodeError> {
+  fn serialize_bytes<W: io::Write>(&self, writer: &mut W) -> Result<(), err::EncodeError> {
     try!(writer.write(&self.0));
     unimplemented!();
   }

@@ -12,7 +12,7 @@ macro_rules! asn1_info {
       }
       
       fn asn1_class() -> tag::Class {
-        tag::class::from($class)
+        tag::Class::from($class)
       }
 
       fn asn1_tagnum() -> tag::TagNum {
@@ -53,15 +53,7 @@ macro_rules! asn1_sequence_info {
 macro_rules! asn1_sequence_serialize {
   ($rs_type:ty, $($item:ident),*) => (
     impl serial::traits::Asn1Serialize for $rs_type {
-      fn serialize<W: io::Write>(&self, writer: &mut W) -> Result<(), err::EncodeError> {
-        let tag = tag::Tag {
-          class: $crate::serial::traits::Asn1Info::asn1_class(self),
-          tagnum: $crate::serial::traits::Asn1Info::asn1_tagnum(self),
-          constructed: $crate::serial::traits::Asn1Info::asn1_constructed(self),
-          len: tag::Len::Indef,
-        };
-        // Write initial tag.
-        try!(tag.encode_tag(writer));
+      fn serialize_bytes<W: io::Write>(&self, writer: &mut W) -> Result<(), err::EncodeError> {
         // For each declared sequence member, serialize it onto the stream.
         $(
           try!(

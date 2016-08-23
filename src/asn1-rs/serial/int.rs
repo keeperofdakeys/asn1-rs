@@ -24,7 +24,7 @@ impl serial::traits::Asn1Info for u64 {
 }
 
 impl serial::traits::Asn1Serialize for u64 {
-  fn serialize<W: io::Write>(&self, writer: &mut W) -> Result<(), err::EncodeError> {
+  fn serialize_bytes<W: io::Write>(&self, writer: &mut W) -> Result<(), err::EncodeError> {
     let mut started = false;
     // Loop through bytes in int backwards, start writing when first non-zero byte is encounted.
     for offset in (0..8).rev() {
