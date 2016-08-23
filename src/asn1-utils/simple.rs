@@ -10,9 +10,10 @@ use asn1_cereal::serial;
 
 fn main() {
   let mut buffer: Vec<u8> = Vec::new();
+  let seq = IntSequence { a: 3, b: 4 };
   {
     let mut writer = io::BufWriter::new(&mut buffer);
-    serial::traits::Asn1Serialize::serialize(&3u64, &mut writer).unwrap();
+    serial::traits::Asn1Serialize::serialize(&seq, &mut writer).unwrap();
   };
   println!("{:?}", buffer);
 }

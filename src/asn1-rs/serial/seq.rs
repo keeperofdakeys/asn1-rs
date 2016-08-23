@@ -60,9 +60,6 @@ macro_rules! asn1_sequence_serialize {
             serial::traits::Asn1Serialize::serialize(&self.$item, writer)
           );
         )*
-        // Write the end of indef length marker.
-        try!(byte::write_byte(writer, 0x00));
-        try!(byte::write_byte(writer, 0x00));
         Ok(())
       }
     }
