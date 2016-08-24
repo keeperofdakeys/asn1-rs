@@ -4,18 +4,17 @@ extern crate asn1_cereal;
 use std::io;
 
 use asn1_cereal::err;
-use asn1_cereal::byte;
 use asn1_cereal::tag;
 use asn1_cereal::serial;
 
 fn main() {
-  let mut buffer: Vec<u8> = Vec::new();
+  // let mut buffer: Vec<u8> = Vec::new();
+  let mut buffer = io::BufWriter::new(io::stdout());
   let seq = IntSequence { a: 3, b: 4 };
   {
     let mut writer = io::BufWriter::new(&mut buffer);
     serial::traits::Asn1Serialize::serialize(&seq, &mut writer).unwrap();
   };
-  println!("{:?}", buffer);
 }
 
 struct IntSequence {
