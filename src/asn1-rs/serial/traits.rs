@@ -38,9 +38,9 @@ pub trait Asn1Serialize: Asn1Info {
 
     let len = bytes.len() as tag::LenNum;
     let tag = self.asn1_tag(tag::Len::from(Some(len)));
-    tag.encode_tag(writer);
+    try!(tag.encode_tag(writer));
 
-    writer.write(&bytes);
+    try!(writer.write(&bytes));
 
     Ok(())
   }
