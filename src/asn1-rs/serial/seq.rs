@@ -54,11 +54,24 @@ macro_rules! asn1_sequence_serialize {
   ($rs_type:ty, $($item:ident),*) => (
     impl serial::traits::Asn1Serialize for $rs_type {
       fn serialize_bytes<W: io::Write>(&self, writer: &mut W) -> Result<(), err::EncodeError> {
+        let mut bytes = Vec::new();
+        let mut count: u64 = 0;
         // For each declared sequence member, serialize it onto the stream.
         $(
+          count += 1;
           try!(
-            serial::traits::Asn1Serialize::serialize(&self.$item, writer)
+            serial::traits::Asn1Serialize::serialize(&self.$item, &mut bytes)
           );
+          let tag = tag::Tag {
+            class: tag::Class::ContextSpecific,
+            tagnum: count.into(),
+            len: Some(bytes.len() as tag::LenNum).into(),
+            constructed: true,
+          };
+          try!(tag.encode_tag(writer));
+          try!(writer.write(&mut bytes));
+
+          bytes.clear();
         )*
         Ok(())
       }
