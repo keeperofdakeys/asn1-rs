@@ -84,6 +84,7 @@ macro_rules! asn1_sequence_deserialize {
   ($rs_type:ty) => (
     impl serial::traits::Asn1Deserialize for u64 {
       fn deserialize<I: Iterator<Item=io::Result<u8>>>(reader: I) -> Result<Self, err::DecodeError> {
+        let tag = try!(tag::Tag::decode_tag(&mut reader));
         unimplemented!();
       }
     }
