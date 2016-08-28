@@ -30,11 +30,13 @@ pub trait Asn1Info {
 
 /// A trait that provides the plumbing for serializing ASN.1
 /// data from a Rust type.
+///
+/// Usually you'll only need to implement serialize_imp yourself.
 pub trait Asn1Serialize: Asn1Info {
-  /// Serialise an ASN.1 from a value.
-  fn serialize<W: io::Write>(&self, writer: &mut W) -> Result<(), err::EncodeError> {
+  /// Serialise a value into ASN.1 data, with a tag (explicit tagging).
+  fn serialize_exp<W: io::Write>(&self, writer: &mut W) -> Result<(), err::EncodeError> {
     let mut bytes: Vec<u8> = Vec::new();
-    try!(self.serialize_bytes(&mut bytes));
+    try!(self.serialize_imp(&mut bytes));
 
     let len = bytes.len() as tag::LenNum;
     let tag = self.asn1_tag(tag::Len::from(Some(len)));
@@ -45,16 +47,36 @@ pub trait Asn1Serialize: Asn1Info {
     Ok(())
   }
 
-  /// Serialise ASN.1 bytes from a value.
-  fn serialize_bytes<W: io::Write>(&self, writer: &mut W)
-    -> Result<(), err::EncodeError>;
+  /// Serialise a value into ASN.1 data, without a tag (implicit tagging).
+  ///
+  /// (In order to write a tag yourself, you may need to know the byte-count written.
+  /// This is most easily achieved by supplying a &mut Vec<u8> as the writer.)
+  fn serialize_imp<W: io::Write>(&self, writer: &mut W) -> Result<(), err::EncodeError>;
 }
 
 /// A trait that provides the plumbing for deserializing ASN.1
 /// data into a Rust type.
+///
+/// Usually you'll only need to implement deserialize_imp yourself.
 pub trait Asn1Deserialize: Asn1Info + Sized {
 
-  /// Deserialise ASN.1 data into a value.
-  fn deserialize<I: Iterator<Item=io::Result<u8>>>(reader: I)
-    -> Result<Self, err::DecodeError>;
+  /// Deserialise ASN.1 data with a tag into a value.
+  ///
+  /// This function will decode the tag to verify the tag for this type,
+  /// and only read the amount of bytes declared in the tag.
+  fn deserialize_exp<I: Iterator<Item=io::Result<u8>>>(reader: &mut I) -> Result<Self, err::DecodeError> {
+    let tag = try!(tag::Tag::decode_tag(reader));
+
+    // If element is primitive, and length is indefinite, we can't decode it.
+    if tag.constructed && tag.len == tag::Len::Indef {
+      Err(err::DecodeError::PrimIndef)
+    } else {
+      Self::deserialize_imp(reader, tag.len)
+    }
+  }
+
+  /// Deserialise ASN.1 data without a tag into a value.
+  ///
+  /// Since the data has no tag, the byte length must be passed to this function.
+  fn deserialize_imp<I: Iterator<Item=io::Result<u8>>>(reader: &mut I, len: tag::Len) -> Result<Self, err::DecodeError>;
 }

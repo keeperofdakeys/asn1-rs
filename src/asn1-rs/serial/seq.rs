@@ -53,14 +53,14 @@ macro_rules! asn1_sequence_info {
 macro_rules! asn1_sequence_serialize {
   ($rs_type:ty, $($item:ident),*) => (
     impl serial::traits::Asn1Serialize for $rs_type {
-      fn serialize_bytes<W: io::Write>(&self, writer: &mut W) -> Result<(), err::EncodeError> {
+      fn serialize_imp<W: io::Write>(&self, writer: &mut W) -> Result<(), err::EncodeError> {
         let mut bytes = Vec::new();
         let mut count: u64 = 0;
         // For each declared sequence member, serialize it onto the stream.
         $(
           count += 1;
           try!(
-            serial::traits::Asn1Serialize::serialize(&self.$item, &mut bytes)
+            serial::traits::Asn1Serialize::serialize_exp(&self.$item, &mut bytes)
           );
           let tag = tag::Tag {
             class: tag::Class::ContextSpecific,
@@ -83,9 +83,7 @@ macro_rules! asn1_sequence_serialize {
 macro_rules! asn1_sequence_deserialize {
   ($rs_type:ty) => (
     impl serial::traits::Asn1Deserialize for u64 {
-      fn deserialize<I: Iterator<Item=io::Result<u8>>>(reader: I) -> Result<Self, err::DecodeError> {
-        let tag = try!(tag::Tag::decode_tag(&mut reader));
-        unimplemented!();
+      fn deserialize_imp<I: Iterator<Item=io::Result<u8>>>(reader: &mut I, len: tag::Len) -> Result<Self, err::DecodeError> {
       }
     }
   )

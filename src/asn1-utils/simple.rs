@@ -13,7 +13,7 @@ fn main() {
   let seq = IntSequence { a: 3, b: 4 };
   {
     let mut writer = io::BufWriter::new(&mut buffer);
-    serial::traits::Asn1Serialize::serialize(&seq, &mut writer).unwrap();
+    serial::traits::Asn1Serialize::serialize_exp(&seq, &mut writer).unwrap();
   };
 }
 

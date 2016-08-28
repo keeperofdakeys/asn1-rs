@@ -25,14 +25,14 @@ impl serial::traits::Asn1Info for OctetString {
 }
 
 impl serial::traits::Asn1Serialize for OctetString {
-  fn serialize_bytes<W: io::Write>(&self, writer: &mut W) -> Result<(), err::EncodeError> {
+  fn serialize_imp<W: io::Write>(&self, writer: &mut W) -> Result<(), err::EncodeError> {
     try!(writer.write(&self.0));
     unimplemented!();
   }
 }
 
 impl serial::traits::Asn1Deserialize for OctetString {
-  fn deserialize<I: Iterator<Item=io::Result<u8>>>(reader: I) -> Result<Self, err::DecodeError> {
+  fn deserialize_imp<I: Iterator<Item=io::Result<u8>>>(reader: &mut I, len: tag::Len) -> Result<Self, err::DecodeError> {
     unimplemented!();
   }
 }
