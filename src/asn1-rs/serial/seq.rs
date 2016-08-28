@@ -30,19 +30,19 @@ macro_rules! asn1_info {
 macro_rules! asn1_sequence_info {
   ($rs_type:ty, $asn1_ty:expr) => (
     impl $crate::serial::traits::Asn1Info for $rs_type {
-      fn asn1_type(&self) -> tag::Type {
+      fn asn1_type() -> tag::Type {
         $asn1_ty.into()
       }
       
-      fn asn1_class(&self) -> tag::Class {
+      fn asn1_class() -> tag::Class {
         tag::Class::Universal
       }
 
-      fn asn1_tagnum(&self) -> tag::TagNum {
+      fn asn1_tagnum() -> tag::TagNum {
         tag::TagNum::from(0x10 as u8)
       }
 
-      fn asn1_constructed(&self) -> bool {
+      fn asn1_constructed() -> bool {
         true
       }
     }

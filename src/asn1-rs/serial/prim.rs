@@ -7,19 +7,19 @@ use serial;
 pub struct OctetString(Vec<u8>);
 
 impl serial::traits::Asn1Info for OctetString {
-  fn asn1_type(&self) -> tag::Type {
+  fn asn1_type() -> tag::Type {
     tag::Type::from("OCTET STRING")
   }
 
-  fn asn1_class(&self) -> tag::Class {
+  fn asn1_class() -> tag::Class {
     tag::Class::Universal
   }
 
-  fn asn1_tagnum(&self) -> tag::TagNum {
+  fn asn1_tagnum() -> tag::TagNum {
     tag::TagNum::from(4u8)
   }
 
-  fn asn1_constructed(&self) -> bool {
+  fn asn1_constructed() -> bool {
     false
   }
 }

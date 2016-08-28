@@ -6,24 +6,24 @@ use err;
 /// A trait that provides ASN.1 type information for a Rust type.
 pub trait Asn1Info {
   /// Get the ASN.1 type for this Rust type.
-  fn asn1_type(&self) -> tag::Type;
+  fn asn1_type() -> tag::Type;
 
   /// Get the ASN.1 class for this Rust type.
-  fn asn1_class(&self) -> tag::Class;
+  fn asn1_class() -> tag::Class;
 
   /// Get the ASN.1 tag number for this Rust type.
-  fn asn1_tagnum(&self) -> tag::TagNum;
+  fn asn1_tagnum() -> tag::TagNum;
 
   /// Get the ASN.1 constructed bit for this Rust type.
-  fn asn1_constructed(&self) -> bool;
+  fn asn1_constructed() -> bool;
 
   /// Given a length, get the ASN.1 tag for this Rust type.
-  fn asn1_tag(&self, len: tag::Len) -> tag::Tag {
+  fn asn1_tag(len: tag::Len) -> tag::Tag {
     tag::Tag {
-      class: self.asn1_class(),
-      tagnum: self.asn1_tagnum(),
+      class: Self::asn1_class(),
+      tagnum: Self::asn1_tagnum(),
       len: len,
-      constructed: self.asn1_constructed(),
+      constructed: Self::asn1_constructed(),
     }
   }
 }
@@ -39,7 +39,7 @@ pub trait Asn1Serialize: Asn1Info {
     try!(self.serialize_imp(&mut bytes));
 
     let len = bytes.len() as tag::LenNum;
-    let tag = self.asn1_tag(tag::Len::from(Some(len)));
+    let tag = Self::asn1_tag(tag::Len::from(Some(len)));
     try!(tag.encode_tag(writer));
 
     try!(writer.write(&bytes));
