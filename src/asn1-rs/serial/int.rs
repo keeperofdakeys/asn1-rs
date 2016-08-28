@@ -3,7 +3,7 @@ use std::io;
 use tag;
 use err;
 use serial;
-use byte::write_byte;
+use byte::{read_byte, write_byte};
 
 impl serial::traits::Asn1Info for u64 {
   fn asn1_type(&self) -> tag::Type {
@@ -49,6 +49,18 @@ impl serial::traits::Asn1Serialize for u64 {
 
 impl serial::traits::Asn1Deserialize for u64 {
   fn deserialize_imp<I: Iterator<Item=io::Result<u8>>>(reader: &mut I, len: tag::Len) -> Result<Self, err::DecodeError> {
-    unimplemented!();
+    let len_num = try!(match len {
+      tag::Len::Def(l) => Ok(l),
+      _ => Err(err::DecodeError::PrimIndef),
+    });
+
+    let mut int: u64 = 0;
+
+    for _ in 0..len_num {
+      let byte = try!(read_byte(reader));
+      int = (int << 8) + int as u64;
+    }
+
+    Ok(int)
   }
 }
