@@ -58,7 +58,7 @@ impl serial::traits::Asn1Deserialize for u64 {
 
     for _ in 0..len_num {
       let byte = try!(read_byte(reader));
-      int = (int << 8) + int as u64;
+      int = (int << 8) + (byte as u64);
     }
 
     Ok(int)

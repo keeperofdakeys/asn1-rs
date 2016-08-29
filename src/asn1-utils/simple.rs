@@ -15,6 +15,7 @@ fn main() {
     let mut writer = io::BufWriter::new(&mut buffer);
     serial::traits::Asn1Serialize::serialize_exp(&seq, &mut writer).unwrap();
   };
+  println!("{:?}", buffer);
   {
     let mut reader = buffer.iter().map(|x| Ok(*x) as Result<u8, std::io::Error>);
     let seq: IntSequence = serial::traits::Asn1Deserialize::deserialize_exp(&mut reader).unwrap();
