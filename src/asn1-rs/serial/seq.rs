@@ -7,16 +7,16 @@ use err;
 macro_rules! asn1_info {
   ($rs_type:ty, $asn1_ty:expr, $class:expr, $tagnum:expr, $constructed:expr) => (
     impl $crate::serial::traits::Asn1Info for $rs_type {
-      fn asn1_type() -> tag::Type {
-        tag::Type::from($asn1_ty)
+      fn asn1_type() -> $crate::tag::Type {
+        $crate::tag::Type::from($asn1_ty)
       }
       
-      fn asn1_class() -> tag::Class {
-        tag::Class::from($class)
+      fn asn1_class() -> $crate::tag::Class {
+        $crate::tag::Class::from($class)
       }
 
-      fn asn1_tagnum() -> tag::TagNum {
-        tag::TagNum::from($tagnum)
+      fn asn1_tagnum() -> $crate::tag::TagNum {
+        $crate::tag::TagNum::from($tagnum)
       }
 
       fn asn1_constructed() -> bool {
@@ -30,16 +30,16 @@ macro_rules! asn1_info {
 macro_rules! asn1_sequence_info {
   ($rs_type:ty, $asn1_ty:expr) => (
     impl $crate::serial::traits::Asn1Info for $rs_type {
-      fn asn1_type() -> tag::Type {
+      fn asn1_type() -> $crate::tag::Type {
         $asn1_ty.into()
       }
       
-      fn asn1_class() -> tag::Class {
-        tag::Class::Universal
+      fn asn1_class() -> $crate::tag::Class {
+        $crate::tag::Class::Universal
       }
 
-      fn asn1_tagnum() -> tag::TagNum {
-        tag::TagNum::from(0x10 as u8)
+      fn asn1_tagnum() -> $crate::tag::TagNum {
+        $crate::tag::TagNum::from(0x10 as u8)
       }
 
       fn asn1_constructed() -> bool {
@@ -62,10 +62,10 @@ macro_rules! asn1_sequence_serialize {
           try!(
             serial::traits::Asn1Serialize::serialize_exp(&self.$item, &mut bytes)
           );
-          let tag = tag::Tag {
-            class: tag::Class::ContextSpecific,
+          let tag = $crate::tag::Tag {
+            class: $crate::tag::Class::ContextSpecific,
             tagnum: count.into(),
-            len: Some(bytes.len() as tag::LenNum).into(),
+            len: Some(bytes.len() as $crate::tag::LenNum).into(),
             constructed: true,
           };
           try!(tag.encode_tag(writer));
@@ -81,9 +81,16 @@ macro_rules! asn1_sequence_serialize {
 
 #[macro_export]
 macro_rules! asn1_sequence_deserialize {
-  ($rs_type:ty) => (
-    impl serial::traits::Asn1Deserialize for u64 {
-      fn deserialize_imp<I: Iterator<Item=io::Result<u8>>>(reader: &mut I, len: tag::Len) -> Result<Self, err::DecodeError> {
+  ($rs_type:ident, $($item:ident),*) => (
+    impl serial::traits::Asn1Deserialize for $rs_type {
+      fn deserialize_imp<I: Iterator<Item=io::Result<u8>>>(reader: &mut I, len: $crate::tag::Len) -> Result<Self, err::DecodeError> {
+        let mut total_len: $crate::tag::LenNum = 0;
+        Ok( $rs_type { $(
+          $item: {
+            let tag = try!($crate::tag::Tag::decode_tag(reader));
+            try!($crate::serial::traits::Asn1Deserialize::deserialize_exp(reader))
+          },
+        )* })
       }
     }
   )
