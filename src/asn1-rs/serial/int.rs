@@ -72,7 +72,8 @@ macro_rules! asn1_cereal_int {
   )
 }
 
-asn1_cereal_int!(u8, 1);
+// Can't bitshift a u8 by 8 bits, need to update deserialize_imp.
+// asn1_cereal_int!(u8, 1);
 asn1_cereal_int!(u16, 2);
 asn1_cereal_int!(u32, 4);
 asn1_cereal_int!(u64, 8);
