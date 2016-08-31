@@ -11,6 +11,8 @@ pub enum DecodeError {
   SmallerLen,
   /// Primitive value encoded with an indefinite length.
   PrimIndef,
+  /// Custom decoding error.
+  Custom(&'static str),
 }
 
 impl From<io::Error> for DecodeError {

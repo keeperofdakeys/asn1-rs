@@ -10,7 +10,7 @@ use asn1_cereal::serial;
 fn main() {
   let mut buffer: Vec<u8> = Vec::new();
   // let mut buffer = io::BufWriter::new(io::stdout());
-  let seq = IntSequence { a: 3, b: 4 };
+  let seq = IntSequence { a: 3, b: 4, c: "Hello".into() };
   {
     let mut writer = io::BufWriter::new(&mut buffer);
     serial::traits::Asn1Serialize::serialize_exp(&seq, &mut writer).unwrap();
@@ -27,6 +27,7 @@ fn main() {
 struct IntSequence {
   a: u64,
   b: u64,
+  c: String,
 }
 
 asn1_sequence_info!(
@@ -37,11 +38,13 @@ asn1_sequence_info!(
 asn1_sequence_serialize!(
   IntSequence,
   a,
-  b
+  b,
+  c
 );
 
 asn1_sequence_deserialize!(
   IntSequence,
   a,
-  b
+  b,
+  c
 );
