@@ -3,8 +3,6 @@ extern crate asn1_cereal;
 
 use std::io;
 
-use asn1_cereal::err;
-use asn1_cereal::tag;
 use asn1_cereal::serial;
 
 fn main() {

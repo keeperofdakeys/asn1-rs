@@ -48,15 +48,16 @@ impl StreamDumper {
 }
 
 impl stream::StreamDecodee for StreamDumper {
-  fn start_element(&mut self, tag: tag::Tag) -> stream::ParseResult {
-    if tag.constructed {
+  fn start_element(&mut self, tag: tag::TagLen) -> stream::ParseResult {
+    if tag.tag.constructed {
       self.stack.push(Vec::new());
     }
 
     stream::ParseResult::Ok
   }
 
-  fn end_element(&mut self, tag: tag::Tag) -> stream::ParseResult {
+  fn end_element(&mut self, taglen: tag::TagLen) -> stream::ParseResult {
+    let (tag, len) = (taglen.tag, taglen.len);
     let mut tag_map = BTreeMap::new();
     let mut map = BTreeMap::new();
     tag_map.insert(
@@ -68,7 +69,7 @@ impl stream::StreamDecodee for StreamDumper {
         tag::Class::ContextSpecific => "context",
       }.to_owned(),
     );
-    if let tag::Len::Def(ref l) = tag.len {
+    if let tag::Len::Def(ref l) = len {
       tag_map.insert("length", l.to_string());
     }
     tag_map.insert("num", tag.tagnum.to_string());

@@ -8,14 +8,14 @@ use std::io;
 pub trait StreamDecodee {
   /// This function is called when an ASN.1 tag is encountered. In other
   /// words, at the start of an ASN.1 element.
-  fn start_element(&mut self, tag: tag::Tag) -> ParseResult {
+  fn start_element(&mut self, _: tag::TagLen) -> ParseResult {
     ParseResult::Ok
   }
 
   /// This function is called when an ASN.1 element has finished decoding.
   /// Specifically, this is called for both constructed, and un-constructed
   /// elements.
-  fn end_element(&mut self, tag: tag::Tag) -> ParseResult {
+  fn end_element(&mut self, _: tag::TagLen) -> ParseResult {
     ParseResult::Ok
   }
 
@@ -35,12 +35,12 @@ pub trait StreamDecodee {
     ParseResult::Ok
   }
 
-  fn warning(err: err::DecodeError) -> ParseResult {
+  fn warning(_: err::DecodeError) -> ParseResult {
     ParseResult::Stop
   }
 
   /// This is called when a fatal decoding error occurs.
-  fn error(err: err::DecodeError) {
+  fn error(_: err::DecodeError) {
   }
 }
 
@@ -68,13 +68,14 @@ impl<'a, I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<'a, I
 
   // FIXME: Convert explicit decoded_len to use diff of internal reader count.
   /// Internal decode function.
-  fn _decode(&mut self) -> Result<tag::Tag, err::DecodeError> {
+  fn _decode(&mut self) -> Result<tag::TagLen, err::DecodeError> {
     // Decode tag.
-    let tag = try!(tag::Tag::decode_tag(&mut self.reader));
+    let taglen = try!(tag::TagLen::read_taglen(&mut self.reader));
+    let (tag, len) = (taglen.tag, taglen.len);
     let post_tag_count: tag::LenNum  = self.reader.count;
 
     // Call the decodee start element callback;
-    self.decodee.start_element(tag);
+    self.decodee.start_element(taglen);
 
 
     // If this type is constructed, decode child element..
@@ -84,7 +85,7 @@ impl<'a, I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<'a, I
         let decoded_len = self.reader.count - post_tag_count;
         // Compare decoded length with length in tag.
         // Put this first to handle zero-length elements.
-        match tag.len.partial_cmp(&decoded_len) {
+        match len.partial_cmp(&decoded_len) {
           // Return an error when we've decoded too much.
           Some(Ordering::Less) => return Err(err::DecodeError::GreaterLen),
           // Finish loop when equal, we must be finished.
@@ -102,14 +103,14 @@ impl<'a, I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<'a, I
         // When decoding indefinite length encoding, stop on '00 00'
         // tag.
         if child_tag.len == tag::Len::Def(0) &&
-           child_tag.class == tag::Class::Universal &&
-           child_tag.tagnum == 0 {
+           child_tag.tag.class == tag::Class::Universal &&
+           child_tag.tag.tagnum == 0 {
           break;
         }
       }
     // Otherwise decode primitive value.
     } else {
-      let len_num = try!(match tag.len {
+      let len_num = try!(match len {
         tag::Len::Def(l) => Ok(l),
         tag::Len::Indef =>
           Err(err::DecodeError::PrimIndef),
@@ -121,7 +122,7 @@ impl<'a, I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<'a, I
       // Calculate decoded length.
       let decoded_len = self.reader.count - post_tag_count;
       // Ensure the exact amout of bytes was decoded.
-      match tag.len.partial_cmp(&decoded_len) {
+      match len.partial_cmp(&decoded_len) {
         Some(Ordering::Less) => return Err(err::DecodeError::GreaterLen),
         Some(Ordering::Greater) => return Err(err::DecodeError::SmallerLen),
         _ => {},
@@ -129,10 +130,10 @@ impl<'a, I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<'a, I
     }
 
     // Call decodee end element callback.
-    self.decodee.end_element(tag);
+    self.decodee.end_element(taglen);
 
     // Return decoded + tag_len, which is total decoded length.
-    Ok(tag)
+    Ok(taglen)
   }
 }
 
@@ -149,15 +150,15 @@ impl<W: io::Write> StreamEncoder<W> {
 }
 
 impl<W: io::Write> StreamDecodee for StreamEncoder<W> {
-  fn start_element(&mut self, tag: tag::Tag) -> ParseResult {
-    match tag.encode_tag(&mut self.writer) {
+  fn start_element(&mut self, tag: tag::TagLen) -> ParseResult {
+    match tag.write_taglen(&mut self.writer) {
       Err(e) =>  return e.into(),
       _ => (),
     };
     ParseResult::Ok
   }
 
-  fn end_element(&mut self, tag: tag::Tag) -> ParseResult {
+  fn end_element(&mut self, _: tag::TagLen) -> ParseResult {
     ParseResult::Ok
   }
 

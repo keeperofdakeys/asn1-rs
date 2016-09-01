@@ -10,20 +10,16 @@ use std::cmp;
 macro_rules! asn1_cereal_int {
   ($rs_type:ty, $size:expr) => (
     impl serial::traits::Asn1Info for $rs_type {
+      fn asn1_tag() -> tag::Tag {
+        tag::Tag {
+          class: tag::Class::Universal,
+          tagnum: 2u8.into(),
+          constructed: false,
+        }
+      }
+
       fn asn1_type() -> tag::Type {
         tag::Type::from("INTEGER")
-      }
-
-      fn asn1_class() -> tag::Class {
-        tag::Class::Universal
-      }
-
-      fn asn1_tagnum() -> tag::TagNum {
-        tag::TagNum::from(2u8)
-      }
-
-      fn asn1_constructed() -> bool {
-        false
       }
     }
 
@@ -53,15 +49,12 @@ macro_rules! asn1_cereal_int {
 
     impl serial::traits::Asn1Deserialize for $rs_type {
       fn deserialize_imp<I: Iterator<Item=io::Result<u8>>>(reader: &mut I, len: tag::Len) -> Result<Self, err::DecodeError> {
-        let len_num = try!(match len {
-          tag::Len::Def(l) => Ok(l),
-          _ => Err(err::DecodeError::PrimIndef),
-        });
+        let len_num = try!(len.as_num().ok_or(err::DecodeError::PrimIndef));
 
         let mut int: $rs_type = 0;
         let size = cmp::min($size, len_num);
 
-        for _ in 0..len_num {
+        for _ in 0..size {
           let byte = try!(read_byte(reader));
           int = (int << 8) + (byte as $rs_type);
         }

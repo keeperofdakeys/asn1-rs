@@ -36,15 +36,15 @@ impl StreamDumper {
 }
 
 impl stream::StreamDecodee for StreamDumper {
-  fn start_element(&mut self, tag: tag::Tag) -> stream::ParseResult {
+  fn start_element(&mut self, tag: tag::TagLen) -> stream::ParseResult {
     // Print tag info.
     println!("{:>width$}TagNum: {}, Class: {}, Len: {}, Constructed: {}", "",
-             tag.tagnum, tag.class, tag.len, tag.constructed, width=self.indent);
+             tag.tag.tagnum, tag.tag.class, tag.len, tag.tag.constructed, width=self.indent);
     self.indent += 1;
     stream::ParseResult::Ok
   }
 
-  fn end_element(&mut self, tag: tag::Tag) -> stream::ParseResult {
+  fn end_element(&mut self, _: tag::TagLen) -> stream::ParseResult {
     self.indent -= 1;
     println!("{:>width$}{}", "", "End.", width=self.indent);
     stream::ParseResult::Ok

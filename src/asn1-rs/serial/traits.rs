@@ -3,29 +3,13 @@ use std::io;
 use tag;
 use err;
 
-/// A trait that provides ASN.1 type information for a Rust type.
+/// A trait that provides data about the ASN.1 tag and type for a Rust type.
 pub trait Asn1Info {
+  /// Get the ASN.1 tag for this Rust type.
+  fn asn1_tag() -> tag::Tag;
+
   /// Get the ASN.1 type for this Rust type.
   fn asn1_type() -> tag::Type;
-
-  /// Get the ASN.1 class for this Rust type.
-  fn asn1_class() -> tag::Class;
-
-  /// Get the ASN.1 tag number for this Rust type.
-  fn asn1_tagnum() -> tag::TagNum;
-
-  /// Get the ASN.1 constructed bit for this Rust type.
-  fn asn1_constructed() -> bool;
-
-  /// Given a length, get the ASN.1 tag for this Rust type.
-  fn asn1_tag(len: tag::Len) -> tag::Tag {
-    tag::Tag {
-      class: Self::asn1_class(),
-      tagnum: Self::asn1_tagnum(),
-      len: len,
-      constructed: Self::asn1_constructed(),
-    }
-  }
 }
 
 /// A trait that provides the plumbing for serializing ASN.1
@@ -39,8 +23,11 @@ pub trait Asn1Serialize: Asn1Info {
     try!(self.serialize_imp(&mut bytes));
 
     let len = bytes.len() as tag::LenNum;
-    let tag = Self::asn1_tag(tag::Len::from(Some(len)));
-    try!(tag.encode_tag(writer));
+    let tag = tag::TagLen {
+      tag: Self::asn1_tag(),
+      len: Some(len).into(),
+    };
+    try!(tag.write_taglen(writer));
 
     try!(writer.write(&bytes));
 
@@ -65,10 +52,10 @@ pub trait Asn1Deserialize: Asn1Info + Sized {
   /// This function will decode the tag to verify the tag for this type,
   /// and only read the amount of bytes declared in the tag.
   fn deserialize_exp<I: Iterator<Item=io::Result<u8>>>(reader: &mut I) -> Result<Self, err::DecodeError> {
-    let tag = try!(tag::Tag::decode_tag(reader));
+    let tag = try!(tag::TagLen::read_taglen(reader));
 
     // If element is primitive, and length is indefinite, we can't decode it.
-    if tag.constructed && tag.len == tag::Len::Indef {
+    if tag.tag.constructed && tag.len == tag::Len::Indef {
       Err(err::DecodeError::PrimIndef)
     } else {
       Self::deserialize_imp(reader, tag.len)
