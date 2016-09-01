@@ -338,7 +338,7 @@ fn tag_simple() {
   let tag = TagLen {
     tag: Tag {
       class: 0u8.into(),
-      taglen: 2u64.into(),
+      tagnum: 2u64.into(),
       constructed: false,
     },
     len: Some(0u64).into(),
@@ -362,7 +362,7 @@ fn high_tag_class_1() {
   let tag = TagLen {
     tag: Tag {
       class: 1u8.into(),
-      taglen: 1u64.into(),
+      tagnum: 1u64.into(),
       constructed: false,
     },
     len: Some(16u64).into(),
@@ -389,7 +389,7 @@ fn high_tag_class_2() {
   let tag = TagLen {
     tag: Tag {
       class: 1u8.into(),
-      taglen: 33u64.into(),
+      tagnum: 33u64.into(),
       constructed: false,
     },
     len: Some(16u64).into(),
@@ -412,7 +412,7 @@ fn tag_constructed() {
   let tag = TagLen {
     tag: Tag {
       class: 0u8.into(),
-      taglen: 16u64.into(),
+      tagnum: 16u64.into(),
       constructed: true,
     },
     len: Some(18u64).into(),
@@ -435,7 +435,7 @@ fn tag_indefinite() {
   let tag = TagLen {
     tag: Tag {
       class: 0u8.into(),
-      taglen: 16u64.into(),
+      tagnum: 16u64.into(),
       constructed: true,
     },
     len: None.into(),
@@ -459,7 +459,7 @@ fn tag_long_len_1() {
   let tag = TagLen {
     tag: Tag {
       class: 0u8.into(),
-      taglen: 16u64.into(),
+      tagnum: 16u64.into(),
       constructed: true,
     },
     len: Some(17u64).into(),
@@ -486,7 +486,7 @@ fn tag_long_len_2() {
   let tag = TagLen {
     tag: Tag {
       class: 0u8.into(),
-      taglen: 16u64.into(),
+      tagnum: 16u64.into(),
       constructed: true,
     },
     len: Some(129u64).into(),
@@ -509,7 +509,7 @@ fn tag_ridiculous() {
   let tag = TagLen {
     tag: Tag {
       class: 1u8.into(),
-      taglen: 0x4001u64.into(),
+      tagnum: 0x4001u64.into(),
       constructed: true,
     },
     len: Some(549755813889u64).into(),
