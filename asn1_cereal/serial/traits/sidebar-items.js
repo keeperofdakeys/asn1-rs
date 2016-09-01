@@ -1,0 +1,1 @@
+initSidebarItems({"trait":[["Asn1Deserialize","A trait that provides the plumbing for deserializing ASN.1 data into a Rust type."],["Asn1Info","A trait that provides data about the ASN.1 tag and type for a Rust type."],["Asn1Serialize","A trait that provides the plumbing for serializing ASN.1 data from a Rust type."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["assign","The macros in this module can implement the serialisation traits for a simple ASN.1 definition. IE: One ASN.1 type being defined as an alias of another."],["int",""],["prim",""],["seq","The macros in this module can implement the serialisation traits for Sequences and Sets."],["str",""],["traits",""]]});
