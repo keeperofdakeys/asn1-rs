@@ -1,3 +1,13 @@
+//! A SAXParser inspired stream parser and encoder for tags in an ASN.1 streams.
+//!
+//! Given a struct that implements StreamDecodee, a StreamDecoder can be used to
+//! decode the stream, calling each function in the StreamDecodee trait as they
+//! are encountered.
+//!
+//! The StreamEncoder struct is also provided, which itself implements the
+//! StreamDecodee trait. This allows you to encode an ASN.1 stream using
+//! the StreamDecodee interface as the caller.
+
 use tag;
 use err;
 use byte;
@@ -5,6 +15,10 @@ use byte;
 use std::cmp::Ordering;
 use std::io;
 
+/// This trait provides a SAXParser inspired interface for parsing ASN.1 streams.
+///
+/// If it were implemented, the ParseResult return types would be used to
+/// provide feedback on whether parsing of that element was successful.
 pub trait StreamDecodee {
   /// This function is called when an ASN.1 tag is encountered. In other
   /// words, at the start of an ASN.1 element.
@@ -13,8 +27,9 @@ pub trait StreamDecodee {
   }
 
   /// This function is called when an ASN.1 element has finished decoding.
-  /// Specifically, this is called for both constructed, and un-constructed
-  /// elements.
+  /// Note that this is also called for all elements, even after a primitive()
+  /// call. For this reason, you may need to check the constructed flag in some
+  /// cases.
   fn end_element(&mut self, _: tag::TagLen) -> ParseResult {
     ParseResult::Ok
   }
@@ -22,8 +37,8 @@ pub trait StreamDecodee {
   // FIXME: Currently it's the function's responsibility to decode the element
   // with the correct amounts of bytes. Without heap allocation, this might be
   // the only way.
-  /// This is called when a primitive element is encountered. The start_element
-  /// function is always called before this.
+  /// This function is called when a primitive element is encountered. Note that both
+  /// start_element and end_element are called before/after this function.
   fn primitive<I: Iterator<Item=io::Result<u8>>>(&mut self, reader: &mut byte::ByteReader<I>,
       len: tag::LenNum) -> ParseResult {
     for _ in 0..len {
@@ -35,21 +50,25 @@ pub trait StreamDecodee {
     ParseResult::Ok
   }
 
+  /// This function would be called when a recoverable decode error occurs, however
+  /// currently nothing calls this.
   fn warning(_: err::DecodeError) -> ParseResult {
     ParseResult::Stop
   }
 
-  /// This is called when a fatal decoding error occurs.
+  /// This function would be called when a fatal decoding error occurs, however 
+  /// currently nothing calls this.
   fn error(_: err::DecodeError) {
   }
 }
 
-/// A decoder that calls into an object implementing the StreamDecodee
-/// trait.
+/// A decoder that calls into a struct implementing the StreamDecodee trait,
+/// similar to a SAXParser
 pub struct StreamDecoder<'a, I: Iterator<Item=io::Result<u8>>, S: StreamDecodee + 'a> {
   /// Internal reader with an included byte counter.
   reader: byte::ByteReader<I>,
-  /// Object implementing StreamDecodee trait, called into during decoding.
+  /// Object implementing StreamDecodee trait, functions are called when
+  /// specific things are found in the ASN.1 stream.
   decodee: &'a mut S,
 }
 
@@ -137,6 +156,8 @@ impl<'a, I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<'a, I
   }
 }
 
+/// A stream encoder that implements StreamDecodee. Using this,
+/// a ASN.1 stream can be written using a SAXParser style interface.
 pub struct StreamEncoder<W: io::Write> {
   writer: byte::ByteWriter<W>
 }
@@ -180,7 +201,9 @@ impl<W: io::Write> StreamDecodee for StreamEncoder<W> {
 
 
 // FIXME: This seems to have two mixed meanings, perhaps split it?
-/// The result of a parsing function.
+/// The result of parsing after a callback on a StreamDecodee.
+///
+/// If it were implemented, this would provide feedback to the Decoder/Parser.
 pub enum ParseResult {
   /// Everything went okay.
   Ok,
