@@ -9,7 +9,7 @@ serde = "0.7"
 serde_json = "0.7"
 
 [lib]
-path="src/asn1-rs/lib.rs"
+path="src/asn1-cereal/lib.rs"
 
 [[bin]]
 path="src/asn1-utils/ber-dump.rs"
