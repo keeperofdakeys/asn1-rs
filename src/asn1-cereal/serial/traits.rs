@@ -29,7 +29,7 @@ pub trait Asn1Serialize: Asn1Info {
     };
     try!(tag.write_taglen(writer));
 
-    try!(writer.write(&bytes));
+    try!(writer.write_all(&bytes));
 
     Ok(())
   }

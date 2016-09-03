@@ -94,7 +94,7 @@ macro_rules! asn1_sequence_serialize {
             len: Some(bytes.len() as $crate::tag::LenNum).into(),
           };
           try!(tag.write_taglen(writer));
-          try!(writer.write(&mut bytes));
+          try!(writer.write_all(&mut bytes));
 
           bytes.clear();
         )*

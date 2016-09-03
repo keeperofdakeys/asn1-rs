@@ -14,13 +14,13 @@ impl serial::traits::Asn1Info for String {
   }
 
   fn asn1_type() -> tag::Type {
-    tag::Type::from("INTEGER")
+    tag::Type::from("PRINTABLESTRING")
   }
 }
 
 impl serial::traits::Asn1Serialize for String {
   fn serialize_imp<W: io::Write>(&self, writer: &mut W) -> Result<(), err::EncodeError> {
-    try!(writer.write(self.as_bytes()));
+    try!(writer.write_all(self.as_bytes()));
     Ok(())
   }
 }
