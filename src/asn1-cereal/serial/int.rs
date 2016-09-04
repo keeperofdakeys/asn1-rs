@@ -7,7 +7,7 @@ use byte::{read_byte, write_byte};
 
 use std::cmp;
 
-macro_rules! asn1_cereal_int {
+macro_rules! asn1_cereal_uint {
   ($rs_type:ty, $size:expr) => (
     impl serial::traits::Asn1Info for $rs_type {
       fn asn1_tag() -> tag::Tag {
@@ -67,6 +67,6 @@ macro_rules! asn1_cereal_int {
 
 // Can't bitshift a u8 by 8 bits, need to update deserialize_imp.
 // asn1_cereal_int!(u8, 1);
-asn1_cereal_int!(u16, 2);
-asn1_cereal_int!(u32, 4);
-asn1_cereal_int!(u64, 8);
+asn1_cereal_uint!(u16, 2);
+asn1_cereal_uint!(u32, 4);
+asn1_cereal_uint!(u64, 8);
