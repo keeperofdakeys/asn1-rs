@@ -20,27 +20,6 @@
 //! or Set).
 
 #[macro_export]
-/// This macro is a compact way of defining asn1_info for a type.
-macro_rules! asn1_info {
-  ($rs_type:ty, $class:expr, $tagnum:expr, $constructed:expr, $asn1_ty:expr) => (
-    impl $crate::serial::traits::Asn1Info for $rs_type {
-      fn asn1_tag() -> $crate::tag::Tag {
-        $crate::tag::Tag {
-          class: ($class as u8).into(),
-          tagnum: $tagnum as $crate::tag::TagNum,
-          constructed: $constructed,
-
-        }
-      }
-
-      fn asn1_type() -> $crate::tag::Type {
-        $crate::tag::Type::from($asn1_ty)
-      }
-    }
-  )
-}
-
-#[macro_export]
 /// This macro is a compact way of defining the Asn1Info trait implementation
 /// for a struct that represents an ASN.1 structure. If a custom class or tag
 /// number is required, asn1_info! should be used instead.
@@ -83,21 +62,25 @@ macro_rules! asn1_sequence_serialize {
         // For each declared sequence member, serialize it onto the stream.
         $(
           count += 1;
-          try!(
-            $crate::serial::traits::Asn1Serialize::serialize_enc(&self.$item, e, &mut bytes)
-          );
-          let tag = $crate::tag::TagLen {
-            tag: $crate::tag::Tag {
-              class: $crate::tag::Class::ContextSpecific,
-              tagnum: count.into(),
-              constructed: true,
-            },
-            len: Some(bytes.len() as $crate::tag::LenNum).into(),
-          };
-          try!(tag.write_taglen(writer));
-          try!(writer.write_all(&mut bytes));
+          // If encoding uses implicit tag, skip context-specific tag.
+          if E::tag_rules() == $crate::enc::TagEnc::Implicit {
+            try!($crate::serial::traits::Asn1Serialize::serialize_enc(&self.$item, e, writer));
+          // Otherwise encode the context-specific tag.
+          } else {
+            try!($crate::serial::traits::Asn1Serialize::serialize_enc(&self.$item, e, &mut bytes));
+            let tag = $crate::tag::TagLen {
+              tag: $crate::tag::Tag {
+                class: $crate::tag::Class::ContextSpecific,
+                tagnum: count.into(),
+                constructed: true,
+              },
+              len: Some(bytes.len() as $crate::tag::LenNum).into(),
+            };
+            try!(tag.write_taglen(writer));
+            try!(writer.write_all(&mut bytes));
 
-          bytes.clear();
+            bytes.clear();
+          }
         )*
         Ok(())
       }
@@ -123,8 +106,13 @@ macro_rules! asn1_sequence_deserialize {
           (e: E, reader: &mut I, _: Option<$crate::tag::LenNum>) -> Result<Self, $crate::err::DecodeError> {
         Ok( $rs_type { $(
           $item: {
-            let tag = try!($crate::tag::TagLen::read_taglen(reader));
-            try!($crate::serial::traits::Asn1Deserialize::deserialize_enc(e, reader, tag.len.as_num()))
+            // If encoding uses implicit tag, skip context-specific tag.
+            if E::tag_rules() == $crate::enc::TagEnc::Implicit {
+              try!($crate::serial::traits::Asn1Deserialize::deserialize_enc(e, reader, None))
+            } else {
+              let tag = try!($crate::tag::TagLen::read_taglen(reader));
+              try!($crate::serial::traits::Asn1Deserialize::deserialize_enc(e, reader, tag.len.as_num()))
+            }
           },
         )* })
       }

@@ -26,11 +26,6 @@ pub trait Asn1Serialize: Asn1Info {
   /// Serialize a value into ASN.1 data using a specific set of encoding rules.
   fn serialize_enc<E: enc::Asn1EncRules, W: io::Write>
       (&self, e: E, writer: &mut W) -> Result<(), err::EncodeError> {
-    if E::tag_rules() == enc::TagEnc::Implicit {
-      try!(self.serialize_bytes(e, writer));
-      return Ok(())
-    }
-
     let mut bytes: Vec<u8> = Vec::new();
     try!(self.serialize_bytes(e, &mut bytes));
 
@@ -70,7 +65,7 @@ pub trait Asn1Deserialize: Asn1Info + Sized {
     let tag = try!(tag::TagLen::read_taglen(reader));
 
     // If element is primitive, and length is indefinite, we can't decode it.
-    if tag.tag.constructed && tag.len == tag::Len::Indef {
+    if !tag.tag.constructed && tag.len == tag::Len::Indef {
       Err(err::DecodeError::PrimIndef)
     } else {
       Self::deserialize_bytes(e, reader, tag.len.as_num())

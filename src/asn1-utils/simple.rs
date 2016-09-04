@@ -4,7 +4,7 @@ extern crate asn1_cereal;
 use std::io;
 
 use asn1_cereal::serial::{Asn1Serialize, Asn1Deserialize};
-use asn1_cereal::enc::BER;
+use asn1_cereal::enc::{DER, BER};
 use asn1_cereal::tag::Class;
 
 fn main() {
@@ -18,7 +18,7 @@ fn main() {
   println!("{:?}", buffer);
   {
     let mut reader = buffer.iter().map(|x| Ok(*x) as Result<u8, std::io::Error>);
-    let seq = IntSequence::deserialize(&mut reader).unwrap();
+    let seq = IntSequence::deserialize_enc(BER, &mut reader, None).unwrap();
     println!("{:?}", seq);
   }
 }

@@ -52,7 +52,7 @@ pub struct DER;
 
 impl Asn1EncRules for DER {
   fn tag_rules() -> TagEnc {
-    TagEnc::Explicit
+    TagEnc::Implicit
   }
 
   fn len_rules() -> LenEnc {
@@ -75,7 +75,7 @@ pub struct BER;
 
 impl Asn1EncRules for BER {
   fn tag_rules() -> TagEnc {
-    TagEnc::Implicit
+    TagEnc::Explicit
   }
 
   fn len_rules() -> LenEnc {
