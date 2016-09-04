@@ -34,9 +34,10 @@
 /// anonymous struct (a newtype).
 macro_rules! asn1_newtype_serialize {
   ($rs_type:ident) => (
-    impl $crate::serial::traits::Asn1Serialize for $rs_type {
-      fn serialize_imp<W: std::io::Write>(&self, writer: &mut W) -> Result<(), $crate::err::EncodeError> {
-        self.0.serialize_imp(writer)
+    impl $crate::serial::Asn1Serialize for $rs_type {
+      fn serialize_bytes<E: $crate::enc::Asn1EncRules, W: std::io::Write>
+          (&self, e: E, writer: &mut W) -> Result<(), $crate::err::EncodeError> {
+        self.0.serialize_enc(e, writer)
       }
     }
   )
@@ -47,9 +48,10 @@ macro_rules! asn1_newtype_serialize {
 /// anonymous struct (a newtype).
 macro_rules! asn1_newtype_deserialize {
   ($rs_type:ident) => (
-    impl $crate::serial::traits::Asn1Deserialize for $rs_type {
-      fn deserialize_imp<I: Iterator<Item=std::io::Result<u8>>>(reader: &mut I, len: $crate::tag::Len) -> Result<Self, $crate::err::DecodeError> {
-        Ok($rs_type(try!($crate::serial::Asn1Deserialize::deserialize_imp(reader, len))))
+    impl $crate::serial::Asn1Deserialize for $rs_type {
+      fn deserialize_bytes<E: $crate::enc::Asn1EncRules, I: Iterator<Item=std::io::Result<u8>>>
+          (e: E, reader: &mut I, len: Option<$crate::tag::LenNum>) -> Result<Self, $crate::err::DecodeError> {
+        Ok($rs_type(try!($crate::serial::Asn1Deserialize::deserialize_enc(e, reader, len))))
       }
     }
   )

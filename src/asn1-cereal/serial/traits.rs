@@ -2,6 +2,7 @@ use std::io;
 
 use tag;
 use err;
+use enc;
 
 /// A trait that provides data about the ASN.1 tag and type for a Rust type.
 pub trait Asn1Info {
@@ -15,12 +16,23 @@ pub trait Asn1Info {
 /// A trait that provides the plumbing for serializing ASN.1
 /// data from a Rust type.
 ///
-/// Usually you'll only need to implement serialize_imp yourself.
+/// Usually you'll only need to implement serialize_enc yourself.
 pub trait Asn1Serialize: Asn1Info {
-  /// Serialise a value into ASN.1 data, with a tag (explicit tagging).
-  fn serialize_exp<W: io::Write>(&self, writer: &mut W) -> Result<(), err::EncodeError> {
+  /// Serialize a value into ASN.1 data as DER.
+  fn serialize<W: io::Write>(&self, writer: &mut W) -> Result<(), err::EncodeError> {
+    self.serialize_enc(enc::DER, writer)
+  }
+
+  /// Serialize a value into ASN.1 data using a specific set of encoding rules.
+  fn serialize_enc<E: enc::Asn1EncRules, W: io::Write>
+      (&self, e: E, writer: &mut W) -> Result<(), err::EncodeError> {
+    if E::tag_rules() == enc::TagEnc::Implicit {
+      try!(self.serialize_bytes(e, writer));
+      return Ok(())
+    }
+
     let mut bytes: Vec<u8> = Vec::new();
-    try!(self.serialize_imp(&mut bytes));
+    try!(self.serialize_bytes(e, &mut bytes));
 
     let len = bytes.len() as tag::LenNum;
     let tag = tag::TagLen {
@@ -35,35 +47,39 @@ pub trait Asn1Serialize: Asn1Info {
   }
 
   /// Serialise a value into ASN.1 data, without a tag (implicit tagging).
-  ///
-  /// (In order to write a tag yourself, you may need to know the byte-count written.
-  /// This is most easily achieved by supplying a &mut Vec<u8> as the writer.)
-  fn serialize_imp<W: io::Write>(&self, writer: &mut W) -> Result<(), err::EncodeError>;
+  fn serialize_bytes<E: enc::Asn1EncRules, W: io::Write>
+    (&self, e: E, writer: &mut W) -> Result<(), err::EncodeError>;
 }
 
 /// A trait that provides the plumbing for deserializing ASN.1
 /// data into a Rust type.
 ///
-/// Usually you'll only need to implement deserialize_imp yourself.
+/// Usually you'll only need to implement deserialize_enc yourself.
 pub trait Asn1Deserialize: Asn1Info + Sized {
+  /// Deserialize ASN.1 data into a Rust value, accepting any valid BER.
+  fn deserialize<I: Iterator<Item=io::Result<u8>>>(reader: &mut I) -> Result<Self, err::DecodeError> {
+    Self::deserialize_enc(enc::BER, reader, None)
+  }
 
-  /// Deserialise ASN.1 data with a tag into a value.
-  ///
-  /// This function will decode the tag to verify the tag for this type,
-  /// and only read the amount of bytes declared in the tag.
-  fn deserialize_exp<I: Iterator<Item=io::Result<u8>>>(reader: &mut I) -> Result<Self, err::DecodeError> {
+  /// Deserialize ASN.1 data into a Rust value, using a specific set of encoding rules.
+  fn deserialize_enc<E: enc::Asn1EncRules, I: Iterator<Item=io::Result<u8>>>
+      (e: E, reader: &mut I, len: Option<tag::LenNum>) -> Result<Self, err::DecodeError> {
+    if E::tag_rules() == enc::TagEnc::Implicit {
+      return Self::deserialize_bytes(e, reader, len);
+    }
     let tag = try!(tag::TagLen::read_taglen(reader));
 
     // If element is primitive, and length is indefinite, we can't decode it.
     if tag.tag.constructed && tag.len == tag::Len::Indef {
       Err(err::DecodeError::PrimIndef)
     } else {
-      Self::deserialize_imp(reader, tag.len)
+      Self::deserialize_bytes(e, reader, tag.len.as_num())
     }
   }
 
   /// Deserialise ASN.1 data without a tag into a value.
   ///
   /// Since the data has no tag, the byte length must be passed to this function.
-  fn deserialize_imp<I: Iterator<Item=io::Result<u8>>>(reader: &mut I, len: tag::Len) -> Result<Self, err::DecodeError>;
+  fn deserialize_bytes<E: enc::Asn1EncRules, I: Iterator<Item=io::Result<u8>>>
+    (e: E, reader: &mut I, len: Option<tag::LenNum>) -> Result<Self, err::DecodeError>;
 }

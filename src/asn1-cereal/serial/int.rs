@@ -3,6 +3,7 @@ use std::io;
 use tag;
 use err;
 use serial;
+use enc;
 use byte::{read_byte, write_byte};
 
 use std::cmp;
@@ -24,7 +25,8 @@ macro_rules! asn1_cereal_uint {
     }
 
     impl serial::traits::Asn1Serialize for $rs_type {
-      fn serialize_imp<W: io::Write>(&self, writer: &mut W) -> Result<(), err::EncodeError> {
+      fn serialize_bytes<E: enc::Asn1EncRules, W: io::Write>
+          (&self, _: E, writer: &mut W) -> Result<(), err::EncodeError> {
         let mut started = false;
         // Loop through bytes in int backwards, start writing when first non-zero byte is encounted.
         for offset in (0..8).rev() {
@@ -48,8 +50,9 @@ macro_rules! asn1_cereal_uint {
     }
 
     impl serial::traits::Asn1Deserialize for $rs_type {
-      fn deserialize_imp<I: Iterator<Item=io::Result<u8>>>(reader: &mut I, len: tag::Len) -> Result<Self, err::DecodeError> {
-        let len_num = try!(len.as_num().ok_or(err::DecodeError::PrimIndef));
+      fn deserialize_bytes<E: enc::Asn1EncRules, I: Iterator<Item=io::Result<u8>>>
+          (_: E, reader: &mut I, len: Option<tag::LenNum>) -> Result<Self, err::DecodeError> {
+        let len_num = try!(len.ok_or(err::DecodeError::PrimIndef));
 
         let mut int: $rs_type = 0;
         let size = cmp::min($size, len_num);
@@ -65,7 +68,7 @@ macro_rules! asn1_cereal_uint {
   )
 }
 
-// Can't bitshift a u8 by 8 bits, need to update deserialize_imp.
+// Can't bitshift a u8 by 8 bits, need to update deserialize_bytes.
 // asn1_cereal_int!(u8, 1);
 asn1_cereal_uint!(u16, 2);
 asn1_cereal_uint!(u32, 4);

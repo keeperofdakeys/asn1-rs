@@ -1,3 +1,4 @@
+#[derive(PartialEq)]
 /// An enum which determines how tags are encoded.
 pub enum TagEnc {
   /// When encoding, all tags will be encoded as explicit tags.
@@ -13,6 +14,7 @@ pub enum TagEnc {
   Implicit,
 }
 
+#[derive(PartialEq)]
 /// An enum which determines how lengths are encoded.
 pub enum LenEnc {
   /// When encoding, all lengths are encoded using the definite form.
@@ -26,7 +28,7 @@ pub enum LenEnc {
 }
 
 /// A trait to define encoding rules to use while encoding ASN.1.
-pub trait Asn1EncRules {
+pub trait Asn1EncRules: Copy {
   /// Get the encoding rules for tags.
   fn tag_rules() -> TagEnc;
 
@@ -39,13 +41,14 @@ pub trait Asn1EncRules {
   fn shortest_form() -> bool;
 }
 
+#[derive(Copy, Clone)]
 /// Distinguished Encoding Rules are a subset of BER, and provide a
 /// deterministic, shortest form of encoding. These are the default
 /// encoding rules used when encoding ASN.1.
 ///
 /// Note: When decoding elements, invalid DER will cause an error.
 /// If this is an issue, the BER encoding rules should be used
-struct DER;
+pub struct DER;
 
 impl Asn1EncRules for DER {
   fn tag_rules() -> TagEnc {
@@ -61,13 +64,14 @@ impl Asn1EncRules for DER {
   }
 }
 
+#[derive(Copy, Clone)]
 /// Basic Encoding Rules define the most basic rules that can be
 /// used to encode an ASN.1 tag. These are the default encoding rules
 /// used when decoding ASN1, as all variants are valid BER.
 ///
 /// When encoding, explicit tags and definite length encoding will
 /// be used for all elements.
-struct BER;
+pub struct BER;
 
 impl Asn1EncRules for BER {
   fn tag_rules() -> TagEnc {
@@ -83,6 +87,7 @@ impl Asn1EncRules for BER {
   }
 }
 
+#[derive(Copy, Clone)]
 /// This set of rules creates a valid BER stream, but will use
 /// implicit tags where possible, and indefinite length encoding
 /// for all constructed elements.
@@ -93,7 +98,7 @@ impl Asn1EncRules for BER {
 ///
 /// Note. Due to indefinite length encoding, this will not produce a valid
 /// DER encoding.
-struct BERAlt;
+pub struct BERAlt;
 
 impl Asn1EncRules for BERAlt {
   fn tag_rules() -> TagEnc {

@@ -76,14 +76,15 @@ macro_rules! asn1_sequence_info {
 macro_rules! asn1_sequence_serialize {
   ($rs_type:ty, $($item:ident),*) => (
     impl $crate::serial::traits::Asn1Serialize for $rs_type {
-      fn serialize_imp<W: std::io::Write>(&self, writer: &mut W) -> Result<(), $crate::err::EncodeError> {
+      fn serialize_bytes<E: $crate::enc::Asn1EncRules, W: std::io::Write>
+          (&self, e: E, writer: &mut W) -> Result<(), $crate::err::EncodeError> {
         let mut bytes = Vec::new();
         let mut count: u64 = 0;
         // For each declared sequence member, serialize it onto the stream.
         $(
           count += 1;
           try!(
-            $crate::serial::traits::Asn1Serialize::serialize_exp(&self.$item, &mut bytes)
+            $crate::serial::traits::Asn1Serialize::serialize_enc(&self.$item, e, &mut bytes)
           );
           let tag = $crate::tag::TagLen {
             tag: $crate::tag::Tag {
@@ -118,12 +119,12 @@ macro_rules! asn1_sequence_serialize {
 macro_rules! asn1_sequence_deserialize {
   ($rs_type:ident, $($item:ident),*) => (
     impl $crate::serial::traits::Asn1Deserialize for $rs_type {
-      fn deserialize_imp<I: Iterator<Item=std::io::Result<u8>>>(reader: &mut I, _: $crate::tag::Len) -> Result<Self, $crate::err::DecodeError> {
+      fn deserialize_bytes<E: $crate::enc::Asn1EncRules, I: Iterator<Item=std::io::Result<u8>>>
+          (e: E, reader: &mut I, _: Option<$crate::tag::LenNum>) -> Result<Self, $crate::err::DecodeError> {
         Ok( $rs_type { $(
           $item: {
             let tag = try!($crate::tag::TagLen::read_taglen(reader));
-            let _ = tag;
-            try!($crate::serial::traits::Asn1Deserialize::deserialize_exp(reader))
+            try!($crate::serial::traits::Asn1Deserialize::deserialize_enc(e, reader, tag.len.as_num()))
           },
         )* })
       }

@@ -2,6 +2,7 @@ use std::io;
 
 use tag;
 use err;
+use enc;
 use serial;
 
 impl serial::traits::Asn1Info for String {
@@ -19,15 +20,17 @@ impl serial::traits::Asn1Info for String {
 }
 
 impl serial::traits::Asn1Serialize for String {
-  fn serialize_imp<W: io::Write>(&self, writer: &mut W) -> Result<(), err::EncodeError> {
+  fn serialize_bytes<E: enc::Asn1EncRules, W: io::Write>
+      (&self, _: E, writer: &mut W) -> Result<(), err::EncodeError> {
     try!(writer.write_all(self.as_bytes()));
     Ok(())
   }
 }
 
 impl serial::traits::Asn1Deserialize for String {
-  fn deserialize_imp<I: Iterator<Item=io::Result<u8>>>(reader: &mut I, len: tag::Len) -> Result<Self, err::DecodeError> {
-    let len_num = try!(len.as_num().ok_or(err::DecodeError::PrimIndef));
+  fn deserialize_bytes<E: enc::Asn1EncRules, I: Iterator<Item=io::Result<u8>>>
+      (_: E, reader: &mut I, len: Option<tag::LenNum>) -> Result<Self, err::DecodeError> {
+    let len_num = try!(len.ok_or(err::DecodeError::PrimIndef));
     let bytes: Result<Vec<u8>, _> = reader.take(len_num as usize).collect();
     match String::from_utf8(try!(bytes)) {
       Ok(str) => Ok(str),
