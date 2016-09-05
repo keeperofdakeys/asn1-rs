@@ -116,7 +116,7 @@ macro_rules! asn1_sequence_deserialize {
             let tag = try!($crate::tag::Tag::read_tag(reader));
 
             // If encoding uses implicit tagging, throw an error if this isn't an implicit tag.
-            if E::tag_rules() == $crate::enc::TagEnc::Implicit && tag != our_tag {
+            if E::tag_rules() == $crate::enc::TagEnc::Implicit && tag == our_tag {
               return Err($crate::err::DecodeError::ExplicitTag);
             }
 
