@@ -35,6 +35,26 @@
 macro_rules! asn1_newtype_serialize {
   ($rs_type:ident) => (
     impl $crate::serial::Asn1Serialize for $rs_type {
+      fn serialize_enc<E: $crate::enc::Asn1EncRules, W: std::io::Write>
+          (&self, e: E, writer: &mut W) -> Result<(), $crate::err::EncodeError> {
+        // If encoding uses implicit tag, skip our tag.
+        if E::tag_rules() == $crate::enc::TagEnc::Implicit {
+          return self.0.serialize_enc(e, writer);
+        }
+
+        let mut bytes: Vec<u8> = Vec::new();
+        try!(self.serialize_bytes(e, &mut bytes));
+
+        try!(<Self as $crate::serial::Asn1Info>::asn1_tag().write_tag(writer));
+        try!($crate::tag::Len::write_len(
+          Some(bytes.len() as $crate::tag::LenNum).into(),
+          writer
+        ));
+        try!(writer.write_all(&bytes));
+
+        Ok(())
+      }
+
       fn serialize_bytes<E: $crate::enc::Asn1EncRules, W: std::io::Write>
           (&self, e: E, writer: &mut W) -> Result<(), $crate::err::EncodeError> {
         self.0.serialize_enc(e, writer)

@@ -29,13 +29,8 @@ pub trait Asn1Serialize: Asn1Info {
     let mut bytes: Vec<u8> = Vec::new();
     try!(self.serialize_bytes(e, &mut bytes));
 
-    let len = bytes.len() as tag::LenNum;
-    let tag = tag::TagLen {
-      tag: Self::asn1_tag(),
-      len: Some(len).into(),
-    };
-    try!(tag.write_taglen(writer));
-
+    try!(Self::asn1_tag().write_tag(writer));
+    try!(tag::Len::write_len(Some(bytes.len() as tag::LenNum).into(), writer));
     try!(writer.write_all(&bytes));
 
     Ok(())

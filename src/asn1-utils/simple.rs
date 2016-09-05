@@ -8,19 +8,19 @@ use asn1_cereal::enc::{DER, BER};
 use asn1_cereal::tag::Class;
 
 fn main() {
-  let mut buffer: Vec<u8> = Vec::new();
-  // let mut buffer = io::BufWriter::new(io::stdout());
+  // let mut buffer: Vec<u8> = Vec::new();
+  let mut buffer = io::BufWriter::new(io::stdout());
   let seq = IntSequence { a: 3, b: 4, c: SomeString("Hello".into()) };
   {
     let mut writer = io::BufWriter::new(&mut buffer);
-    seq.serialize_enc(BER, &mut writer).unwrap();
+    seq.serialize_enc(DER, &mut writer).unwrap();
   };
-  println!("{:?}", buffer);
-  {
-    let mut reader = buffer.iter().map(|x| Ok(*x) as Result<u8, std::io::Error>);
-    let seq = IntSequence::deserialize_enc(BER, &mut reader, None).unwrap();
-    println!("{:?}", seq);
-  }
+  // println!("{:?}", buffer);
+  // {
+  //   let mut reader = buffer.iter().map(|x| Ok(*x) as Result<u8, std::io::Error>);
+  //   let seq = IntSequence::deserialize_enc(DER, &mut reader, None).unwrap();
+  //   println!("{:?}", seq);
+  // }
 }
 
 #[derive(Debug)]
