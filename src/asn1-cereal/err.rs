@@ -11,6 +11,8 @@ pub enum DecodeError {
   SmallerLen,
   /// Primitive value encoded with an indefinite length.
   PrimIndef,
+  /// Decoded tag does not match the expected tag for this type.
+  TagTypeMismatch,
   /// Custom decoding error.
   Custom(&'static str),
 }

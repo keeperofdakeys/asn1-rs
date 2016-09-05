@@ -59,16 +59,25 @@ pub trait Asn1Deserialize: Asn1Info + Sized {
   /// Deserialize ASN.1 data into a Rust value, using a specific set of encoding rules.
   fn deserialize_enc<E: enc::Asn1EncRules, I: Iterator<Item=io::Result<u8>>>
       (e: E, reader: &mut I, len: Option<tag::LenNum>) -> Result<Self, err::DecodeError> {
-    if E::tag_rules() == enc::TagEnc::Implicit {
-      return Self::deserialize_bytes(e, reader, len);
+    let tag = try!(tag::Tag::read_tag(reader));
+    Self::deserialize_enc_tag(e, tag, reader, len)
+  }
+
+  /// Deserialize ASN.1 data into a Rust value, using a specific set of encoding rules. Also
+  /// use a specific tag, rather than reading from stream.
+  fn deserialize_enc_tag<E: enc::Asn1EncRules, I: Iterator<Item=io::Result<u8>>>
+      (e: E, tag: tag::Tag, reader: &mut I, len: Option<tag::LenNum>) -> Result<Self, err::DecodeError> {
+    if tag != Self::asn1_tag() {
+      return Err(err::DecodeError::TagTypeMismatch);
     }
-    let tag = try!(tag::TagLen::read_taglen(reader));
+
+    let len = try!(tag::Len::read_len(reader));
 
     // If element is primitive, and length is indefinite, we can't decode it.
-    if !tag.tag.constructed && tag.len == tag::Len::Indef {
+    if !tag.constructed && len == tag::Len::Indef {
       Err(err::DecodeError::PrimIndef)
     } else {
-      Self::deserialize_bytes(e, reader, tag.len.as_num())
+      Self::deserialize_bytes(e, reader, len.as_num())
     }
   }
 
