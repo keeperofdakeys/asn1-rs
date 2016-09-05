@@ -3,7 +3,6 @@
 pub enum TagEnc {
   /// When encoding, all tags will be encoded as explicit tags.
   /// When decoding, implict or explict tags will be accepted.
-  /// implicit tags are an error.
   /// Implicit: Tags that can be encoded implicitly must
   Explicit,
   /// When encoding, constructed tags will be encoded as implicit

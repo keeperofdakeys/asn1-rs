@@ -60,13 +60,13 @@ pub trait Asn1Deserialize: Asn1Info + Sized {
   fn deserialize_enc<E: enc::Asn1EncRules, I: Iterator<Item=io::Result<u8>>>
       (e: E, reader: &mut I, len: Option<tag::LenNum>) -> Result<Self, err::DecodeError> {
     let tag = try!(tag::Tag::read_tag(reader));
-    Self::deserialize_enc_tag(e, tag, reader, len)
+    Self::deserialize_enc_tag(e, reader, tag, len)
   }
 
   /// Deserialize ASN.1 data into a Rust value, using a specific set of encoding rules. Also
   /// use a specific tag, rather than reading from stream.
   fn deserialize_enc_tag<E: enc::Asn1EncRules, I: Iterator<Item=io::Result<u8>>>
-      (e: E, tag: tag::Tag, reader: &mut I, len: Option<tag::LenNum>) -> Result<Self, err::DecodeError> {
+      (e: E, reader: &mut I, tag: tag::Tag, len: Option<tag::LenNum>) -> Result<Self, err::DecodeError> {
     if tag != Self::asn1_tag() {
       return Err(err::DecodeError::TagTypeMismatch);
     }

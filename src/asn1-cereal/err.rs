@@ -13,6 +13,8 @@ pub enum DecodeError {
   PrimIndef,
   /// Decoded tag does not match the expected tag for this type.
   TagTypeMismatch,
+  /// An explicit tag appeared where an Implicit tag was expected.
+  ExplicitTag,
   /// Custom decoding error.
   Custom(&'static str),
 }

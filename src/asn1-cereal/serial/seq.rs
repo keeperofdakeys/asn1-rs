@@ -104,14 +104,29 @@ macro_rules! asn1_sequence_deserialize {
     impl $crate::serial::traits::Asn1Deserialize for $rs_type {
       fn deserialize_bytes<E: $crate::enc::Asn1EncRules, I: Iterator<Item=std::io::Result<u8>>>
           (e: E, reader: &mut I, _: Option<$crate::tag::LenNum>) -> Result<Self, $crate::err::DecodeError> {
+        let mut count: u64 = 0;
         Ok( $rs_type { $(
           $item: {
-            // If encoding uses implicit tag, skip context-specific tag.
-            if E::tag_rules() == $crate::enc::TagEnc::Implicit {
-              try!($crate::serial::traits::Asn1Deserialize::deserialize_enc(e, reader, None))
+            count += 1;
+            let our_tag = $crate::tag::Tag {
+              class: $crate::tag::Class::ContextSpecific,
+              tagnum: count.into(),
+              constructed: true,
+            };
+            let tag = try!($crate::tag::Tag::read_tag(reader));
+
+            // If encoding uses implicit tagging, throw an error if this isn't an implicit tag.
+            if E::tag_rules() == $crate::enc::TagEnc::Implicit && tag != our_tag {
+              return Err($crate::err::DecodeError::ExplicitTag);
+            }
+
+            // If the tag matches our tag, decode the len and call the normal deserialize function.
+            if tag == our_tag {
+              let len = try!($crate::tag::Len::read_len(reader));
+              try!($crate::serial::traits::Asn1Deserialize::deserialize_enc(e, reader, len.as_num()))
+            // Otherwise decode it as the inner type.
             } else {
-              let tag = try!($crate::tag::TagLen::read_taglen(reader));
-              try!($crate::serial::traits::Asn1Deserialize::deserialize_enc(e, reader, tag.len.as_num()))
+              try!($crate::serial::traits::Asn1Deserialize::deserialize_enc_tag(e, reader, tag, None))
             }
           },
         )* })
