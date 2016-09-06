@@ -121,9 +121,16 @@ macro_rules! asn1_sequence_deserialize {
       fn deserialize_bytes<E: $crate::enc::Asn1EncRules, I: Iterator<Item=std::io::Result<u8>>>
           (e: E, reader: &mut I, _: Option<$crate::tag::LenNum>) -> Result<Self, $crate::err::DecodeError> {
         let mut count: u64 = 0;
-        Ok( $rs_type { $(
-          $item: {
-            count += 1;
+        $(
+          // Iterate count.
+          // FIXME: Does this start from 0 or 1?
+          count += 1;
+
+          // Use field name as variable name, due to hygiene this won't conflict with any
+          // defined locally.
+          let $item;
+          {
+            // Create a copy of what our tag context-specific tag would look like.
             let our_tag = $crate::tag::Tag {
               class: $crate::tag::Class::ContextSpecific,
               tagnum: count.into(),
@@ -137,14 +144,20 @@ macro_rules! asn1_sequence_deserialize {
             }
 
             // If the tag matches our tag, decode the len and call the normal deserialize function.
-            if tag == our_tag {
+            $item = if tag == our_tag {
+              // We don't have anything to do with this, technically we should use it to
+              // check the length decoded.
               let _ = try!($crate::tag::Len::read_len(reader));
               try!($crate::serial::Asn1Deserialize::deserialize_enc(e, reader))
-            // Otherwise decode it as the inner type.
+            // Otherwise decode it as the inner type. (We give the tag that we
+            // decoded, and the function will decode the length itself).
             } else {
               try!($crate::serial::Asn1Deserialize::deserialize_enc_tag(e, reader, tag))
-            }
-          },
+            };
+          }
+        )*
+        Ok( $rs_type { $(
+          $item: $item,
         )* })
       }
     }
