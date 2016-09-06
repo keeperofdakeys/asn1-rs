@@ -1,6 +1,11 @@
 //! The macros in this module can implement the serialisation traits for a
-//! simple ASN.1 definition. IE: One ASN.1 type being defined as an alias of
-//! another.
+//! simple ASN.1 type definition/assignment, respresnted by a Rust newtype
+//! (anonymous struct with a single field).
+//!
+//! You can either define both asn1_info! and asn1_newtype!, or all three
+//! of asn1_info!, asn1_newtype_serialize! and asn1_newtype_deserialize!.
+//!
+//! IE:
 //!
 //! ```text
 //! TYPE1 ::= SEQUENCE {
@@ -9,8 +14,6 @@
 //!
 //! TYPE1 ::= TYPE2
 //! ```
-//!
-//! This mdoule assumes this is being represented in Rust as a newtype.
 //! 
 //! ```
 //! #[macro_use] extern crate asn1_cereal; fn main() {
@@ -24,14 +27,30 @@
 //!
 //!   struct Type2 (Type1);
 //!   asn1_info!(Type2, 0x3, 0x1, true, "TYPE2");
-//!   asn1_newtype_serialize!(Type2);
-//!   asn1_newtype_deserialize!(Type2);
+//!   asn1_newtype!(Type2);
+//!
+//!   // OR
+//!
+//!   struct Type3 (Type1);
+//!   asn1_info!(Type3, 0x3, 0x1, true, "TYPE2");
+//!   asn1_newtype_serialize!(Type3);
+//!   asn1_newtype_deserialize!(Type3);
 //! }
 //! ```
 
 #[macro_export]
-/// This macro will generate an Asn1Serialize implementation for an
-/// anonymous struct (a newtype).
+/// This macro is a compact way of defining both of the
+/// Asn1 serialization traits - Asn1Serialize and Asn1Deserialize
+/// - for a rust newtype, that represents an ASN.1 type definition.
+macro_rules! asn1_newtype {
+  ($rs_type:ident) => (
+    asn1_newtype_serialize!($rs_type);
+    asn1_newtype_deserialize!($rs_type);
+  )
+}
+
+#[macro_export]
+/// This macro defines the Asn1Serialize trait for a rust newtype.
 macro_rules! asn1_newtype_serialize {
   ($rs_type:ident) => (
     impl $crate::serial::Asn1Serialize for $rs_type {
@@ -64,13 +83,12 @@ macro_rules! asn1_newtype_serialize {
 }
 
 #[macro_export]
-/// This macro will generate an Asn1Deserialize implementation for an
-/// anonymous struct (a newtype).
+/// This macro defines the Asn1Serialize trait for a rust newtype.
 macro_rules! asn1_newtype_deserialize {
   ($rs_type:ident) => (
     impl $crate::serial::Asn1Deserialize for $rs_type {
       /// Reimplement this function to handle implicit tagging.
-      fn deserialize_enc_tag<E: $crate::enc::Asn1EncRules, I: Iterator<Item=io::Result<u8>>>
+      fn deserialize_enc_tag<E: $crate::enc::Asn1EncRules, I: Iterator<Item=std::io::Result<u8>>>
           (e: E, reader: &mut I, tag: $crate::tag::Tag)
           -> Result<Self, $crate::err::DecodeError> {
         let my_tag = <Self as $crate::serial::Asn1Info>::asn1_tag();
