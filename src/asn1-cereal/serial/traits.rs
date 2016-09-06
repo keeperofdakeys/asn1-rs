@@ -48,20 +48,20 @@ pub trait Asn1Serialize: Asn1Info {
 pub trait Asn1Deserialize: Asn1Info + Sized {
   /// Deserialize ASN.1 data into a Rust value, accepting any valid BER.
   fn deserialize<I: Iterator<Item=io::Result<u8>>>(reader: &mut I) -> Result<Self, err::DecodeError> {
-    Self::deserialize_enc(enc::BER, reader, None)
+    Self::deserialize_enc(enc::BER, reader)
   }
 
   /// Deserialize ASN.1 data into a Rust value, using a specific set of encoding rules.
   fn deserialize_enc<E: enc::Asn1EncRules, I: Iterator<Item=io::Result<u8>>>
-      (e: E, reader: &mut I, len: Option<tag::LenNum>) -> Result<Self, err::DecodeError> {
+      (e: E, reader: &mut I) -> Result<Self, err::DecodeError> {
     let tag = try!(tag::Tag::read_tag(reader));
-    Self::deserialize_enc_tag(e, reader, tag, len)
+    Self::deserialize_enc_tag(e, reader, tag)
   }
 
   /// Deserialize ASN.1 data into a Rust value, using a specific set of encoding rules. Also
   /// use a specific tag, rather than reading from stream.
   fn deserialize_enc_tag<E: enc::Asn1EncRules, I: Iterator<Item=io::Result<u8>>>
-      (e: E, reader: &mut I, tag: tag::Tag, len: Option<tag::LenNum>) -> Result<Self, err::DecodeError> {
+      (e: E, reader: &mut I, tag: tag::Tag) -> Result<Self, err::DecodeError> {
     if tag != Self::asn1_tag() {
       return Err(err::DecodeError::TagTypeMismatch);
     }

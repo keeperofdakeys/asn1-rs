@@ -122,11 +122,11 @@ macro_rules! asn1_sequence_deserialize {
 
             // If the tag matches our tag, decode the len and call the normal deserialize function.
             if tag == our_tag {
-              let len = try!($crate::tag::Len::read_len(reader));
-              try!($crate::serial::Asn1Deserialize::deserialize_enc(e, reader, len.as_num()))
+              let _ = try!($crate::tag::Len::read_len(reader));
+              try!($crate::serial::Asn1Deserialize::deserialize_enc(e, reader))
             // Otherwise decode it as the inner type.
             } else {
-              try!($crate::serial::Asn1Deserialize::deserialize_enc_tag(e, reader, tag, None))
+              try!($crate::serial::Asn1Deserialize::deserialize_enc_tag(e, reader, tag))
             }
           },
         )* })

@@ -71,7 +71,7 @@ macro_rules! asn1_newtype_deserialize {
     impl $crate::serial::Asn1Deserialize for $rs_type {
       /// Reimplement this function to handle implicit tagging.
       fn deserialize_enc_tag<E: $crate::enc::Asn1EncRules, I: Iterator<Item=io::Result<u8>>>
-          (e: E, reader: &mut I, tag: $crate::tag::Tag, len: Option<$crate::tag::LenNum>)
+          (e: E, reader: &mut I, tag: $crate::tag::Tag)
           -> Result<Self, $crate::err::DecodeError> {
         let my_tag = <Self as $crate::serial::Asn1Info>::asn1_tag();
 
@@ -83,7 +83,7 @@ macro_rules! asn1_newtype_deserialize {
         // If the tag doesn't match our tag, decode it as the inner type.
         if tag != my_tag {
           return Ok($rs_type(try!(
-            $crate::serial::Asn1Deserialize::deserialize_enc_tag(e, reader, tag, len)
+            $crate::serial::Asn1Deserialize::deserialize_enc_tag(e, reader, tag)
           )));
         }
 
@@ -97,8 +97,8 @@ macro_rules! asn1_newtype_deserialize {
         }
       }
       fn deserialize_bytes<E: $crate::enc::Asn1EncRules, I: Iterator<Item=std::io::Result<u8>>>
-          (e: E, reader: &mut I, len: Option<$crate::tag::LenNum>) -> Result<Self, $crate::err::DecodeError> {
-        Ok($rs_type(try!($crate::serial::Asn1Deserialize::deserialize_enc(e, reader, len))))
+          (e: E, reader: &mut I, _: Option<$crate::tag::LenNum>) -> Result<Self, $crate::err::DecodeError> {
+        Ok($rs_type(try!($crate::serial::Asn1Deserialize::deserialize_enc(e, reader))))
       }
     }
   )

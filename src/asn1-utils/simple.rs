@@ -18,7 +18,7 @@ fn main() {
   println!("{:?}", buffer);
   {
     let mut reader = buffer.iter().map(|x| Ok(*x) as Result<u8, std::io::Error>);
-    let seq = IntSequence::deserialize_enc(BER, &mut reader, None).unwrap();
+    let seq = IntSequence::deserialize_enc(DER, &mut reader).unwrap();
     println!("{:?}", seq);
   }
 }
