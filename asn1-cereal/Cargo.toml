@@ -1,0 +1,7 @@
+[package]
+name = "asn1-cereal"
+version = "0.1.0"
+authors = ["Josh <keeperofdakeys@gmail.com>"]
+
+[lib]
+path="src/lib.rs"

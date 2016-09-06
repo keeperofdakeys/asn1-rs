@@ -1,5 +1,5 @@
 [package]
-name = "asn1-cereal"
+name = "asn1-utils"
 version = "0.1.0"
 authors = ["Josh <keeperofdakeys@gmail.com>"]
 
@@ -7,22 +7,20 @@ authors = ["Josh <keeperofdakeys@gmail.com>"]
 argparse = "0.2"
 serde = "0.7"
 serde_json = "0.7"
-
-[lib]
-path="src/asn1-cereal/lib.rs"
+asn1-cereal = { path = "../asn1-cereal" }
 
 [[bin]]
-path="src/asn1-utils/ber-dump.rs"
+path="src/ber-dump.rs"
 name="ber-dump"
 
 [[bin]]
-path="src/asn1-utils/ber-json-decode.rs"
+path="src/ber-json-decode.rs"
 name="ber-json-decode"
 
 [[bin]]
-path="src/asn1-utils/simple.rs"
+path="src/simple.rs"
 name="simple"
 
 # [[bin]]
-# path="src/asn1-utils/snmp-decode.rs"
+# path="src/snmp-decode.rs"
 # name="snmp-decode"
