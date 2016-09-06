@@ -34,8 +34,7 @@ asn1_info!(
   "SOMESTRING"
 );
 
-asn1_newtype_serialize!(SomeString);
-asn1_newtype_deserialize!(SomeString);
+asn1_newtype!(SomeString);
 
 #[derive(Debug)]
 struct IntSequence {
@@ -44,20 +43,9 @@ struct IntSequence {
   c: SomeString,
 }
 
-asn1_sequence_info!(
+asn1_sequence!(
   IntSequence,
-  "INTSEQ"
-);
-
-asn1_sequence_serialize!(
-  IntSequence,
-  a,
-  b,
-  c
-);
-
-asn1_sequence_deserialize!(
-  IntSequence,
+  "INTSEQ",
   a,
   b,
   c
