@@ -5,7 +5,7 @@ use err;
 use enc;
 use serial;
 
-impl serial::traits::Asn1Info for Vec<u8> {
+impl serial::Asn1Info for Vec<u8> {
   fn asn1_tag() -> tag::Tag {
     tag::Tag {
       class: tag::Class::Universal,
@@ -19,7 +19,7 @@ impl serial::traits::Asn1Info for Vec<u8> {
   }
 }
 
-impl serial::traits::Asn1Serialize for Vec<u8> {
+impl serial::Asn1Serialize for Vec<u8> {
   fn serialize_bytes<E: enc::Asn1EncRules, W: io::Write>
       (&self, _: E, writer: &mut W) -> Result<(), err::EncodeError> {
     try!(writer.write_all(self));
@@ -27,7 +27,7 @@ impl serial::traits::Asn1Serialize for Vec<u8> {
   }
 }
 
-impl serial::traits::Asn1Deserialize for Vec<u8> {
+impl serial::Asn1Deserialize for Vec<u8> {
   fn deserialize_bytes<E: enc::Asn1EncRules, I: Iterator<Item=io::Result<u8>>>
       (_: E, reader: &mut I, len: Option<tag::LenNum>) -> Result<Self, err::DecodeError> {
     let len_num = try!(len.ok_or(err::DecodeError::PrimIndef));

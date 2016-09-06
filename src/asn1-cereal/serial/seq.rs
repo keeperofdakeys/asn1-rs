@@ -25,7 +25,7 @@
 /// number is required, asn1_info! should be used instead.
 macro_rules! asn1_sequence_info {
   ($rs_type:ty, $asn1_ty:expr) => (
-    impl $crate::serial::traits::Asn1Info for $rs_type {
+    impl $crate::serial::Asn1Info for $rs_type {
       fn asn1_tag() -> $crate::tag::Tag {
         $crate::tag::Tag {
           class: $crate::tag::Class::Universal,
@@ -54,7 +54,7 @@ macro_rules! asn1_sequence_info {
 /// listing the fields in the macro might not be required.
 macro_rules! asn1_sequence_serialize {
   ($rs_type:ty, $($item:ident),*) => (
-    impl $crate::serial::traits::Asn1Serialize for $rs_type {
+    impl $crate::serial::Asn1Serialize for $rs_type {
       fn serialize_bytes<E: $crate::enc::Asn1EncRules, W: std::io::Write>
           (&self, e: E, writer: &mut W) -> Result<(), $crate::err::EncodeError> {
         let mut bytes = Vec::new();
@@ -64,10 +64,10 @@ macro_rules! asn1_sequence_serialize {
           count += 1;
           // If encoding uses implicit tag, skip context-specific tag.
           if E::tag_rules() == $crate::enc::TagEnc::Implicit {
-            try!($crate::serial::traits::Asn1Serialize::serialize_enc(&self.$item, e, writer));
+            try!($crate::serial::Asn1Serialize::serialize_enc(&self.$item, e, writer));
           // Otherwise encode the context-specific tag.
           } else {
-            try!($crate::serial::traits::Asn1Serialize::serialize_enc(&self.$item, e, &mut bytes));
+            try!($crate::serial::Asn1Serialize::serialize_enc(&self.$item, e, &mut bytes));
             let tag = $crate::tag::TagLen {
               tag: $crate::tag::Tag {
                 class: $crate::tag::Class::ContextSpecific,
@@ -101,7 +101,7 @@ macro_rules! asn1_sequence_serialize {
 /// listing the fields in the macro might not be required.
 macro_rules! asn1_sequence_deserialize {
   ($rs_type:ident, $($item:ident),*) => (
-    impl $crate::serial::traits::Asn1Deserialize for $rs_type {
+    impl $crate::serial::Asn1Deserialize for $rs_type {
       fn deserialize_bytes<E: $crate::enc::Asn1EncRules, I: Iterator<Item=std::io::Result<u8>>>
           (e: E, reader: &mut I, _: Option<$crate::tag::LenNum>) -> Result<Self, $crate::err::DecodeError> {
         let mut count: u64 = 0;
@@ -123,10 +123,10 @@ macro_rules! asn1_sequence_deserialize {
             // If the tag matches our tag, decode the len and call the normal deserialize function.
             if tag == our_tag {
               let len = try!($crate::tag::Len::read_len(reader));
-              try!($crate::serial::traits::Asn1Deserialize::deserialize_enc(e, reader, len.as_num()))
+              try!($crate::serial::Asn1Deserialize::deserialize_enc(e, reader, len.as_num()))
             // Otherwise decode it as the inner type.
             } else {
-              try!($crate::serial::traits::Asn1Deserialize::deserialize_enc_tag(e, reader, tag, None))
+              try!($crate::serial::Asn1Deserialize::deserialize_enc_tag(e, reader, tag, None))
             }
           },
         )* })

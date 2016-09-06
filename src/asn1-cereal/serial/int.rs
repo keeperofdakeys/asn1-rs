@@ -10,7 +10,7 @@ use std::cmp;
 
 macro_rules! asn1_cereal_uint {
   ($rs_type:ty, $size:expr) => (
-    impl serial::traits::Asn1Info for $rs_type {
+    impl serial::Asn1Info for $rs_type {
       fn asn1_tag() -> tag::Tag {
         tag::Tag {
           class: tag::Class::Universal,
@@ -24,7 +24,7 @@ macro_rules! asn1_cereal_uint {
       }
     }
 
-    impl serial::traits::Asn1Serialize for $rs_type {
+    impl serial::Asn1Serialize for $rs_type {
       fn serialize_bytes<E: enc::Asn1EncRules, W: io::Write>
           (&self, _: E, writer: &mut W) -> Result<(), err::EncodeError> {
         let mut started = false;
@@ -49,7 +49,7 @@ macro_rules! asn1_cereal_uint {
       }
     }
 
-    impl serial::traits::Asn1Deserialize for $rs_type {
+    impl serial::Asn1Deserialize for $rs_type {
       fn deserialize_bytes<E: enc::Asn1EncRules, I: Iterator<Item=io::Result<u8>>>
           (_: E, reader: &mut I, len: Option<tag::LenNum>) -> Result<Self, err::DecodeError> {
         let len_num = try!(len.ok_or(err::DecodeError::PrimIndef));
