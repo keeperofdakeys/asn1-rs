@@ -177,6 +177,13 @@ pub enum Len {
 }
 
 impl Len {
+  /// Write an indefinite length terminator to the given writer.
+  pub fn write_indef_end<W: io::Write>(writer: &mut W) -> Result<(), err::EncodeError> {
+    try!(write_byte(writer, 0x0));
+    try!(write_byte(writer, 0x0));
+    Ok(())
+  }
+
   /// Given an iterator over a byte stream, read and return the ASN.1 element length.
   pub fn read_len<I: Iterator<Item=io::Result<u8>>>(bytes: &mut I) -> Result<Self, err::DecodeError> {
     // Decode len byte.
