@@ -26,12 +26,22 @@ pub trait Asn1Serialize: Asn1Info {
   /// Serialize a value into ASN.1 data using a specific set of encoding rules.
   fn serialize_enc<E: enc::Asn1EncRules, W: io::Write>
       (&self, e: E, writer: &mut W) -> Result<(), err::EncodeError> {
-    let mut bytes: Vec<u8> = Vec::new();
-    try!(self.serialize_bytes(e, &mut bytes));
+    let tag = Self::asn1_tag();
+    try!(tag.write_tag(writer));
 
-    try!(Self::asn1_tag().write_tag(writer));
-    try!(tag::Len::write_len(Some(bytes.len() as tag::LenNum).into(), writer));
-    try!(writer.write_all(&bytes));
+    // If this is indefinite length and constructed, write the data directly.
+    if E::len_rules() == enc::LenEnc::Indefinite &&
+       tag.constructed {
+      try!(tag::Len::Indef.write_len(writer));
+      try!(self.serialize_bytes(e, writer));
+      try!(tag::Len::write_indef_end(writer));
+    // Otherwise write to a Vec first, so we can write the length.
+    } else {
+      let mut bytes: Vec<u8> = Vec::new();
+      try!(self.serialize_bytes(e, &mut bytes));
+      try!(tag::Len::write_len(Some(bytes.len() as tag::LenNum).into(), writer));
+      try!(writer.write_all(&bytes));
+    }
 
     Ok(())
   }
