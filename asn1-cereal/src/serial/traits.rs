@@ -76,14 +76,29 @@ pub trait Asn1Deserialize: Asn1Info + Sized {
       return Err(err::DecodeError::TagTypeMismatch);
     }
 
+    // Read length fromm stream.
     let len = try!(tag::Len::read_len(reader));
 
-    // If element is primitive, and length is indefinite, we can't decode it.
-    if !tag.constructed && len == tag::Len::Indef {
-      Err(err::DecodeError::PrimIndef)
-    } else {
-      Self::deserialize_bytes(e, reader, len.as_num())
+    // Handle any indefinite length error conditions.
+    if len == tag::Len::Indef {
+      // Return an error if the encoding rules only allow definite length
+      // encoding.
+      if E::len_rules() == enc::LenEnc::Definite {
+        return Err(err::DecodeError::IndefiniteLen);
+      // If this element is primitve, the length isn't allowed to be indefinite length.
+      } else if !tag.constructed {
+       return Err(err::DecodeError::PrimIndef)
+      }
     }
+    // Read the main data.
+    let item: Self = try!(Self::deserialize_bytes(e, reader, len.as_num()));
+
+    // If this is encoded with an indefinte length, try to read the end octets.
+    if len == tag::Len::Indef {
+      try!(tag::Len::read_indef_end(reader));
+    }
+
+    Ok(item)
   }
 
   /// Deserialise ASN.1 data without a tag into a value.

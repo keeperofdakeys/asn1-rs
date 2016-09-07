@@ -177,6 +177,14 @@ pub enum Len {
 }
 
 impl Len {
+  /// Given an iterator, read an indefinite length terminator.
+  pub fn read_indef_end<I: Iterator<Item=io::Result<u8>>>(bytes: &mut I) -> Result<(), err::DecodeError> {
+    if try!(read_byte(bytes)) != 0x00 ||
+       try!(read_byte(bytes)) != 0x00 {
+      return Err(err::DecodeError::IndefiniteLenEnd);
+    }
+    Ok(())
+  }
   /// Write an indefinite length terminator to the given writer.
   pub fn write_indef_end<W: io::Write>(writer: &mut W) -> Result<(), err::EncodeError> {
     try!(write_byte(writer, 0x0));

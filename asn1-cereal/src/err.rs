@@ -15,6 +15,12 @@ pub enum DecodeError {
   TagTypeMismatch,
   /// An explicit tag appeared where an Implicit tag was expected.
   ExplicitTag,
+  /// Indefinite length encoding appeared when definite length encoding was
+  /// expected.
+  IndefiniteLen,
+  /// Indefinite length encoding was started, but no terminator was found
+  /// at the end.
+  IndefiniteLenEnd,
   /// Custom decoding error.
   Custom(&'static str),
 }
