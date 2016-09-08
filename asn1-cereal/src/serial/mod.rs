@@ -4,6 +4,7 @@ mod prim;
 mod seq;
 mod str;
 mod assign;
+mod choice;
 
 pub use self::traits::{Asn1Serialize, Asn1Deserialize, Asn1Info};
 
