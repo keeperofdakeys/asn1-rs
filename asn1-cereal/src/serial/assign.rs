@@ -32,7 +32,7 @@
 //!   // OR
 //!
 //!   struct Type3 (Type1);
-//!   asn1_info!(Type3, 0x3, 0x1, true, "TYPE2");
+//!   asn1_info!(Type3, 0x3, 0x1, true, "TYPE3");
 //!   asn1_newtype_serialize!(Type3);
 //!   asn1_newtype_deserialize!(Type3);
 //! }
@@ -61,15 +61,22 @@ macro_rules! asn1_newtype_serialize {
           return self.0.serialize_enc(e, writer);
         }
 
-        let mut bytes: Vec<u8> = Vec::new();
-        try!(self.serialize_bytes(e, &mut bytes));
+        let tag = <Self as $crate::serial::Asn1Info>::asn1_tag();
+        try!(tag.write_tag(writer));
 
-        try!(<Self as $crate::serial::Asn1Info>::asn1_tag().write_tag(writer));
-        try!($crate::tag::Len::write_len(
-          Some(bytes.len() as $crate::tag::LenNum).into(),
-          writer
-        ));
-        try!(writer.write_all(&bytes));
+        // If this is indefinite length and constructed, write the data directly.
+        if E::len_rules() == $crate::enc::LenEnc::Indefinite &&
+           tag.constructed {
+          try!($crate::tag::Len::Indef.write_len(writer));
+          try!(self.serialize_bytes(e, writer));
+          try!($crate::tag::Len::write_indef_end(writer));
+        // Otherwise write to a Vec first, so we can write the length.
+        } else {
+          let mut bytes: Vec<u8> = Vec::new();
+          try!(self.serialize_bytes(e, &mut bytes));
+          try!($crate::tag::Len::write_len(Some(bytes.len() as $crate::tag::LenNum).into(), writer));
+          try!(writer.write_all(&bytes));
+        }
 
         Ok(())
       }
@@ -87,7 +94,6 @@ macro_rules! asn1_newtype_serialize {
 macro_rules! asn1_newtype_deserialize {
   ($rs_type:ident) => (
     impl $crate::serial::Asn1Deserialize for $rs_type {
-      /// Reimplement this function to handle implicit tagging.
       fn deserialize_enc_tag<E: $crate::enc::Asn1EncRules, I: Iterator<Item=std::io::Result<u8>>>
           (e: E, reader: &mut I, tag: $crate::tag::Tag)
           -> Result<Self, $crate::err::DecodeError> {
@@ -105,15 +111,31 @@ macro_rules! asn1_newtype_deserialize {
           )));
         }
 
+        // Read length fromm stream.
         let len = try!($crate::tag::Len::read_len(reader));
 
-        // If element is primitive, and length is indefinite, we can't decode it.
-        if !tag.constructed && len == $crate::tag::Len::Indef {
-          Err($crate::err::DecodeError::PrimIndef)
-        } else {
-          Self::deserialize_bytes(e, reader, len.as_num())
+        // Handle any indefinite length error conditions.
+        if len == $crate::tag::Len::Indef {
+          // Return an error if the encoding rules only allow definite length
+          // encoding.
+          if E::len_rules() == $crate::enc::LenEnc::Definite {
+            return Err($crate::err::DecodeError::IndefiniteLen);
+          // If this element is primitve, the length isn't allowed to be indefinite length.
+          } else if !tag.constructed {
+           return Err($crate::err::DecodeError::PrimIndef)
+          }
         }
+        // Read the main data.
+        let item: Self = try!(Self::deserialize_bytes(e, reader, len.as_num()));
+
+        // If this is encoded with an indefinte length, try to read the end octets.
+        if len == $crate::tag::Len::Indef {
+          try!($crate::tag::Len::read_indef_end(reader));
+        }
+
+        Ok(item)
       }
+
       fn deserialize_bytes<E: $crate::enc::Asn1EncRules, I: Iterator<Item=std::io::Result<u8>>>
           (e: E, reader: &mut I, _: Option<$crate::tag::LenNum>) -> Result<Self, $crate::err::DecodeError> {
         Ok($rs_type(try!($crate::serial::Asn1Deserialize::deserialize_enc(e, reader))))
