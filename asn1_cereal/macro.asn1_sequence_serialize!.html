@@ -47,21 +47,13 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-643' class='srclink' href='../src/asn1_cereal/src/asn1-cereal/serial/seq.rs.html#76-105' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-770' class='srclink' href='../src/asn1_cereal/src/serial/seq.rs.html#79-113' title='goto source code'>[src]</a></span></h1>
 <pre class='rust macro'>
 <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>asn1_sequence_serialize</span> {
     (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ty</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>:<span class='ident'>ident</span>),<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
 }</pre>
-<div class='docblock'><p>This macro will generate an Asn1Serialize implementation for a struct
-that represents an ASN.1 structure.</p>
-
-<p>Note that struct fields need to be manually specificied, and serialization
-will occur in that order. If you don&#39;t list a field, it won&#39;t get
-serialized. Each of these fields need to implement Asn1Serialize,
-otherwise compilation will fail.</p>
-
-<p>If some form of procedural macros are eventually stabilised,
-listing the fields in the macro might not be required.</p>
+<div class='docblock'><p>This macro defines the Asn1Serialize trait for a rust struct. The code generated
+will serialize the specified fields in the order that they are given.</p>
 </div></section>
     <section id='search' class="content hidden"></section>
 

@@ -47,53 +47,30 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-4' class='srclink' href='../../src/asn1_cereal/src/asn1-cereal/serial/mod.rs.html#1-8' title='goto source code'>[src]</a></span></h1>
-<h2 id='reexports' class='section-header'><a href="#reexports">Reexports</a></h2>
-<table><tr><td><code>pub use self::traits::{<a class='trait' href='../../asn1_cereal/serial/traits/trait.Asn1Serialize.html' title='asn1_cereal::serial::traits::Asn1Serialize'>Asn1Serialize</a>, <a class='trait' href='../../asn1_cereal/serial/traits/trait.Asn1Deserialize.html' title='asn1_cereal::serial::traits::Asn1Deserialize'>Asn1Deserialize</a>, <a class='trait' href='../../asn1_cereal/serial/traits/trait.Asn1Info.html' title='asn1_cereal::serial::traits::Asn1Info'>Asn1Info</a>};</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+               </span><a id='src-4' class='srclink' href='../../src/asn1_cereal/src/serial/mod.rs.html#1-30' title='goto source code'>[src]</a></span></h1>
+<h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
 <table>
                        <tr class=' module-item'>
-                           <td><a class='mod' href='assign/index.html'
-                                  title='asn1_cereal::serial::assign'>assign</a></td>
+                           <td><a class='trait' href='trait.Asn1Deserialize.html'
+                                  title='asn1_cereal::serial::Asn1Deserialize'>Asn1Deserialize</a></td>
                            <td class='docblock short'>
-                                <p>The macros in this module can implement the serialisation traits for a
-simple ASN.1 definition. IE: One ASN.1 type being defined as an alias of
-another.</p>
+                                <p>A trait that provides the plumbing for deserializing ASN.1
+data into a Rust type.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
-                           <td><a class='mod' href='int/index.html'
-                                  title='asn1_cereal::serial::int'>int</a></td>
+                           <td><a class='trait' href='trait.Asn1Info.html'
+                                  title='asn1_cereal::serial::Asn1Info'>Asn1Info</a></td>
                            <td class='docblock short'>
-                                
+                                <p>A trait that provides data about the ASN.1 tag and type for a Rust type.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
-                           <td><a class='mod' href='prim/index.html'
-                                  title='asn1_cereal::serial::prim'>prim</a></td>
+                           <td><a class='trait' href='trait.Asn1Serialize.html'
+                                  title='asn1_cereal::serial::Asn1Serialize'>Asn1Serialize</a></td>
                            <td class='docblock short'>
-                                
-                           </td>
-                       </tr>
-                       <tr class=' module-item'>
-                           <td><a class='mod' href='seq/index.html'
-                                  title='asn1_cereal::serial::seq'>seq</a></td>
-                           <td class='docblock short'>
-                                <p>The macros in this module can implement the serialisation traits for Sequences and
-Sets.</p>
-                           </td>
-                       </tr>
-                       <tr class=' module-item'>
-                           <td><a class='mod' href='str/index.html'
-                                  title='asn1_cereal::serial::str'>str</a></td>
-                           <td class='docblock short'>
-                                
-                           </td>
-                       </tr>
-                       <tr class=' module-item'>
-                           <td><a class='mod' href='traits/index.html'
-                                  title='asn1_cereal::serial::traits'>traits</a></td>
-                           <td class='docblock short'>
-                                
+                                <p>A trait that provides the plumbing for serializing ASN.1
+data from a Rust type.</p>
                            </td>
                        </tr></table></section>
     <section id='search' class="content hidden"></section>

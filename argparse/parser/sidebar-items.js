@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["ArgumentParser","The main argument parser class"],["Ref",""],["Var",""]]});

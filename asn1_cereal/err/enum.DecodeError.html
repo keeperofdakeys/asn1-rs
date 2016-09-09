@@ -47,12 +47,16 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-618' class='srclink' href='../../src/asn1_cereal/src/asn1-cereal/err.rs.html#5-16' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-688' class='srclink' href='../../src/asn1_cereal/src/err.rs.html#5-26' title='goto source code'>[src]</a></span></h1>
 <pre class='rust enum'>pub enum DecodeError {
     IO(<a class='struct' href='https://doc.rust-lang.org/nightly/std/io/error/struct.Error.html' title='std::io::error::Error'>Error</a>),
     GreaterLen,
     SmallerLen,
     PrimIndef,
+    TagTypeMismatch,
+    ExplicitTag,
+    IndefiniteLen,
+    IndefiniteLenEnd,
     Custom(&amp;'static <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>),
 }</pre><div class='docblock'><p>Errors that can occur while decoding an ASN.1 element.</p>
 </div><h2 class='variants'>Variants</h2>
@@ -60,11 +64,17 @@
 </div><span id='variant.GreaterLen' class='variant'><code>GreaterLen</code></span><div class='docblock'><p>Child element(s) decoded to greater length than the parent&#39;s tag.</p>
 </div><span id='variant.SmallerLen' class='variant'><code>SmallerLen</code></span><div class='docblock'><p>Child element(s) decoded to smaller length than the parent&#39;s tag.</p>
 </div><span id='variant.PrimIndef' class='variant'><code>PrimIndef</code></span><div class='docblock'><p>Primitive value encoded with an indefinite length.</p>
+</div><span id='variant.TagTypeMismatch' class='variant'><code>TagTypeMismatch</code></span><div class='docblock'><p>Decoded tag does not match the expected tag for this type.</p>
+</div><span id='variant.ExplicitTag' class='variant'><code>ExplicitTag</code></span><div class='docblock'><p>An explicit tag appeared where an Implicit tag was expected.</p>
+</div><span id='variant.IndefiniteLen' class='variant'><code>IndefiniteLen</code></span><div class='docblock'><p>Indefinite length encoding appeared when definite length encoding was
+expected.</p>
+</div><span id='variant.IndefiniteLenEnd' class='variant'><code>IndefiniteLenEnd</code></span><div class='docblock'><p>Indefinite length encoding was started, but no terminator was found
+at the end.</p>
 </div><span id='variant.Custom' class='variant'><code>Custom(&amp;'static <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>)</code></span><div class='docblock'><p>Custom decoding error.</p>
-</div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='enum' href='../../asn1_cereal/err/enum.DecodeError.html' title='asn1_cereal::err::DecodeError'>DecodeError</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-607' class='srclink' href='../../src/asn1_cereal/src/asn1-cereal/err.rs.html#3' title='goto source code'>[src]</a></span></h3>
+</div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='enum' href='../../asn1_cereal/err/enum.DecodeError.html' title='asn1_cereal::err::DecodeError'>DecodeError</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-673' class='srclink' href='../../src/asn1_cereal/src/err.rs.html#3' title='goto source code'>[src]</a></span></h3>
 <div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
 <div class='docblock'><p>Formats the value using the given formatter.</p>
-</div></div><h3 class='impl'><span class='in-band'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.From.html' title='core::convert::From'>From</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/std/io/error/struct.Error.html' title='std::io::error::Error'>Error</a>&gt; for <a class='enum' href='../../asn1_cereal/err/enum.DecodeError.html' title='asn1_cereal::err::DecodeError'>DecodeError</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-626' class='srclink' href='../../src/asn1_cereal/src/asn1-cereal/err.rs.html#18-22' title='goto source code'>[src]</a></span></h3>
+</div></div><h3 class='impl'><span class='in-band'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.From.html' title='core::convert::From'>From</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/std/io/error/struct.Error.html' title='std::io::error::Error'>Error</a>&gt; for <a class='enum' href='../../asn1_cereal/err/enum.DecodeError.html' title='asn1_cereal::err::DecodeError'>DecodeError</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-700' class='srclink' href='../../src/asn1_cereal/src/err.rs.html#28-32' title='goto source code'>[src]</a></span></h3>
 <div class='impl-items'><h4 id='method.from' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/convert/trait.From.html#tymethod.from' class='fnname'>from</a>(err: <a class='struct' href='https://doc.rust-lang.org/nightly/std/io/error/struct.Error.html' title='std::io::error::Error'>Error</a>) -&gt; Self</code></h4>
 <div class='docblock'><p>Performs the conversion.</p>
 </div></div></section>
