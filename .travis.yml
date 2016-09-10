@@ -6,3 +6,7 @@ rust:
 matrix:
   allow_failures:
     - rust: nightly
+script:
+  - cd asn1-cereal; cargo build --verbose; cargo test --verbose
+  - cd ..
+  - cd asn1-utils; cargo build --verbose; cargo test --verbose
