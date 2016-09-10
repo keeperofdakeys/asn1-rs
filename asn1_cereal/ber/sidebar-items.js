@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["stream","A SAXParser inspired stream parser and encoder for tags in an ASN.1 streams."]]});
+initSidebarItems({"mod":[["stream","A SAXParser inspired stream parser and encoder for ber streams."]]});

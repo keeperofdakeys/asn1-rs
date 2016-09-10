@@ -151,6 +151,10 @@
 <span id="107">107</span>
 <span id="108">108</span>
 <span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>;
 
@@ -158,7 +162,7 @@
 <span class='kw'>use</span> <span class='ident'>err</span>;
 <span class='kw'>use</span> <span class='ident'>enc</span>;
 
-<span class='doccomment'>/// A trait that provides data about the ASN.1 tag and type for a Rust type.</span>
+<span class='doccomment'>/// Provides ASN.1 information about a Rust type, including the BER tag and ASN.1 type.</span>
 <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>Asn1Info</span> {
   <span class='doccomment'>/// Get the ASN.1 tag for this Rust type.</span>
   <span class='kw'>fn</span> <span class='ident'>asn1_tag</span>() <span class='op'>-&gt;</span> <span class='ident'>tag</span>::<span class='ident'>Tag</span>;
@@ -167,10 +171,10 @@
   <span class='kw'>fn</span> <span class='ident'>asn1_type</span>() <span class='op'>-&gt;</span> <span class='ident'>tag</span>::<span class='ident'>Type</span>;
 }
 
-<span class='doccomment'>/// A trait that provides the plumbing for serializing ASN.1</span>
-<span class='doccomment'>/// data from a Rust type.</span>
+<span class='doccomment'>/// Provides the methods required to serialize this Rust type into an ASN.1 stream.</span>
 <span class='doccomment'>///</span>
-<span class='doccomment'>/// Usually you&#39;ll only need to implement serialize_enc yourself.</span>
+<span class='doccomment'>/// When implementing this for a simple primitive type, implementing serialize_bytes</span>
+<span class='doccomment'>/// should be all that&#39;s required.</span>
 <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>Asn1Serialize</span>: <span class='ident'>Asn1Info</span> {
   <span class='doccomment'>/// Serialize a value into ASN.1 data as DER.</span>
   <span class='kw'>fn</span> <span class='ident'>serialize</span><span class='op'>&lt;</span><span class='ident'>W</span>: <span class='ident'>io</span>::<span class='ident'>Write</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>writer</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>err</span>::<span class='ident'>EncodeError</span><span class='op'>&gt;</span> {
@@ -205,10 +209,10 @@
     (<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>e</span>: <span class='ident'>E</span>, <span class='ident'>writer</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>err</span>::<span class='ident'>EncodeError</span><span class='op'>&gt;</span>;
 }
 
-<span class='doccomment'>/// A trait that provides the plumbing for deserializing ASN.1</span>
-<span class='doccomment'>/// data into a Rust type.</span>
+<span class='doccomment'>/// Provides the methods required to deserialize this Rust type from an ASN.1 stream.</span>
 <span class='doccomment'>///</span>
-<span class='doccomment'>/// Usually you&#39;ll only need to implement deserialize_enc yourself.</span>
+<span class='doccomment'>/// When implementing this for a simple primitive type, implementing deserialize_bytes</span>
+<span class='doccomment'>/// should be all that&#39;s required.</span>
 <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>Asn1Deserialize</span>: <span class='ident'>Asn1Info</span> <span class='op'>+</span> <span class='ident'>Sized</span> {
   <span class='doccomment'>/// Deserialize ASN.1 data into a Rust value, accepting any valid BER.</span>
   <span class='kw'>fn</span> <span class='ident'>deserialize</span><span class='op'>&lt;</span><span class='ident'>I</span>: <span class='ident'>Iterator</span><span class='op'>&lt;</span><span class='ident'>Item</span><span class='op'>=</span><span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span>(<span class='ident'>reader</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>I</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='self'>Self</span>, <span class='ident'>err</span>::<span class='ident'>DecodeError</span><span class='op'>&gt;</span> {
@@ -222,8 +226,11 @@
     <span class='self'>Self</span>::<span class='ident'>deserialize_enc_tag</span>(<span class='ident'>e</span>, <span class='ident'>reader</span>, <span class='ident'>tag</span>)
   }
 
-  <span class='doccomment'>/// Deserialize ASN.1 data into a Rust value, using a specific set of encoding rules. Also</span>
-  <span class='doccomment'>/// use a specific tag, rather than reading from stream.</span>
+  <span class='doccomment'>/// Deserialize ASN.1 data into a Rust value, using a specific set of encoding rules, and</span>
+  <span class='doccomment'>/// also providing the decoded tag.</span>
+  <span class='doccomment'>///</span>
+  <span class='doccomment'>/// This function assumes the next bytes to decode are</span>
+  <span class='doccomment'>/// the BER length of this element.</span>
   <span class='kw'>fn</span> <span class='ident'>deserialize_enc_tag</span><span class='op'>&lt;</span><span class='ident'>E</span>: <span class='ident'>enc</span>::<span class='ident'>Asn1EncRules</span>, <span class='ident'>I</span>: <span class='ident'>Iterator</span><span class='op'>&lt;</span><span class='ident'>Item</span><span class='op'>=</span><span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span>
       (<span class='ident'>e</span>: <span class='ident'>E</span>, <span class='ident'>reader</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>I</span>, <span class='ident'>tag</span>: <span class='ident'>tag</span>::<span class='ident'>Tag</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='self'>Self</span>, <span class='ident'>err</span>::<span class='ident'>DecodeError</span><span class='op'>&gt;</span> {
     <span class='kw'>if</span> <span class='ident'>tag</span> <span class='op'>!=</span> <span class='self'>Self</span>::<span class='ident'>asn1_tag</span>() {
@@ -257,7 +264,8 @@
 
   <span class='doccomment'>/// Deserialise ASN.1 data without a tag into a value.</span>
   <span class='doccomment'>///</span>
-  <span class='doccomment'>/// Since the data has no tag, the byte length must be passed to this function.</span>
+  <span class='doccomment'>/// The data length must be explicitly passed to this function. For primitive types,</span>
+  <span class='doccomment'>/// an error will be returned if this length is Indefinite.</span>
   <span class='kw'>fn</span> <span class='ident'>deserialize_bytes</span><span class='op'>&lt;</span><span class='ident'>E</span>: <span class='ident'>enc</span>::<span class='ident'>Asn1EncRules</span>, <span class='ident'>I</span>: <span class='ident'>Iterator</span><span class='op'>&lt;</span><span class='ident'>Item</span><span class='op'>=</span><span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span>
     (<span class='ident'>e</span>: <span class='ident'>E</span>, <span class='ident'>reader</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>I</span>, <span class='ident'>len</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>tag</span>::<span class='ident'>LenNum</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='self'>Self</span>, <span class='ident'>err</span>::<span class='ident'>DecodeError</span><span class='op'>&gt;</span>;
 }

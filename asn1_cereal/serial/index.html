@@ -47,30 +47,103 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-4' class='srclink' href='../../src/asn1_cereal/src/serial/mod.rs.html#1-30' title='goto source code'>[src]</a></span></h1>
-<h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
+               </span><a id='src-4' class='srclink' href='../../src/asn1_cereal/src/serial/mod.rs.html#1-73' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>Traits for serializing and deserializing rust types from/to ASN.1.</p>
+
+<p>The traits in this module can be used to implement serialization and
+deserialization for a Rust type from/to ASN.1. For built-in types,
+this module provides an implementation already. For more complex
+types (like structs and enumms), macros are provided to generate
+an implementation for them.</p>
+
+<h1 id='usage' class='section-header'><a href='#usage'>Usage</a></h1>
+<p>The below example defines a Rust struct, and uses a macro to generate
+the code required to serialize it to an ASN.1 sequence, or to deserialize
+an ASN.1 sequence into an instance of the struct.</p>
+
+<p>The example then uses the Asn1Serialize::serialize function to encode
+the struct to a DER-encoded byte stream.</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='attribute'>#[<span class='ident'>macro_use</span>]</span> <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>asn1_cereal</span>; <span class='kw'>fn</span> <span class='ident'>main</span>() {
+  <span class='kw'>struct</span> <span class='ident'>ShortSequence</span> {
+    <span class='ident'>z</span>: <span class='ident'>u64</span>,
+    <span class='ident'>y</span>: <span class='ident'>u32</span>,
+  }
+
+  <span class='macro'>asn1_sequence</span><span class='macro'>!</span>(
+    <span class='ident'>ShortSequence</span>,
+    <span class='string'>&quot;SHORT_SEQUENCE&quot;</span>,
+    <span class='ident'>z</span>,
+    <span class='ident'>y</span>
+  );
+
+  <span class='kw'>use</span> <span class='ident'>asn1_cereal</span>::<span class='ident'>serial</span>;
+
+  <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='ident'>ShortSequence</span>{ <span class='ident'>z</span>: <span class='number'>1</span>, <span class='ident'>y</span>: <span class='number'>2</span> };
+  <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>bytes</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
+  <span class='ident'>serial</span>::<span class='ident'>Asn1Serialize</span>::<span class='ident'>serialize</span>(<span class='kw-2'>&amp;</span><span class='ident'>data</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>bytes</span>).<span class='ident'>unwrap</span>();
+}</pre>
+</div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='assign/index.html'
+                                  title='asn1_cereal::serial::assign'>assign</a></td>
+                           <td class='docblock short'>
+                                <p>Macros to generate the implementation of the serialization traits for Rust
+newtypes, as ASN.1 type assignments.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='choice/index.html'
+                                  title='asn1_cereal::serial::choice'>choice</a></td>
+                           <td class='docblock short'>
+                                <p>Macros to generate the implementation of the serialization traits for Rust
+enums, as ASN.1 choice.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='int/index.html'
+                                  title='asn1_cereal::serial::int'>int</a></td>
+                           <td class='docblock short'>
+                                <p>Implementation of the serialization traits for Rust integers.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='seq/index.html'
+                                  title='asn1_cereal::serial::seq'>seq</a></td>
+                           <td class='docblock short'>
+                                <p>Macros to generate the implementation of the serialization traits for Rust
+structs, as ASN.1 sequences.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='str/index.html'
+                                  title='asn1_cereal::serial::str'>str</a></td>
+                           <td class='docblock short'>
+                                <p>Implementation of the serialization traits for Rust strings.</p>
+                           </td>
+                       </tr></table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
 <table>
                        <tr class=' module-item'>
                            <td><a class='trait' href='trait.Asn1Deserialize.html'
                                   title='asn1_cereal::serial::Asn1Deserialize'>Asn1Deserialize</a></td>
                            <td class='docblock short'>
-                                <p>A trait that provides the plumbing for deserializing ASN.1
-data into a Rust type.</p>
+                                <p>Provides the methods required to deserialize this Rust type from an ASN.1 stream.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class='trait' href='trait.Asn1Info.html'
                                   title='asn1_cereal::serial::Asn1Info'>Asn1Info</a></td>
                            <td class='docblock short'>
-                                <p>A trait that provides data about the ASN.1 tag and type for a Rust type.</p>
+                                <p>Provides ASN.1 information about a Rust type, including the BER tag and ASN.1 type.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class='trait' href='trait.Asn1Serialize.html'
                                   title='asn1_cereal::serial::Asn1Serialize'>Asn1Serialize</a></td>
                            <td class='docblock short'>
-                                <p>A trait that provides the plumbing for serializing ASN.1
-data from a Rust type.</p>
+                                <p>Provides the methods required to serialize this Rust type into an ASN.1 stream.</p>
                            </td>
                        </tr></table></section>
     <section id='search' class="content hidden"></section>

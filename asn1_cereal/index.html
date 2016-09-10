@@ -47,49 +47,57 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-0' class='srclink' href='../src/asn1_cereal/src/lib.rs.html#1-6' title='goto source code'>[src]</a></span></h1>
-<h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+               </span><a id='src-0' class='srclink' href='../src/asn1_cereal/src/lib.rs.html#1-16' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'>
+<h1 id='asn1-cereal' class='section-header'><a href='#asn1-cereal'>asn1-cereal</a></h1>
+<p>A collection of encoders and decoders for BER, DER and ASN.1.</p>
+
+<p>The grains of this library are a collection of traits and macros, that
+allow serialization and deserialization of rust types to and from ASN.1.</p>
+
+<p>New users of this library probably want to start with the <a href="serial/index.html"><code>serial</code></a> library.</p>
+</div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
 <table>
                        <tr class=' module-item'>
                            <td><a class='mod' href='ber/index.html'
                                   title='asn1_cereal::ber'>ber</a></td>
                            <td class='docblock short'>
-                                
+                                <p>Tools that can be used to parse BER streams.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class='mod' href='byte/index.html'
                                   title='asn1_cereal::byte'>byte</a></td>
                            <td class='docblock short'>
-                                
+                                <p>Constructs for reading and writing bytes used by this crate.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class='mod' href='enc/index.html'
                                   title='asn1_cereal::enc'>enc</a></td>
                            <td class='docblock short'>
-                                
+                                <p>Encoding rules to use when encoding or decoding ASN.1.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class='mod' href='err/index.html'
                                   title='asn1_cereal::err'>err</a></td>
                            <td class='docblock short'>
-                                
+                                <p>Encoding and Decoding errors that this crate can produce.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class='mod' href='serial/index.html'
                                   title='asn1_cereal::serial'>serial</a></td>
                            <td class='docblock short'>
-                                
+                                <p>Traits for serializing and deserializing rust types from/to ASN.1.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class='mod' href='tag/index.html'
                                   title='asn1_cereal::tag'>tag</a></td>
                            <td class='docblock short'>
-                                
+                                <p>Encoding and decoding of tag and length bytes for BER.</p>
                            </td>
                        </tr></table><h2 id='macros' class='section-header'><a href="#macros">Macros</a></h2>
 <table>
