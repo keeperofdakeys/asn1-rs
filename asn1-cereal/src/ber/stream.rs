@@ -1,4 +1,4 @@
-//! A SAXParser inspired stream parser and encoder for tags in an ASN.1 streams.
+//! A SAXParser inspired stream parser and encoder for ber streams.
 //!
 //! Given a struct that implements StreamDecodee, a StreamDecoder can be used to
 //! decode the stream, calling each function in the StreamDecodee trait as they

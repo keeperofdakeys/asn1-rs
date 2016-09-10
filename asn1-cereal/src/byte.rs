@@ -1,3 +1,4 @@
+//! Constructs for reading and writing bytes used by this crate.
 use std::io;
 
 #[inline]

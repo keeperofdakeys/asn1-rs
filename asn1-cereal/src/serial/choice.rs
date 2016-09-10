@@ -1,5 +1,5 @@
-//! The macros in this module can implement the serialisation traits for rust Enums,
-//! as if they were ASN.1 Choices.
+//! Macros to generate the implementation of the serialization traits for Rust
+//! enums, as ASN.1 choice.
 //!
 //! You can either define both asn1_info! and asn1_choice!, or all three
 //! of asn1_info!, asn1_choice_serialize! and asn1_choice_deserialize!.

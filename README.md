@@ -20,7 +20,7 @@ For example, the following will encode this struct as an ASN.1 sequence.
       y
     );
 
-The asn1\_sequence! macro generates the implementation for each trait,
+The asn1\_sequence! macro generates the trait implementation for each type,
 which in turn call the serialize/deserialize method for each struct
 field. For custom primitive ASN.1 elements, you may need to provide
 your own implementation.

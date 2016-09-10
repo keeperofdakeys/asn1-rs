@@ -1,6 +1,16 @@
+//! # asn1-cereal
+//! A collection of encoders and decoders for BER, DER and ASN.1.
+//!
+//! The grains of this library are a collection of traits and macros, that
+//! allow serialization and deserialization of rust types to and from ASN.1.
+//!
+//! New users of this library probably want to start with the [`serial`] library.
+//!
+//! [`serial`]: serial/index.html
+
 pub mod serial;
-pub mod ber;
-pub mod tag;
-pub mod byte;
-pub mod err;
 pub mod enc;
+pub mod tag;
+pub mod err;
+pub mod byte;
+pub mod ber;

@@ -1,3 +1,5 @@
+//! Implementation of the serialization traits for Rust integers.
+
 use std::io;
 
 use tag;

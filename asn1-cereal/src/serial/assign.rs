@@ -1,6 +1,5 @@
-//! The macros in this module can implement the serialisation traits for a
-//! simple ASN.1 type definition/assignment, respresnted by a Rust newtype
-//! (anonymous struct with a single field).
+//! Macros to generate the implementation of the serialization traits for Rust
+//! newtypes, as ASN.1 type assignments.
 //!
 //! You can either define both asn1_info! and asn1_newtype!, or all three
 //! of asn1_info!, asn1_newtype_serialize! and asn1_newtype_deserialize!.

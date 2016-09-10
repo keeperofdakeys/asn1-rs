@@ -1,3 +1,5 @@
+//! Encoding and decoding of tag and length bytes for BER.
+
 use byte::{read_byte, write_byte};
 use err;
 

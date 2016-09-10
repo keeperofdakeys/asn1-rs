@@ -1,3 +1,9 @@
+//! Encoding rules to use when encoding or decoding ASN.1.
+//!
+//! The defaults are to use the DER encoding during serialization,
+//! and to use the BER encoding during deserliazation (all valid
+//! BER is accepted, including DER).
+
 #[derive(PartialEq)]
 /// An enum which determines how tags are encoded.
 pub enum TagEnc {

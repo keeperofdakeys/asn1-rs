@@ -1,3 +1,5 @@
+//! Implementation of the serialization traits for Rust strings.
+
 use std::io;
 
 use tag;

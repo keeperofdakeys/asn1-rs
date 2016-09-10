@@ -1,3 +1,5 @@
+//! Encoding and Decoding errors that this crate can produce.
+
 use std::io;
 
 #[derive(Debug)]
