@@ -31,7 +31,7 @@ macro_rules! asn1_cereal_uint {
           (&self, _: E, writer: &mut W) -> Result<(), err::EncodeError> {
         let mut started = false;
         // Loop through bytes in int backwards, start writing when first non-zero byte is encounted.
-        for offset in (0..8).rev() {
+        for offset in (0..$size).rev() {
           let shifted: $rs_type = self >> (offset * 8);
           let byte: u8 = (shifted & 0xff) as u8;
           if !started {
