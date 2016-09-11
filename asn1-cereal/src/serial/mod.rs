@@ -37,17 +37,6 @@
 //! }
 //! ```
 
-mod traits;
-mod prim;
-
-pub mod int;
-pub mod str;
-pub mod assign;
-pub mod choice;
-pub mod seq;
-
-pub use self::traits::{Asn1Serialize, Asn1Deserialize, Asn1Info};
-
 #[macro_export]
 /// This macro defines the Asn1Info trait for a rust type.
 ///
@@ -72,3 +61,14 @@ macro_rules! asn1_info {
   )
 }
 
+mod traits;
+mod prim;
+
+pub mod int;
+pub mod str;
+pub mod assign;
+pub mod choice;
+pub mod seq;
+pub mod seq_of;
+
+pub use self::traits::{Asn1Serialize, Asn1Deserialize, Asn1Info};
