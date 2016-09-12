@@ -1,11 +1,24 @@
 language: rust
+
 rust:
   - stable
   - beta
   - nightly
+  
 matrix:
   allow_failures:
     - rust: nightly
+    
+addons:
+  apt:
+    packages:
+      - libcurl4-openssl-dev
+      - libelf-dev
+      - libdw-dev
+ 
+before_script:
+- pip install 'travis-cargo<0.2' --user && export PATH=$HOME/.local/bin:$PATH
+
 script:
   - cd asn1-cereal; cargo build --verbose; cargo test --verbose
   - cd ..
