@@ -15,7 +15,7 @@ pub trait Asn1Info {
 
 /// Provides the methods required to serialize this Rust type into an ASN.1 stream.
 ///
-/// When implementing this for a simple primitive type, implementing serialize_bytes
+/// When implementing this for a simple primitive type, implementing serialize_value
 /// should be all that's required.
 pub trait Asn1Serialize: Asn1Info {
   /// Serialize a value into ASN.1 data as DER.
@@ -33,12 +33,12 @@ pub trait Asn1Serialize: Asn1Info {
     if E::len_rules() == enc::LenEnc::Indefinite &&
        tag.constructed {
       try!(tag::Len::Indef.write_len(writer));
-      try!(self.serialize_bytes(e, writer));
+      try!(self.serialize_value(e, writer));
       try!(tag::Len::write_indef_end(writer));
     // Otherwise write to a Vec first, so we can write the length.
     } else {
       let mut bytes: Vec<u8> = Vec::new();
-      try!(self.serialize_bytes(e, &mut bytes));
+      try!(self.serialize_value(e, &mut bytes));
       try!(tag::Len::write_len(Some(bytes.len() as tag::LenNum).into(), writer));
       try!(writer.write_all(&bytes));
     }
@@ -47,13 +47,13 @@ pub trait Asn1Serialize: Asn1Info {
   }
 
   /// Serialise a value into ASN.1 data, without a tag (implicit tagging).
-  fn serialize_bytes<E: enc::Asn1EncRules, W: io::Write>
+  fn serialize_value<E: enc::Asn1EncRules, W: io::Write>
     (&self, e: E, writer: &mut W) -> Result<(), err::EncodeError>;
 }
 
 /// Provides the methods required to deserialize this Rust type from an ASN.1 stream.
 ///
-/// When implementing this for a simple primitive type, implementing deserialize_bytes
+/// When implementing this for a simple primitive type, implementing deserialize_value
 /// should be all that's required.
 pub trait Asn1Deserialize: Asn1Info + Sized {
   /// Deserialize ASN.1 data into a Rust value, accepting any valid BER.
@@ -94,7 +94,7 @@ pub trait Asn1Deserialize: Asn1Info + Sized {
       }
     }
     // Read the main data.
-    let item: Self = try!(Self::deserialize_bytes(e, reader, len.as_num()));
+    let item: Self = try!(Self::deserialize_value(e, reader, len.as_num()));
 
     // If this is encoded with an indefinte length, try to read the end octets.
     if len == tag::Len::Indef {
@@ -108,6 +108,6 @@ pub trait Asn1Deserialize: Asn1Info + Sized {
   ///
   /// The data length must be explicitly passed to this function. For primitive types,
   /// an error will be returned if this length is Indefinite.
-  fn deserialize_bytes<E: enc::Asn1EncRules, I: Iterator<Item=io::Result<u8>>>
+  fn deserialize_value<E: enc::Asn1EncRules, I: Iterator<Item=io::Result<u8>>>
     (e: E, reader: &mut I, len: Option<tag::LenNum>) -> Result<Self, err::DecodeError>;
 }

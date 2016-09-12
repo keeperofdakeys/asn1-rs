@@ -44,11 +44,11 @@ macro_rules! asn1_choice_serialize {
         // FIXME: Can't call self.0 to call function on inner type.
         //
         // // Skip choice tag, we don't need to encode this.
-        // self.0.serialize_bytes(e, writer)
+        // self.0.serialize_value(e, writer)
         unimplemented!();
       }
 
-      fn serialize_bytes<E: $crate::enc::Asn1EncRules, W: std::io::Write>
+      fn serialize_value<E: $crate::enc::Asn1EncRules, W: std::io::Write>
           (&self, e: E, writer: &mut W) -> Result<(), $crate::err::EncodeError> {
         // FIXME: Can't call self.0 to call function on inner type.
         //
@@ -78,7 +78,7 @@ macro_rules! asn1_choice_deserialize {
       //   }
       // }
 
-      fn deserialize_bytes<E: $crate::enc::Asn1EncRules, I: Iterator<Item=std::io::Result<u8>>>
+      fn deserialize_value<E: $crate::enc::Asn1EncRules, I: Iterator<Item=std::io::Result<u8>>>
           (e: E, reader: &mut I, _: Option<$crate::tag::LenNum>) -> Result<Self, $crate::err::DecodeError> {
         // This should never be called?
         unimplemented!();

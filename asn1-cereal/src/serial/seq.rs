@@ -79,7 +79,7 @@ macro_rules! asn1_sequence_info {
 macro_rules! asn1_sequence_serialize {
   ($rs_type:ty, $($item:ident),*) => (
     impl $crate::serial::Asn1Serialize for $rs_type {
-      fn serialize_bytes<E: $crate::enc::Asn1EncRules, W: std::io::Write>
+      fn serialize_value<E: $crate::enc::Asn1EncRules, W: std::io::Write>
           (&self, e: E, writer: &mut W) -> Result<(), $crate::err::EncodeError> {
         let mut bytes = Vec::new();
         let mut count: u64 = 0;
@@ -118,7 +118,7 @@ macro_rules! asn1_sequence_serialize {
 macro_rules! asn1_sequence_deserialize {
   ($rs_type:ident, $($item:ident),*) => (
     impl $crate::serial::Asn1Deserialize for $rs_type {
-      fn deserialize_bytes<E: $crate::enc::Asn1EncRules, I: Iterator<Item=std::io::Result<u8>>>
+      fn deserialize_value<E: $crate::enc::Asn1EncRules, I: Iterator<Item=std::io::Result<u8>>>
           (e: E, reader: &mut I, _: Option<$crate::tag::LenNum>) -> Result<Self, $crate::err::DecodeError> {
         let mut count: u64 = 0;
         $(

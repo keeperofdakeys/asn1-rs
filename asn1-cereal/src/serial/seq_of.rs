@@ -1,5 +1,5 @@
 //! Macros to generate the implementation of the serialization traits for Rust
-//! collections, as ASN.1 sequence of.
+//! iterators, as ASN.1 sequence of.
 
 #[macro_export]
 macro_rules! asn1_sequence_of {
@@ -14,7 +14,7 @@ macro_rules! asn1_sequence_of_serialize {
   ($rs_type:ty) => (
     impl $crate::serial::Asn1Serialize for $rs_type
         where $rs_type: std::iter::IntoIterator {
-      fn serialize_bytes<E: $crate::enc::Asn1EncRules, W: std::io::Write>
+      fn serialize_value<E: $crate::enc::Asn1EncRules, W: std::io::Write>
           (&self, e: E, writer: &mut W) -> Result<(), $crate::err::EncodeError> {
         // Call serialize_enc on each item.
         for item in self.iter() {
@@ -30,10 +30,10 @@ macro_rules! asn1_sequence_of_serialize {
 macro_rules! asn1_sequence_of_deserialize {
   ($rs_type:ty) => (
     impl $crate::serial::Asn1Deserialize for $rs_type {
-      fn deserialize_bytes<E: $crate::enc::Asn1EncRules, I: Iterator<Item=std::io::Result<u8>>>
+      fn deserialize_value<E: $crate::enc::Asn1EncRules, I: Iterator<Item=std::io::Result<u8>>>
           (e: E, reader: &mut I, len: Option<$crate::tag::LenNum>) -> Result<Self, $crate::err::DecodeError> {
         struct SeqOfDecoder<T, F, J: Iterator<Item=std::io::Result<u8>>> {
-          len: Option<$crate::tag::LenNum>,
+          len:$crate::tag::Len,
           reader: $crate::byte::ByteReader<J>,
           e: F,
           _p: Option<T>,
@@ -49,7 +49,7 @@ macro_rules! asn1_sequence_of_deserialize {
           fn next(&mut self) -> Option<Self::Item> {
             // Compare decoded length with length in tag.
             // Put this first to handle zero-length elements.
-            match self.len.partial_cmp(&Some(self.reader.count)) {
+            match self.len.partial_cmp(&self.reader.count) {
               // Return an error when we've decoded too much.
               Some(std::cmp::Ordering::Less) => return Some(Err($crate::err::DecodeError::GreaterLen)),
               // Finish loop when equal, we must be finished.
@@ -69,17 +69,20 @@ macro_rules! asn1_sequence_of_deserialize {
               Err(e) => return Some(Err(e)),
             };
 
+            println!("{:?} {:?}", self.len, self.reader.count);
+            println!("{:?} {:?}", tag, len);
+
             // Handle end of indefinite length encoding.
-            if tag.tagnum == 0 && tag.class == 0.into() &&
-               len.as_num() == Some(0) {
+            if tag.tagnum == 0 && tag.class == $crate::tag::Class::Universal &&
+               len == $crate::tag::Len::Def(0) {
               return None;
             }
 
-            return Some($crate::serial::Asn1Deserialize::deserialize_bytes(self.e, &mut self.reader, len.as_num()));
+            return Some($crate::serial::Asn1Deserialize::deserialize_value(self.e, &mut self.reader, len.as_num()));
           }
         }
 
-        let mut decoder = SeqOfDecoder { e: e, len: len, reader: $crate::byte::ByteReader::new(reader), _p: None };
+        let mut decoder = SeqOfDecoder { e: e, len: len.into(), reader: $crate::byte::ByteReader::new(reader), _p: None };
         let v: Result<$rs_type, _> = std::iter::FromIterator::from_iter(decoder.by_ref());
         Ok(try!(v))
       }

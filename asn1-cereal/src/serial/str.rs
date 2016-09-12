@@ -22,7 +22,7 @@ impl serial::Asn1Info for String {
 }
 
 impl serial::Asn1Serialize for String {
-  fn serialize_bytes<E: enc::Asn1EncRules, W: io::Write>
+  fn serialize_value<E: enc::Asn1EncRules, W: io::Write>
       (&self, _: E, writer: &mut W) -> Result<(), err::EncodeError> {
     try!(writer.write_all(self.as_bytes()));
     Ok(())
@@ -30,7 +30,7 @@ impl serial::Asn1Serialize for String {
 }
 
 impl serial::Asn1Deserialize for String {
-  fn deserialize_bytes<E: enc::Asn1EncRules, I: Iterator<Item=io::Result<u8>>>
+  fn deserialize_value<E: enc::Asn1EncRules, I: Iterator<Item=io::Result<u8>>>
       (_: E, reader: &mut I, len: Option<tag::LenNum>) -> Result<Self, err::DecodeError> {
     let len_num = try!(len.ok_or(err::DecodeError::PrimIndef));
     let bytes: Result<Vec<u8>, _> = reader.take(len_num as usize).collect();

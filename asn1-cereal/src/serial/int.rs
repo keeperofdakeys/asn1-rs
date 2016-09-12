@@ -28,7 +28,7 @@ macro_rules! asn1_cereal_int {
     }
 
     impl serial::Asn1Serialize for $rs_type {
-      fn serialize_bytes<E: enc::Asn1EncRules, W: io::Write>
+      fn serialize_value<E: enc::Asn1EncRules, W: io::Write>
           (&self, _: E, writer: &mut W) -> Result<(), err::EncodeError> {
         try!(write_byte(writer, *self as u8));
         return Ok(());
@@ -51,7 +51,7 @@ macro_rules! asn1_cereal_int {
     }
 
     impl serial::Asn1Serialize for $rs_type {
-      fn serialize_bytes<E: enc::Asn1EncRules, W: io::Write>
+      fn serialize_value<E: enc::Asn1EncRules, W: io::Write>
           (&self, _: E, writer: &mut W) -> Result<(), err::EncodeError> {
         let mut started = false;
         // Loop through bytes in int backwards, start writing when first non-zero byte is encounted.
@@ -82,7 +82,7 @@ macro_rules! asn1_cereal_int {
     }
 
     impl serial::Asn1Deserialize for $rs_type {
-      fn deserialize_bytes<E: enc::Asn1EncRules, I: Iterator<Item=io::Result<u8>>>
+      fn deserialize_value<E: enc::Asn1EncRules, I: Iterator<Item=io::Result<u8>>>
           (_: E, reader: &mut I, len: Option<tag::LenNum>) -> Result<Self, err::DecodeError> {
         let len_num = try!(len.ok_or(err::DecodeError::PrimIndef));
 
