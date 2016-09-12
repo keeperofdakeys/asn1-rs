@@ -17,15 +17,21 @@ addons:
       - libcurl4-openssl-dev
       - libelf-dev
       - libdw-dev
+      - binutils-dev
  
 before_script:
 - pip install 'travis-cargo<0.2' --user && export PATH=$HOME/.local/bin:$PATH
 
 script:
-  - cd asn1-cereal; cargo build --verbose; cargo test --verbose
-  - cd ..
-  - cd asn1-utils; cargo build --verbose; cargo test --verbose
+  - cd asn1-cereal
+  - cargo build --verbose
+  - cargo test --verbose
+  - cd ../asn1-utils
+  - cargo build --verbose
+  - cargo test --verbose
 
 after_success:
-  - travis-cargo bench --only stable
-  - travis-cargo coveralls --no-sudo
+  - cd ../asn1-cereal
+  - travis-cargo coveralls --no-sudo --verify
+  - cd ../asn1-utils
+  - travis-cargo coveralls --no-sudo --verify
