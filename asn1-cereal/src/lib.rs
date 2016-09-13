@@ -8,9 +8,12 @@
 //!
 //! [`serial`]: serial/index.html
 
-pub mod serial;
-pub mod enc;
 pub mod tag;
 pub mod err;
 pub mod byte;
+pub mod info;
 pub mod ber;
+
+pub use info::Asn1Info;
+pub use ber::serial::traits::{BerSerialize, BerDeserialize};
+pub use tag::{Type, Class, LenNum, Len, Tag};

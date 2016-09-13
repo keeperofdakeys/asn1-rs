@@ -22,7 +22,7 @@ use std::io;
 pub trait StreamDecodee {
   /// This function is called when an ASN.1 tag is encountered. In other
   /// words, at the start of an ASN.1 element.
-  fn start_element(&mut self, _: tag::TagLen) -> ParseResult {
+  fn start_element(&mut self, _: tag::Tag, _: tag::Len) -> ParseResult {
     ParseResult::Ok
   }
 
@@ -30,7 +30,7 @@ pub trait StreamDecodee {
   /// Note that this is also called for all elements, even after a primitive()
   /// call. For this reason, you may need to check the constructed flag in some
   /// cases.
-  fn end_element(&mut self, _: tag::TagLen) -> ParseResult {
+  fn end_element(&mut self, _: tag::Tag, _: tag::Len) -> ParseResult {
     ParseResult::Ok
   }
 
@@ -87,14 +87,13 @@ impl<'a, I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<'a, I
 
   // FIXME: Convert explicit decoded_len to use diff of internal reader count.
   /// Internal decode function.
-  fn _decode(&mut self) -> Result<tag::TagLen, err::DecodeError> {
+  fn _decode(&mut self) -> Result<(tag::Tag, tag::Len), err::DecodeError> {
     // Decode tag.
-    let taglen = try!(tag::TagLen::read_taglen(&mut self.reader));
-    let (tag, len) = (taglen.tag, taglen.len);
+    let (tag, len) = try!(tag::read_taglen(&mut self.reader));
     let post_tag_count: tag::LenNum  = self.reader.count;
 
     // Call the decodee start element callback;
-    self.decodee.start_element(taglen);
+    self.decodee.start_element(tag, len);
 
 
     // If this type is constructed, decode child element..
@@ -116,14 +115,14 @@ impl<'a, I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<'a, I
         };
 
         // Decode each child element.
-        let child_tag = try!(self._decode());
+        let (child_tag, child_len) = try!(self._decode());
 
         // If applicable, identify end of indefinite length encoding.
         // When decoding indefinite length encoding, stop on '00 00'
         // tag.
-        if child_tag.len == tag::Len::Def(0) &&
-           child_tag.tag.class == tag::Class::Universal &&
-           child_tag.tag.tagnum == 0 {
+        if child_len == tag::Len::Def(0) &&
+           child_tag.class == tag::Class::Universal &&
+           child_tag.tagnum == 0 {
           break;
         }
       }
@@ -149,10 +148,10 @@ impl<'a, I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<'a, I
     }
 
     // Call decodee end element callback.
-    self.decodee.end_element(taglen);
+    self.decodee.end_element(tag, len);
 
     // Return decoded + tag_len, which is total decoded length.
-    Ok(taglen)
+    Ok((tag, len))
   }
 }
 
@@ -171,15 +170,15 @@ impl<W: io::Write> StreamEncoder<W> {
 }
 
 impl<W: io::Write> StreamDecodee for StreamEncoder<W> {
-  fn start_element(&mut self, tag: tag::TagLen) -> ParseResult {
-    match tag.write_taglen(&mut self.writer) {
+  fn start_element(&mut self, tag: tag::Tag, len: tag::Len) -> ParseResult {
+    match tag::write_taglen(tag, len, &mut self.writer) {
       Err(e) =>  return e.into(),
       _ => (),
     };
     ParseResult::Ok
   }
 
-  fn end_element(&mut self, _: tag::TagLen) -> ParseResult {
+  fn end_element(&mut self, _: tag::Tag, _: tag::Len) -> ParseResult {
     ParseResult::Ok
   }
 

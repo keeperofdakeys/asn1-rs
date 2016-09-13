@@ -1,30 +1,22 @@
 use std::io;
 
+use ::Asn1Info;
 use tag;
 use err;
-use enc;
-
-/// Provides ASN.1 information about a Rust type, including the BER tag and ASN.1 type.
-pub trait Asn1Info {
-  /// Get the ASN.1 tag for this Rust type.
-  fn asn1_tag() -> tag::Tag;
-
-  /// Get the ASN.1 type for this Rust type.
-  fn asn1_type() -> tag::Type;
-}
+use ber::enc;
 
 /// Provides the methods required to serialize this Rust type into an ASN.1 stream.
 ///
 /// When implementing this for a simple primitive type, implementing serialize_value
 /// should be all that's required.
-pub trait Asn1Serialize: Asn1Info {
+pub trait BerSerialize: Asn1Info {
   /// Serialize a value into ASN.1 data as DER.
   fn serialize<W: io::Write>(&self, writer: &mut W) -> Result<(), err::EncodeError> {
     self.serialize_enc(enc::DER, writer)
   }
 
   /// Serialize a value into ASN.1 data using a specific set of encoding rules.
-  fn serialize_enc<E: enc::Asn1EncRules, W: io::Write>
+  fn serialize_enc<E: enc::BerEncRules, W: io::Write>
       (&self, e: E, writer: &mut W) -> Result<(), err::EncodeError> {
     let tag = Self::asn1_tag();
     try!(tag.write_tag(writer));
@@ -47,7 +39,7 @@ pub trait Asn1Serialize: Asn1Info {
   }
 
   /// Serialise a value into ASN.1 data, without a tag (implicit tagging).
-  fn serialize_value<E: enc::Asn1EncRules, W: io::Write>
+  fn serialize_value<E: enc::BerEncRules, W: io::Write>
     (&self, e: E, writer: &mut W) -> Result<(), err::EncodeError>;
 }
 
@@ -55,32 +47,34 @@ pub trait Asn1Serialize: Asn1Info {
 ///
 /// When implementing this for a simple primitive type, implementing deserialize_value
 /// should be all that's required.
-pub trait Asn1Deserialize: Asn1Info + Sized {
+pub trait BerDeserialize: Asn1Info + Sized {
   /// Deserialize ASN.1 data into a Rust value, accepting any valid BER.
   fn deserialize<I: Iterator<Item=io::Result<u8>>>(reader: &mut I) -> Result<Self, err::DecodeError> {
     Self::deserialize_enc(enc::BER, reader)
   }
 
   /// Deserialize ASN.1 data into a Rust value, using a specific set of encoding rules.
-  fn deserialize_enc<E: enc::Asn1EncRules, I: Iterator<Item=io::Result<u8>>>
+  fn deserialize_enc<E: enc::BerEncRules, I: Iterator<Item=io::Result<u8>>>
       (e: E, reader: &mut I) -> Result<Self, err::DecodeError> {
-    let tag = try!(tag::Tag::read_tag(reader));
-    Self::deserialize_enc_tag(e, reader, tag)
+    let (tag, len) = try!(tag::read_taglen(reader));
+    Self::deserialize_with_tag(e, reader, tag, len)
   }
 
+
   /// Deserialize ASN.1 data into a Rust value, using a specific set of encoding rules, and
-  /// also providing the decoded tag.
+  /// also providing the decoded tag and length.
   ///
   /// This function assumes the next bytes to decode are
   /// the BER length of this element.
-  fn deserialize_enc_tag<E: enc::Asn1EncRules, I: Iterator<Item=io::Result<u8>>>
-      (e: E, reader: &mut I, tag: tag::Tag) -> Result<Self, err::DecodeError> {
+  fn deserialize_with_tag<E: enc::BerEncRules, I: Iterator<Item=io::Result<u8>>>
+      (e: E, reader: &mut I, tag: tag::Tag, len: tag::Len) -> Result<Self, err::DecodeError> {
+    if let Some(r) = Self::_deserialize_with_tag(e, reader, tag, len) {
+      return r;
+    }
+
     if tag != Self::asn1_tag() {
       return Err(err::DecodeError::TagTypeMismatch);
     }
-
-    // Read length fromm stream.
-    let len = try!(tag::Len::read_len(reader));
 
     // Handle any indefinite length error conditions.
     if len == tag::Len::Indef {
@@ -94,7 +88,7 @@ pub trait Asn1Deserialize: Asn1Info + Sized {
       }
     }
     // Read the main data.
-    let item: Self = try!(Self::deserialize_value(e, reader, len.as_num()));
+    let item: Self = try!(Self::deserialize_value(e, reader, len));
 
     // If this is encoded with an indefinte length, try to read the end octets.
     if len == tag::Len::Indef {
@@ -104,10 +98,17 @@ pub trait Asn1Deserialize: Asn1Info + Sized {
     Ok(item)
   }
 
-  /// Deserialise ASN.1 data without a tag into a value.
+  fn _deserialize_with_tag<E: enc::BerEncRules, I: Iterator<Item=io::Result<u8>>>
+      (e: E, reader: &mut I, tag: tag::Tag, len: tag::Len) -> Option<Result<Self, err::DecodeError>> {
+    let (_, _, _, _) = (e, reader, tag, len);
+    None
+  }
+
+  /// Deserialize an ASN.1 value from a BER stream, after having the tag and length
+  /// decoded.
   ///
   /// The data length must be explicitly passed to this function. For primitive types,
   /// an error will be returned if this length is Indefinite.
-  fn deserialize_value<E: enc::Asn1EncRules, I: Iterator<Item=io::Result<u8>>>
-    (e: E, reader: &mut I, len: Option<tag::LenNum>) -> Result<Self, err::DecodeError>;
+  fn deserialize_value<E: enc::BerEncRules, I: Iterator<Item=io::Result<u8>>>
+    (e: E, reader: &mut I, len: tag::Len) -> Result<Self, err::DecodeError>;
 }

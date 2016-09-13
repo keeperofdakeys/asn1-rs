@@ -38,8 +38,8 @@ macro_rules! asn1_choice {
 #[macro_export]
 macro_rules! asn1_choice_serialize {
   ($rs_type:ident) => (
-    impl $crate::serial::Asn1Serialize for $rs_type {
-      fn serialize_enc<E: $crate::enc::Asn1EncRules, W: std::io::Write>
+    impl $crate::BerSerialize for $rs_type {
+      fn serialize_enc<E: $crate::enc::BerEncRules, W: std::io::Write>
           (&self, e: E, writer: &mut W) -> Result<(), $crate::err::EncodeError> {
         // FIXME: Can't call self.0 to call function on inner type.
         //
@@ -48,7 +48,7 @@ macro_rules! asn1_choice_serialize {
         unimplemented!();
       }
 
-      fn serialize_value<E: $crate::enc::Asn1EncRules, W: std::io::Write>
+      fn serialize_value<E: $crate::enc::BerEncRules, W: std::io::Write>
           (&self, e: E, writer: &mut W) -> Result<(), $crate::err::EncodeError> {
         // FIXME: Can't call self.0 to call function on inner type.
         //
@@ -63,11 +63,11 @@ macro_rules! asn1_choice_serialize {
 #[macro_export]
 macro_rules! asn1_choice_deserialize {
   ($rs_type:ident, $($item:ident),*) => (
-    impl $crate::serial::Asn1Deserialize for $rs_type {
+    impl $crate::BerDeserialize for $rs_type {
       // FIXME: We can't call asn1_tag() on the inner type of the enum variant,
       // so we can't compare the tag with the one we get.
       //
-      // fn deserialize_enc_tag<E: $crate::enc::Asn1EncRules, I: Iterator<Item=std::io::Result<u8>>>
+      // fn deserialize_enc_tag<E: $crate::enc::BerEncRules, I: Iterator<Item=std::io::Result<u8>>>
       //     (e: E, reader: &mut I, tag: $crate::tag::Tag)
       //     -> Result<Self, $crate::err::DecodeError> {
       //   // Decode inner type based on tag.
@@ -78,7 +78,7 @@ macro_rules! asn1_choice_deserialize {
       //   }
       // }
 
-      fn deserialize_value<E: $crate::enc::Asn1EncRules, I: Iterator<Item=std::io::Result<u8>>>
+      fn deserialize_value<E: $crate::enc::BerEncRules, I: Iterator<Item=std::io::Result<u8>>>
           (e: E, reader: &mut I, _: Option<$crate::tag::LenNum>) -> Result<Self, $crate::err::DecodeError> {
         // This should never be called?
         unimplemented!();

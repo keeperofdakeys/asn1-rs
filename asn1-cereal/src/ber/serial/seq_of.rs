@@ -12,13 +12,13 @@ macro_rules! asn1_sequence_of {
 #[macro_export]
 macro_rules! asn1_sequence_of_serialize {
   ($rs_type:ty) => (
-    impl $crate::serial::Asn1Serialize for $rs_type
+    impl $crate::BerSerialize for $rs_type
         where $rs_type: std::iter::IntoIterator {
-      fn serialize_value<E: $crate::enc::Asn1EncRules, W: std::io::Write>
+      fn serialize_value<E: $crate::ber::BerEncRules, W: std::io::Write>
           (&self, e: E, writer: &mut W) -> Result<(), $crate::err::EncodeError> {
         // Call serialize_enc on each item.
         for item in self.iter() {
-          try!($crate::serial::Asn1Serialize::serialize_enc(item, e, writer));
+          try!($crate::BerSerialize::serialize_enc(item, e, writer));
         }
         Ok(())
       }
@@ -29,20 +29,20 @@ macro_rules! asn1_sequence_of_serialize {
 #[macro_export]
 macro_rules! asn1_sequence_of_deserialize {
   ($rs_type:ty) => (
-    impl $crate::serial::Asn1Deserialize for $rs_type {
-      fn deserialize_value<E: $crate::enc::Asn1EncRules, I: Iterator<Item=std::io::Result<u8>>>
-          (e: E, reader: &mut I, len: Option<$crate::tag::LenNum>) -> Result<Self, $crate::err::DecodeError> {
+    impl $crate::BerDeserialize for $rs_type {
+      fn deserialize_value<E: $crate::ber::BerEncRules, I: Iterator<Item=std::io::Result<u8>>>
+          (e: E, reader: &mut I, len: $crate::tag::Len) -> Result<Self, $crate::err::DecodeError> {
         struct SeqOfDecoder<T, F, J: Iterator<Item=std::io::Result<u8>>> {
-          len:$crate::tag::Len,
+          len: $crate::tag::Len,
           reader: $crate::byte::ByteReader<J>,
           e: F,
           _p: Option<T>,
         }
 
         impl<T, F, J> Iterator for SeqOfDecoder<T, F, J> where
-            F: $crate::enc::Asn1EncRules,
+            F: $crate::ber::BerEncRules,
             J: Iterator<Item=std::io::Result<u8>>,
-            T: $crate::serial::Asn1Deserialize {
+            T: $crate::BerDeserialize {
           type Item = Result<T, $crate::err::DecodeError>;
 
           #[inline]
@@ -69,16 +69,13 @@ macro_rules! asn1_sequence_of_deserialize {
               Err(e) => return Some(Err(e)),
             };
 
-            println!("{:?} {:?}", self.len, self.reader.count);
-            println!("{:?} {:?}", tag, len);
-
             // Handle end of indefinite length encoding.
             if tag.tagnum == 0 && tag.class == $crate::tag::Class::Universal &&
                len == $crate::tag::Len::Def(0) {
               return None;
             }
 
-            return Some($crate::serial::Asn1Deserialize::deserialize_value(self.e, &mut self.reader, len.as_num()));
+            return Some($crate::BerDeserialize::deserialize_value(self.e, &mut self.reader, len));
           }
         }
 

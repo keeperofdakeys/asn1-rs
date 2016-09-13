@@ -39,7 +39,7 @@
 
 #[macro_export]
 /// This macro is a compact way of defining both of the
-/// Asn1 serialization traits - Asn1Serialize and Asn1Deserialize
+/// Asn1 serialization traits - BerSerialize and BerDeserialize
 /// - for a rust newtype, that represents an ASN.1 type definition.
 macro_rules! asn1_newtype {
   ($rs_type:ident) => (
@@ -49,22 +49,22 @@ macro_rules! asn1_newtype {
 }
 
 #[macro_export]
-/// This macro defines the Asn1Serialize trait for a rust newtype.
+/// This macro defines the BerSerialize trait for a rust newtype.
 macro_rules! asn1_newtype_serialize {
   ($rs_type:ident) => (
-    impl $crate::serial::Asn1Serialize for $rs_type {
-      fn serialize_enc<E: $crate::enc::Asn1EncRules, W: std::io::Write>
+    impl $crate::BerSerialize for $rs_type {
+      fn serialize_enc<E: $crate::ber::BerEncRules, W: std::io::Write>
           (&self, e: E, writer: &mut W) -> Result<(), $crate::err::EncodeError> {
         // If encoding uses implicit tag, skip our tag.
-        if E::tag_rules() == $crate::enc::TagEnc::Implicit {
+        if E::tag_rules() == $crate::ber::enc::TagEnc::Implicit {
           return self.0.serialize_enc(e, writer);
         }
 
-        let tag = <Self as $crate::serial::Asn1Info>::asn1_tag();
+        let tag = <Self as $crate::Asn1Info>::asn1_tag();
         try!(tag.write_tag(writer));
 
         // If this is indefinite length and constructed, write the data directly.
-        if E::len_rules() == $crate::enc::LenEnc::Indefinite &&
+        if E::len_rules() == $crate::ber::enc::LenEnc::Indefinite &&
            tag.constructed {
           try!($crate::tag::Len::Indef.write_len(writer));
           try!(self.serialize_value(e, writer));
@@ -80,7 +80,7 @@ macro_rules! asn1_newtype_serialize {
         Ok(())
       }
 
-      fn serialize_value<E: $crate::enc::Asn1EncRules, W: std::io::Write>
+      fn serialize_value<E: $crate::ber::BerEncRules, W: std::io::Write>
           (&self, e: E, writer: &mut W) -> Result<(), $crate::err::EncodeError> {
         self.0.serialize_enc(e, writer)
       }
@@ -89,55 +89,34 @@ macro_rules! asn1_newtype_serialize {
 }
 
 #[macro_export]
-/// This macro defines the Asn1Serialize trait for a rust newtype.
+/// This macro defines the BerSerialize trait for a rust newtype.
 macro_rules! asn1_newtype_deserialize {
   ($rs_type:ident) => (
-    impl $crate::serial::Asn1Deserialize for $rs_type {
-      fn deserialize_enc_tag<E: $crate::enc::Asn1EncRules, I: Iterator<Item=std::io::Result<u8>>>
-          (e: E, reader: &mut I, tag: $crate::tag::Tag)
-          -> Result<Self, $crate::err::DecodeError> {
-        let my_tag = <Self as $crate::serial::Asn1Info>::asn1_tag();
+    impl $crate::BerDeserialize for $rs_type {
+      fn _deserialize_with_tag<E: $crate::ber::BerEncRules, I: Iterator<Item=std::io::Result<u8>>>
+          (e: E, reader: &mut I, tag: $crate::tag::Tag, len: $crate::tag::Len)
+          -> Option<Result<Self, $crate::err::DecodeError>> {
+        let my_tag = <Self as $crate::Asn1Info>::asn1_tag();
 
         // If we're decoding using Implicit tagging rules, throw an error if this isn't an implicit tag.
-        if E::tag_rules() == $crate::enc::TagEnc::Implicit && tag == my_tag {
-          return Err($crate::err::DecodeError::ExplicitTag);
+        if E::tag_rules() == $crate::ber::enc::TagEnc::Implicit && tag == my_tag {
+          return Some(Err($crate::err::DecodeError::ExplicitTag));
         }
 
         // If the tag doesn't match our tag, decode it as the inner type.
         if tag != my_tag {
-          return Ok($rs_type(try!(
-            $crate::serial::Asn1Deserialize::deserialize_enc_tag(e, reader, tag)
-          )));
+          let res =
+            $crate::BerDeserialize::deserialize_with_tag(e, reader, tag, len)
+            .and_then(|s| Ok($rs_type(s)));
+          Some(res)
+        } else {
+          None
         }
-
-        // Read length fromm stream.
-        let len = try!($crate::tag::Len::read_len(reader));
-
-        // Handle any indefinite length error conditions.
-        if len == $crate::tag::Len::Indef {
-          // Return an error if the encoding rules only allow definite length
-          // encoding.
-          if E::len_rules() == $crate::enc::LenEnc::Definite {
-            return Err($crate::err::DecodeError::IndefiniteLen);
-          // If this element is primitve, the length isn't allowed to be indefinite length.
-          } else if !tag.constructed {
-           return Err($crate::err::DecodeError::PrimIndef)
-          }
-        }
-        // Read the main data.
-        let item: Self = try!(Self::deserialize_value(e, reader, len.as_num()));
-
-        // If this is encoded with an indefinte length, try to read the end octets.
-        if len == $crate::tag::Len::Indef {
-          try!($crate::tag::Len::read_indef_end(reader));
-        }
-
-        Ok(item)
       }
 
-      fn deserialize_value<E: $crate::enc::Asn1EncRules, I: Iterator<Item=std::io::Result<u8>>>
-          (e: E, reader: &mut I, _: Option<$crate::tag::LenNum>) -> Result<Self, $crate::err::DecodeError> {
-        Ok($rs_type(try!($crate::serial::Asn1Deserialize::deserialize_enc(e, reader))))
+      fn deserialize_value<E: $crate::ber::enc::BerEncRules, I: Iterator<Item=std::io::Result<u8>>>
+          (e: E, reader: &mut I, _: $crate::tag::Len) -> Result<Self, $crate::err::DecodeError> {
+        Ok($rs_type(try!($crate::BerDeserialize::deserialize_enc(e, reader))))
       }
     }
   )

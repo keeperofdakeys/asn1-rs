@@ -36,7 +36,7 @@
 
 #[macro_export]
 /// This macro is a compact way of defining all three of the
-/// Asn1 traits - Asn1Info, Asn1Serialize and Asn1Deserialize -
+/// Asn1 traits - Asn1Info, BerSerialize and BerDeserialize -
 /// for a rust struct, that represents an ASN.1 sequence.
 ///
 /// Note that the order the fields are placed in will affect the order
@@ -57,7 +57,7 @@ macro_rules! asn1_sequence {
 /// class or tag, consider using the asn1_info! macro.
 macro_rules! asn1_sequence_info {
   ($rs_type:ident, $asn1_ty:expr) => (
-    impl $crate::serial::Asn1Info for $rs_type {
+    impl $crate::Asn1Info for $rs_type {
       fn asn1_tag() -> $crate::tag::Tag {
         $crate::tag::Tag {
           class: $crate::tag::Class::Universal,
@@ -74,12 +74,12 @@ macro_rules! asn1_sequence_info {
 }
 
 #[macro_export]
-/// This macro defines the Asn1Serialize trait for a rust struct. The code generated
+/// This macro defines the BerSerialize trait for a rust struct. The code generated
 /// will serialize the specified fields in the order that they are given.
 macro_rules! asn1_sequence_serialize {
   ($rs_type:ty, $($item:ident),*) => (
-    impl $crate::serial::Asn1Serialize for $rs_type {
-      fn serialize_value<E: $crate::enc::Asn1EncRules, W: std::io::Write>
+    impl $crate::BerSerialize for $rs_type {
+      fn serialize_value<E: $crate::ber::BerEncRules, W: std::io::Write>
           (&self, e: E, writer: &mut W) -> Result<(), $crate::err::EncodeError> {
         let mut bytes = Vec::new();
         let mut count: u64 = 0;
@@ -87,20 +87,18 @@ macro_rules! asn1_sequence_serialize {
         $(
           count += 1;
           // If encoding uses implicit tag, skip context-specific tag.
-          if E::tag_rules() == $crate::enc::TagEnc::Implicit {
-            try!($crate::serial::Asn1Serialize::serialize_enc(&self.$item, e, writer));
+          if E::tag_rules() == $crate::ber::enc::TagEnc::Implicit {
+            try!($crate::BerSerialize::serialize_enc(&self.$item, e, writer));
           // Otherwise encode the context-specific tag.
           } else {
-            try!($crate::serial::Asn1Serialize::serialize_enc(&self.$item, e, &mut bytes));
-            let tag = $crate::tag::TagLen {
-              tag: $crate::tag::Tag {
-                class: $crate::tag::Class::ContextSpecific,
-                tagnum: count.into(),
-                constructed: true,
-              },
-              len: Some(bytes.len() as $crate::tag::LenNum).into(),
+            try!($crate::BerSerialize::serialize_enc(&self.$item, e, &mut bytes));
+            let tag = $crate::tag::Tag {
+              class: $crate::tag::Class::ContextSpecific,
+              tagnum: count.into(),
+              constructed: true,
             };
-            try!(tag.write_taglen(writer));
+            let len: $crate::tag::Len = Some(bytes.len() as $crate::tag::LenNum).into();
+            try!($crate::tag::write_taglen(tag, len, writer));
             try!(writer.write_all(&mut bytes));
 
             bytes.clear();
@@ -113,13 +111,13 @@ macro_rules! asn1_sequence_serialize {
 }
 
 #[macro_export]
-/// This macro defines the Asn1Deserialize trait for a rust struct. The code generated
+/// This macro defines the BerDeserialize trait for a rust struct. The code generated
 /// will deserialize the specified fields in the order that they are given.
 macro_rules! asn1_sequence_deserialize {
   ($rs_type:ident, $($item:ident),*) => (
-    impl $crate::serial::Asn1Deserialize for $rs_type {
-      fn deserialize_value<E: $crate::enc::Asn1EncRules, I: Iterator<Item=std::io::Result<u8>>>
-          (e: E, reader: &mut I, _: Option<$crate::tag::LenNum>) -> Result<Self, $crate::err::DecodeError> {
+    impl $crate::BerDeserialize for $rs_type {
+      fn deserialize_value<E: $crate::ber::BerEncRules, I: Iterator<Item=std::io::Result<u8>>>
+          (e: E, reader: &mut I, _: $crate::tag::Len) -> Result<Self, $crate::err::DecodeError> {
         let mut count: u64 = 0;
         $(
           // Iterate count.
@@ -139,20 +137,22 @@ macro_rules! asn1_sequence_deserialize {
             let tag = try!($crate::tag::Tag::read_tag(reader));
 
             // If encoding uses implicit tagging, throw an error if this isn't an implicit tag.
-            if E::tag_rules() == $crate::enc::TagEnc::Implicit && tag == our_tag {
+            if E::tag_rules() == $crate::ber::enc::TagEnc::Implicit && tag == our_tag {
               return Err($crate::err::DecodeError::ExplicitTag);
             }
 
+            let len = try!($crate::tag::Len::read_len(reader));
+
             // If the tag matches our tag, decode the len and call the normal deserialize function.
             $item = if tag == our_tag {
-              // We don't have anything to do with this, technically we should use it to
+              // We don't have anything to do with the len, technically we should use it to
               // check the length decoded.
-              let _ = try!($crate::tag::Len::read_len(reader));
-              try!($crate::serial::Asn1Deserialize::deserialize_enc(e, reader))
+              let _ = len;
+              try!($crate::BerDeserialize::deserialize_enc(e, reader))
             // Otherwise decode it as the inner type. (We give the tag that we
             // decoded, and the function will decode the length itself).
             } else {
-              try!($crate::serial::Asn1Deserialize::deserialize_enc_tag(e, reader, tag))
+              try!($crate::BerDeserialize::deserialize_with_tag(e, reader, tag, len))
             };
           }
         )*

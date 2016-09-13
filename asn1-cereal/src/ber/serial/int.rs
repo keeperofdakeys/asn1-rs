@@ -2,10 +2,10 @@
 
 use std::io;
 
+use ::{BerSerialize, BerDeserialize, Asn1Info};
 use tag;
 use err;
-use serial;
-use enc;
+use ber;
 use byte::{read_byte, write_byte};
 
 use std::cmp;
@@ -13,7 +13,7 @@ use std::cmp;
 /// Generate the ASN.1 int implementation for an int type.
 macro_rules! asn1_cereal_int {
   ($rs_type:ty, 1, $unsigned:expr) => (
-    impl serial::Asn1Info for $rs_type {
+    impl Asn1Info for $rs_type {
       fn asn1_tag() -> tag::Tag {
         tag::Tag {
           class: tag::Class::Universal,
@@ -27,8 +27,8 @@ macro_rules! asn1_cereal_int {
       }
     }
 
-    impl serial::Asn1Serialize for $rs_type {
-      fn serialize_value<E: enc::Asn1EncRules, W: io::Write>
+    impl BerSerialize for $rs_type {
+      fn serialize_value<E: ber::BerEncRules, W: io::Write>
           (&self, _: E, writer: &mut W) -> Result<(), err::EncodeError> {
         try!(write_byte(writer, *self as u8));
         return Ok(());
@@ -36,7 +36,7 @@ macro_rules! asn1_cereal_int {
     }
   );
   ($rs_type:ty, $size:expr, $unsigned:expr) => (
-    impl serial::Asn1Info for $rs_type {
+    impl Asn1Info for $rs_type {
       fn asn1_tag() -> tag::Tag {
         tag::Tag {
           class: tag::Class::Universal,
@@ -50,8 +50,8 @@ macro_rules! asn1_cereal_int {
       }
     }
 
-    impl serial::Asn1Serialize for $rs_type {
-      fn serialize_value<E: enc::Asn1EncRules, W: io::Write>
+    impl BerSerialize for $rs_type {
+      fn serialize_value<E: ber::BerEncRules, W: io::Write>
           (&self, _: E, writer: &mut W) -> Result<(), err::EncodeError> {
         let mut started = false;
         // Loop through bytes in int backwards, start writing when first non-zero byte is encounted.
@@ -81,10 +81,10 @@ macro_rules! asn1_cereal_int {
       }
     }
 
-    impl serial::Asn1Deserialize for $rs_type {
-      fn deserialize_value<E: enc::Asn1EncRules, I: Iterator<Item=io::Result<u8>>>
-          (_: E, reader: &mut I, len: Option<tag::LenNum>) -> Result<Self, err::DecodeError> {
-        let len_num = try!(len.ok_or(err::DecodeError::PrimIndef));
+    impl BerDeserialize for $rs_type {
+      fn deserialize_value<E: ber::BerEncRules, I: Iterator<Item=io::Result<u8>>>
+          (_: E, reader: &mut I, len: tag::Len) -> Result<Self, err::DecodeError> {
+        let len_num = try!(len.as_num().ok_or(err::DecodeError::PrimIndef));
 
         let mut int: $rs_type = 0;
         let size = cmp::min($size, len_num);

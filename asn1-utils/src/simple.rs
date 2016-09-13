@@ -4,9 +4,8 @@ extern crate argparse;
 
 use std::io;
 
-use asn1_cereal::serial::{Asn1Serialize, Asn1Deserialize};
-use asn1_cereal::enc::{DER, BER, BERAlt};
-use asn1_cereal::tag::Class;
+use asn1_cereal::{BerSerialize, BerDeserialize};
+use asn1_cereal::ber::{DER, BER, BERAlt};
 use argparse::{ArgumentParser, StoreTrue};
 
 fn main() {
@@ -19,17 +18,17 @@ fn main() {
 
   if opts.dump {
     let mut writer = io::BufWriter::new(&mut output);
-    seq.serialize_enc(BER, &mut writer).unwrap();
+    seq.serialize_enc(DER, &mut writer).unwrap();
     return;
   }
   {
     let mut writer = io::BufWriter::new(&mut buffer);
-    seq.serialize_enc(BER, &mut writer).unwrap();
+    seq.serialize_enc(DER, &mut writer).unwrap();
   }
   println!("{:?}", buffer);
   {
     let mut reader = buffer.iter().map(|x| Ok(*x) as Result<u8, std::io::Error>);
-    let seq = IntSequence::deserialize_enc(BER, &mut reader).unwrap();
+    let seq = IntSequence::deserialize_enc(DER, &mut reader).unwrap();
     println!("{:?}", seq);
   }
 }
@@ -39,7 +38,7 @@ struct SomeString(String);
 
 asn1_info!(
   SomeString,
-  Class::Private,
+  asn1_cereal::tag::Class::Private,
   1,
   true,
   "SOMESTRING"

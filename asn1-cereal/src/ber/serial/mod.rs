@@ -11,7 +11,7 @@
 //! the code required to serialize it to an ASN.1 sequence, or to deserialize
 //! an ASN.1 sequence into an instance of the struct.
 //!
-//! The example then uses the Asn1Serialize::serialize function to encode
+//! The example then uses the BerSerialize::serialize function to encode
 //! the struct to a DER-encoded byte stream.
 //!
 //!
@@ -33,7 +33,7 @@
 //!
 //!   let data = ShortSequence{ z: 1, y: 2 };
 //!   let mut bytes: Vec<u8> = Vec::new();
-//!   serial::Asn1Serialize::serialize(&data, &mut bytes).unwrap();
+//!   BerSerialize::serialize(&data, &mut bytes).unwrap();
 //! }
 //! ```
 
@@ -44,7 +44,7 @@
 /// so it should match the expected values in the ASN.1 stream.
 macro_rules! asn1_info {
   ($rs_type:ty, $class:expr, $tagnum:expr, $constructed:expr, $asn1_ty:expr) => (
-    impl $crate::serial::Asn1Info for $rs_type {
+    impl $crate::Asn1Info for $rs_type {
       fn asn1_tag() -> $crate::tag::Tag {
         $crate::tag::Tag {
           class: ($class as u8).into(),
@@ -61,7 +61,7 @@ macro_rules! asn1_info {
   )
 }
 
-mod traits;
+pub mod traits;
 mod prim;
 
 pub mod int;
@@ -70,5 +70,3 @@ pub mod assign;
 pub mod choice;
 pub mod seq;
 pub mod seq_of;
-
-pub use self::traits::{Asn1Serialize, Asn1Deserialize, Asn1Info};

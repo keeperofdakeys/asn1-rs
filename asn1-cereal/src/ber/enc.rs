@@ -33,7 +33,7 @@ pub enum LenEnc {
 }
 
 /// A trait to define encoding rules to use while encoding ASN.1.
-pub trait Asn1EncRules: Copy {
+pub trait BerEncRules: Copy {
   /// Get the encoding rules for tags.
   fn tag_rules() -> TagEnc;
 
@@ -55,7 +55,7 @@ pub trait Asn1EncRules: Copy {
 /// If this is an issue, the BER encoding rules should be used
 pub struct DER;
 
-impl Asn1EncRules for DER {
+impl BerEncRules for DER {
   fn tag_rules() -> TagEnc {
     TagEnc::Implicit
   }
@@ -78,7 +78,7 @@ impl Asn1EncRules for DER {
 /// be used for all elements.
 pub struct BER;
 
-impl Asn1EncRules for BER {
+impl BerEncRules for BER {
   fn tag_rules() -> TagEnc {
     TagEnc::Explicit
   }
@@ -105,7 +105,7 @@ impl Asn1EncRules for BER {
 /// DER encoding.
 pub struct BERAlt;
 
-impl Asn1EncRules for BERAlt {
+impl BerEncRules for BERAlt {
   fn tag_rules() -> TagEnc {
     TagEnc::Implicit
   }

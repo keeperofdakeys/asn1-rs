@@ -317,33 +317,18 @@ impl fmt::Display for Len {
   }
 }
 
-
-#[derive(PartialEq, Debug, Clone, Copy)]
-/// A struct containing the ASN.1 tag and length of an ASN.1 element.
-pub struct TagLen {
-  /// The tag of this ASN.1 element.
-  pub tag: Tag,
-  /// The len of this ASN.1 element.
-  pub len: Len,
+/// Given an iterator over a byte stream, read and return a TagLen struct.
+pub fn read_taglen<I: Iterator<Item=io::Result<u8>>>(bytes: &mut I) -> Result<(Tag, Len), err::DecodeError> {
+  let tag = try!(Tag::read_tag(bytes));
+  let len = try!(Len::read_len(bytes));
+  Ok((tag, len))
 }
 
-impl TagLen {
-  /// Given an iterator over a byte stream, read and return a TagLen struct.
-  pub fn read_taglen<I: Iterator<Item=io::Result<u8>>>(bytes: &mut I) -> Result<Self, err::DecodeError> {
-    let tag = try!(Tag::read_tag(bytes));
-    let len = try!(Len::read_len(bytes));
-    Ok(TagLen {
-      tag: tag,
-      len: len,
-    })
-  }
-
-  /// Write the ASN.1 representation of this TagNum struct to the given writer.
-  pub fn write_taglen<W: io::Write>(self, writer: &mut W) -> Result<(), err::EncodeError> {
-    try!(self.tag.write_tag(writer));
-    try!(self.len.write_len(writer));
-    Ok(())
-  }
+/// Write the ASN.1 representation of this TagNum struct to the given writer.
+pub fn write_taglen<W: io::Write>(tag: Tag, len: Len, writer: &mut W) -> Result<(), err::EncodeError> {
+  try!(tag.write_tag(writer));
+  try!(len.write_len(writer));
+  Ok(())
 }
 
 #[cfg(test)]
@@ -352,20 +337,18 @@ use std::io::Read;
 #[test]
 fn tag_simple() {
   let bytes = b"\x02\x00";
-  let tag = TagLen {
-    tag: Tag {
-      class: 0u8.into(),
-      tagnum: 2u64.into(),
-      constructed: false,
-    },
-    len: Some(0u64).into(),
+  let tag = Tag {
+    class: 0u8.into(),
+    tagnum: 2u64.into(),
+    constructed: false,
   };
+  let len: Len = Some(0u64).into();
   assert_eq!(
-    TagLen::read_taglen(bytes.bytes().by_ref()).unwrap(),
-    tag
+    read_taglen(bytes.bytes().by_ref()).unwrap(),
+    (tag, len)
   );
   let mut buf: Vec<u8> = Vec::new();
-  tag.write_taglen(&mut buf).unwrap();
+  write_taglen(tag, len, &mut buf).unwrap();
   assert_eq!(
     &buf,
     bytes
@@ -376,24 +359,22 @@ fn tag_simple() {
 fn high_tag_class_1() {
   let short_bytes = b"\x41\x10";
   let long_bytes = b"\x5f\x01\x10";
-  let tag = TagLen {
-    tag: Tag {
-      class: 1u8.into(),
-      tagnum: 1u64.into(),
-      constructed: false,
-    },
-    len: Some(16u64).into(),
+  let tag = Tag {
+    class: 1u8.into(),
+    tagnum: 1u64.into(),
+    constructed: false,
   };
+  let len: Len = Some(16u64).into();
   assert_eq!(
-    TagLen::read_taglen(short_bytes.bytes().by_ref()).unwrap(),
-    tag
+    read_taglen(short_bytes.bytes().by_ref()).unwrap(),
+    (tag, len)
   );
   assert_eq!(
-    TagLen::read_taglen(long_bytes.bytes().by_ref()).unwrap(),
-    tag
+    read_taglen(long_bytes.bytes().by_ref()).unwrap(),
+    (tag, len)
   );
   let mut buf: Vec<u8> = Vec::new();
-  tag.write_taglen(&mut buf).unwrap();
+  write_taglen(tag, len, &mut buf).unwrap();
   assert_eq!(
     &buf,
     short_bytes
@@ -403,20 +384,18 @@ fn high_tag_class_1() {
 #[test]
 fn high_tag_class_2() {
   let bytes = b"\x5f\x21\x10";
-  let tag = TagLen {
-    tag: Tag {
-      class: 1u8.into(),
-      tagnum: 33u64.into(),
-      constructed: false,
-    },
-    len: Some(16u64).into(),
+  let tag = Tag {
+    class: 1u8.into(),
+    tagnum: 33u64.into(),
+    constructed: false,
   };
+  let len: Len = Some(16u64).into();
   assert_eq!(
-    TagLen::read_taglen(bytes.bytes().by_ref()).unwrap(),
-    tag
+    read_taglen(bytes.bytes().by_ref()).unwrap(),
+    (tag, len)
   );
   let mut buf: Vec<u8> = Vec::new();
-  tag.write_taglen(&mut buf).unwrap();
+  write_taglen(tag, len, &mut buf).unwrap();
   assert_eq!(
     &buf,
     bytes
@@ -426,20 +405,18 @@ fn high_tag_class_2() {
 #[test]
 fn tag_constructed() {
   let bytes = b"\x30\x12";
-  let tag = TagLen {
-    tag: Tag {
-      class: 0u8.into(),
-      tagnum: 16u64.into(),
-      constructed: true,
-    },
-    len: Some(18u64).into(),
+  let tag = Tag {
+    class: 0u8.into(),
+    tagnum: 16u64.into(),
+    constructed: true,
   };
+  let len: Len = Some(18u64).into();
   assert_eq!(
-    TagLen::read_taglen(bytes.bytes().by_ref()).unwrap(),
-    tag
+    read_taglen(bytes.bytes().by_ref()).unwrap(),
+    (tag, len)
   );
   let mut buf: Vec<u8> = Vec::new();
-  tag.write_taglen(&mut buf).unwrap();
+  write_taglen(tag, len, &mut buf).unwrap();
   assert_eq!(
     &buf,
     bytes
@@ -449,20 +426,18 @@ fn tag_constructed() {
 #[test]
 fn tag_indefinite() {
   let bytes = b"\x30\x80";
-  let tag = TagLen {
-    tag: Tag {
-      class: 0u8.into(),
-      tagnum: 16u64.into(),
-      constructed: true,
-    },
-    len: None.into(),
+  let tag = Tag {
+    class: 0u8.into(),
+    tagnum: 16u64.into(),
+    constructed: true,
   };
+  let len: Len = None.into();
   assert_eq!(
-    TagLen::read_taglen(bytes.bytes().by_ref()).unwrap(),
-    tag
+    read_taglen(bytes.bytes().by_ref()).unwrap(),
+    (tag, len)
   );
   let mut buf: Vec<u8> = Vec::new();
-  tag.write_taglen(&mut buf).unwrap();
+  write_taglen(tag, len, &mut buf).unwrap();
   assert_eq!(
     &buf,
     bytes
@@ -473,24 +448,22 @@ fn tag_indefinite() {
 fn tag_long_len_1() {
   let long_bytes = b"\x30\x81\x11";
   let short_bytes = b"\x30\x11";
-  let tag = TagLen {
-    tag: Tag {
-      class: 0u8.into(),
-      tagnum: 16u64.into(),
-      constructed: true,
-    },
-    len: Some(17u64).into(),
+  let tag = Tag {
+    class: 0u8.into(),
+    tagnum: 16u64.into(),
+    constructed: true,
   };
+  let len: Len = Some(17u64).into();
   assert_eq!(
-    TagLen::read_taglen(short_bytes.bytes().by_ref()).unwrap(),
-    tag
+    read_taglen(short_bytes.bytes().by_ref()).unwrap(),
+    (tag, len)
   );
   assert_eq!(
-    TagLen::read_taglen(long_bytes.bytes().by_ref()).unwrap(),
-    tag
+    read_taglen(long_bytes.bytes().by_ref()).unwrap(),
+    (tag, len)
   );
   let mut buf: Vec<u8> = Vec::new();
-  tag.write_taglen(&mut buf).unwrap();
+  write_taglen(tag, len, &mut buf).unwrap();
   assert_eq!(
     &buf,
     short_bytes
@@ -500,20 +473,18 @@ fn tag_long_len_1() {
 #[test]
 fn tag_long_len_2() {
   let bytes = b"\x30\x81\x81";
-  let tag = TagLen {
-    tag: Tag {
-      class: 0u8.into(),
-      tagnum: 16u64.into(),
-      constructed: true,
-    },
-    len: Some(129u64).into(),
+  let tag = Tag {
+    class: 0u8.into(),
+    tagnum: 16u64.into(),
+    constructed: true,
   };
+  let len: Len = Some(129u64).into();
   assert_eq!(
-    TagLen::read_taglen(bytes.bytes().by_ref()).unwrap(),
-    tag
+    read_taglen(bytes.bytes().by_ref()).unwrap(),
+    (tag, len)
   );
   let mut buf: Vec<u8> = Vec::new();
-  tag.write_taglen(&mut buf).unwrap();
+  write_taglen(tag, len, &mut buf).unwrap();
   assert_eq!(
     &buf,
     bytes
@@ -523,20 +494,18 @@ fn tag_long_len_2() {
 #[test]
 fn tag_ridiculous() {
   let bytes = b"\x7f\x81\x80\x01\x85\x80\x00\x00\x00\x01";
-  let tag = TagLen {
-    tag: Tag {
-      class: 1u8.into(),
-      tagnum: 0x4001u64.into(),
-      constructed: true,
-    },
-    len: Some(549755813889u64).into(),
+  let tag = Tag {
+    class: 1u8.into(),
+    tagnum: 0x4001u64.into(),
+    constructed: true,
   };
+  let len: Len = Some(549755813889u64).into();
   assert_eq!(
-    TagLen::read_taglen(bytes.bytes().by_ref()).unwrap(),
-    tag
+    read_taglen(bytes.bytes().by_ref()).unwrap(),
+    (tag, len)
   );
   let mut buf: Vec<u8> = Vec::new();
-  tag.write_taglen(&mut buf).unwrap();
+  write_taglen(tag, len, &mut buf).unwrap();
   assert_eq!(
     &buf,
     bytes
@@ -545,7 +514,7 @@ fn tag_ridiculous() {
 
 #[test]
 fn tag_missing_bytes() {
-  let res = TagLen::read_taglen(b"".bytes().by_ref());
+  let res = read_taglen(b"".bytes().by_ref());
   match res {
     Err(err::DecodeError::IO(ref err)) if err.kind() == io::ErrorKind::UnexpectedEof => {},
     _ => panic!("Expected UnexpectedEOf, got {:?}", res.unwrap_err()),
@@ -554,9 +523,9 @@ fn tag_missing_bytes() {
 
 #[test]
 fn tag_missing_tag_bytes() {
-  let res = TagLen::read_taglen(b"\x1f".bytes().by_ref())
-    .or(TagLen::read_taglen(b"\x1f\x80".bytes().by_ref()))
-    .or(TagLen::read_taglen(b"\x1f\x80\x82".bytes().by_ref()));
+  let res = read_taglen(b"\x1f".bytes().by_ref())
+    .or(read_taglen(b"\x1f\x80".bytes().by_ref()))
+    .or(read_taglen(b"\x1f\x80\x82".bytes().by_ref()));
   match res {
     Err(err::DecodeError::IO(ref err)) if err.kind() == io::ErrorKind::UnexpectedEof => {},
     _ => panic!("Expected UnexpectedEOf, got {:?}", res.unwrap_err()),
@@ -565,9 +534,9 @@ fn tag_missing_tag_bytes() {
 
 #[test]
 fn tag_missing_len_bytes() {
-  let res = TagLen::read_taglen(b"\x30".bytes().by_ref())
-    .or(TagLen::read_taglen(b"\x30\x81".bytes().by_ref()))
-    .or(TagLen::read_taglen(b"\x30\x83\x01\x03".bytes().by_ref()));
+  let res = read_taglen(b"\x30".bytes().by_ref())
+    .or(read_taglen(b"\x30\x81".bytes().by_ref()))
+    .or(read_taglen(b"\x30\x83\x01\x03".bytes().by_ref()));
   match res {
     Err(err::DecodeError::IO(ref err)) if err.kind() == io::ErrorKind::UnexpectedEof => {},
     _ => panic!("Expected UnexpectedEOf, got {:?}", res.unwrap_err()),

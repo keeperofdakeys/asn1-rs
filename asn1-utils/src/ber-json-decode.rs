@@ -48,16 +48,15 @@ impl StreamDumper {
 }
 
 impl stream::StreamDecodee for StreamDumper {
-  fn start_element(&mut self, tag: tag::TagLen) -> stream::ParseResult {
-    if tag.tag.constructed {
+  fn start_element(&mut self, tag: tag::Tag, _: tag::Len) -> stream::ParseResult {
+    if tag.constructed {
       self.stack.push(Vec::new());
     }
 
     stream::ParseResult::Ok
   }
 
-  fn end_element(&mut self, taglen: tag::TagLen) -> stream::ParseResult {
-    let (tag, len) = (taglen.tag, taglen.len);
+  fn end_element(&mut self, tag: tag::Tag, len: tag::Len) -> stream::ParseResult {
     let mut tag_map = BTreeMap::new();
     let mut map = BTreeMap::new();
     tag_map.insert(
