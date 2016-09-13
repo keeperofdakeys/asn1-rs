@@ -29,7 +29,7 @@
 //!     y
 //!   );
 //!
-//!   use asn1_cereal::serial;
+//!   use asn1_cereal::BerSerialize;
 //!
 //!   let data = ShortSequence{ z: 1, y: 2 };
 //!   let mut bytes: Vec<u8> = Vec::new();
