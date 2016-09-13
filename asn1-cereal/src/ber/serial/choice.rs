@@ -39,7 +39,7 @@ macro_rules! asn1_choice {
 macro_rules! asn1_choice_serialize {
   ($rs_type:ident) => (
     impl $crate::BerSerialize for $rs_type {
-      fn serialize_enc<E: $crate::enc::BerEncRules, W: std::io::Write>
+      fn serialize_enc<E: $crate::ber::BerEncRules, W: std::io::Write>
           (&self, e: E, writer: &mut W) -> Result<(), $crate::err::EncodeError> {
         // FIXME: Can't call self.0 to call function on inner type.
         //
@@ -48,7 +48,7 @@ macro_rules! asn1_choice_serialize {
         unimplemented!();
       }
 
-      fn serialize_value<E: $crate::enc::BerEncRules, W: std::io::Write>
+      fn serialize_value<E: $crate::ber::BerEncRules, W: std::io::Write>
           (&self, e: E, writer: &mut W) -> Result<(), $crate::err::EncodeError> {
         // FIXME: Can't call self.0 to call function on inner type.
         //
@@ -78,8 +78,8 @@ macro_rules! asn1_choice_deserialize {
       //   }
       // }
 
-      fn deserialize_value<E: $crate::enc::BerEncRules, I: Iterator<Item=std::io::Result<u8>>>
-          (e: E, reader: &mut I, _: Option<$crate::tag::LenNum>) -> Result<Self, $crate::err::DecodeError> {
+      fn deserialize_value<E: $crate::ber::BerEncRules, I: Iterator<Item=std::io::Result<u8>>>
+          (e: E, reader: &mut I, _: $crate::tag::Len) -> Result<Self, $crate::err::DecodeError> {
         // This should never be called?
         unimplemented!();
       }
