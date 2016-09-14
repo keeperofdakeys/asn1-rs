@@ -8,6 +8,9 @@
 //!
 //! [`serial`]: serial/index.html
 
+#![cfg_attr(feature="clippy", feature(plugin))]
+#![cfg_attr(feature="clippy", plugin(clippy))]
+
 pub mod tag;
 pub mod err;
 pub mod byte;
