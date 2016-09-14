@@ -7,7 +7,7 @@ use ber::enc;
 
 /// Provides the methods required to serialize this Rust type into an ASN.1 stream.
 ///
-/// When implementing this for a simple primitive type, implementing serialize_value
+/// When implementing this for a simple primitive type, implementing `serialize_value`
 /// should be all that's required.
 pub trait BerSerialize: Asn1Info {
   /// Serialize a value into ASN.1 data as DER.
@@ -45,7 +45,7 @@ pub trait BerSerialize: Asn1Info {
 
 /// Provides the methods required to deserialize this Rust type from an ASN.1 stream.
 ///
-/// When implementing this for a simple primitive type, implementing deserialize_value
+/// When implementing this for a simple primitive type, implementing `deserialize_value`
 /// should be all that's required.
 pub trait BerDeserialize: Asn1Info + Sized {
   /// Deserialize ASN.1 data into a Rust value, accepting any valid BER.

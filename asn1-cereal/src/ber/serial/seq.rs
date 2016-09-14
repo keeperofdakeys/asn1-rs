@@ -1,8 +1,8 @@
 //! Macros to generate the implementation of the serialization traits for Rust
 //! structs, as ASN.1 sequences.
 //!
-//! You can either use the shortcut asn1_sequence! macro, or each of
-//! asn1_sequence_info!, asn1_sequence_serialize! and asn1_sequence_deserialize!.
+//! You can either use the shortcut `asn1_sequence!` macro, or each of
+//! `asn1_sequence_info!`, `asn1_sequence_serialize!` and `asn1_sequence_deserialize!`.
 //!
 //! ```
 //! #[macro_use] extern crate asn1_cereal; fn main() {

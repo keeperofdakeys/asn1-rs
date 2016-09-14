@@ -2,7 +2,7 @@
 use std::io;
 
 #[inline]
-/// Read a byte from an iterator, and translate Eof into an UnexpectedEof error.
+/// Read a byte from an iterator, and translate Eof into an `UnexpectedEof` error.
 pub fn read_byte<I: Iterator<Item=io::Result<u8>>>(iter: &mut I) -> io::Result<u8> {
   match iter.next() {
     Some(res) => res,

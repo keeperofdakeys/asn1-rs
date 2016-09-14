@@ -75,7 +75,7 @@ macro_rules! asn1_sequence_of_deserialize {
               return None;
             }
 
-            return Some($crate::BerDeserialize::deserialize_value(self.e, &mut self.reader, len));
+            Some($crate::BerDeserialize::deserialize_value(self.e, &mut self.reader, len))
           }
         }
 

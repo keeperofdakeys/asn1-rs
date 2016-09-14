@@ -1,12 +1,12 @@
-//! A SAXParser inspired stream parser and encoder for ber streams.
+//! A `SAXParser` inspired stream parser and encoder for ber streams.
 //!
-//! Given a struct that implements StreamDecodee, a StreamDecoder can be used to
-//! decode the stream, calling each function in the StreamDecodee trait as they
+//! Given a struct that implements `StreamDecodee`, a `StreamDecoder` can be used to
+//! decode the stream, calling each function in the `StreamDecodee` trait as they
 //! are encountered.
 //!
-//! The StreamEncoder struct is also provided, which itself implements the
-//! StreamDecodee trait. This allows you to encode an ASN.1 stream using
-//! the StreamDecodee interface as the caller.
+//! The `StreamEncoder` struct is also provided, which itself implements the
+//! `StreamDecodee` trait. This allows you to encode an ASN.1 stream using
+//! the `StreamDecodee` interface as the caller.
 
 use tag;
 use err;
@@ -15,9 +15,9 @@ use byte;
 use std::cmp::Ordering;
 use std::io;
 
-/// This trait provides a SAXParser inspired interface for parsing ASN.1 streams.
+/// This trait provides a `SAXParser` inspired interface for parsing ASN.1 streams.
 ///
-/// If it were implemented, the ParseResult return types would be used to
+/// If it were implemented, the `ParseResult` return types would be used to
 /// provide feedback on whether parsing of that element was successful.
 pub trait StreamDecodee {
   /// This function is called when an ASN.1 tag is encountered. In other
@@ -42,9 +42,8 @@ pub trait StreamDecodee {
   fn primitive<I: Iterator<Item=io::Result<u8>>>(&mut self, reader: &mut byte::ByteReader<I>,
       len: tag::LenNum) -> ParseResult {
     for _ in 0..len {
-      match reader.read() {
-        Err(e) => return e.into(),
-        _ => {},
+      if let Err(e) = reader.read() {
+        return e.into();
       }
     }
     ParseResult::Ok
@@ -62,8 +61,8 @@ pub trait StreamDecodee {
   }
 }
 
-/// A decoder that calls into a struct implementing the StreamDecodee trait,
-/// similar to a SAXParser
+/// A decoder that calls into a struct implementing the `StreamDecodee` trait,
+/// similar to a `SAXParser`.
 pub struct StreamDecoder<'a, I: Iterator<Item=io::Result<u8>>, S: StreamDecodee + 'a> {
   /// Internal reader with an included byte counter.
   reader: byte::ByteReader<I>,
@@ -108,10 +107,9 @@ impl<'a, I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<'a, I
           Some(Ordering::Less) => return Err(err::DecodeError::GreaterLen),
           // Finish loop when equal, we must be finished.
           Some(Ordering::Equal) => break,
-          // Continue when we are still decoding.
-          Some(Ordering::Greater) => {},
-          // Continue when using indefinite length encoding.
-          None => {},
+          // Continue when we are still decoding, or using indefinite
+          // length encoding.
+          Some(Ordering::Greater) | None => {},
         };
 
         // Decode each child element.
@@ -155,8 +153,8 @@ impl<'a, I: Iterator<Item=io::Result<u8>>, S: StreamDecodee> StreamDecoder<'a, I
   }
 }
 
-/// A stream encoder that implements StreamDecodee. Using this,
-/// a ASN.1 stream can be written using a SAXParser style interface.
+/// A stream encoder that implements `StreamDecodee`. Using this,
+/// a ASN.1 stream can be written using a `SAXParser` style interface.
 pub struct StreamEncoder<W: io::Write> {
   writer: byte::ByteWriter<W>
 }
@@ -171,11 +169,11 @@ impl<W: io::Write> StreamEncoder<W> {
 
 impl<W: io::Write> StreamDecodee for StreamEncoder<W> {
   fn start_element(&mut self, tag: tag::Tag, len: tag::Len) -> ParseResult {
-    match tag::write_taglen(tag, len, &mut self.writer) {
-      Err(e) =>  return e.into(),
-      _ => (),
-    };
-    ParseResult::Ok
+    if let Err(e) = tag::write_taglen(tag, len, &mut self.writer) {
+      e.into()
+    } else {
+      ParseResult::Ok
+    }
   }
 
   fn end_element(&mut self, _: tag::Tag, _: tag::Len) -> ParseResult {
@@ -187,9 +185,8 @@ impl<W: io::Write> StreamDecodee for StreamEncoder<W> {
     for _ in 0..len {
       // Read a byte and write a byte.
       match reader.read() {
-        Ok(byte) => match self.writer.write_byte(byte) {
-          Err(e) => return e.into(),
-          _ => (),
+        Ok(byte) => if let Err(e) = self.writer.write_byte(byte) {
+          return e.into()
         },
         Err(e) => return e.into(),
       };
@@ -200,7 +197,7 @@ impl<W: io::Write> StreamDecodee for StreamEncoder<W> {
 
 
 // FIXME: This seems to have two mixed meanings, perhaps split it?
-/// The result of parsing after a callback on a StreamDecodee.
+/// The result of parsing after a callback on a `StreamDecodee`.
 ///
 /// If it were implemented, this would provide feedback to the Decoder/Parser.
 pub enum ParseResult {

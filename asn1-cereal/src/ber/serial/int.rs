@@ -31,7 +31,7 @@ macro_rules! asn1_cereal_int {
       fn serialize_value<E: ber::BerEncRules, W: io::Write>
           (&self, _: E, writer: &mut W) -> Result<(), err::EncodeError> {
         try!(write_byte(writer, *self as u8));
-        return Ok(());
+        Ok(())
       }
     }
   );

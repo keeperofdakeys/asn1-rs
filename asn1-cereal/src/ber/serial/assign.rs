@@ -1,8 +1,8 @@
 //! Macros to generate the implementation of the serialization traits for Rust
 //! newtypes, as ASN.1 type assignments.
 //!
-//! You can either define both asn1_info! and asn1_newtype!, or all three
-//! of asn1_info!, asn1_newtype_serialize! and asn1_newtype_deserialize!.
+//! You can either define both `asn1_info!` and `asn1_newtype!`, or all three
+//! of `asn1_info!`, `asn1_newtype_serialize!` and `asn1_newtype_deserialize!`.
 //!
 //! IE:
 //!

@@ -75,10 +75,9 @@ impl Tag {
   /// Returns true when this element is a SEQUENCE (OF), or SET (OF).
   pub fn is_structured(&self) -> bool {
     match (self.class, self.tagnum) {
-      // SEQUENCE (OF)
-      (Class::Universal, 16) => true,
-      // SET (OF)
-      (Class::Universal, 17) => true,
+      // SEQUENCE (OF) / SET (OF)
+      (Class::Universal, 16) |
+        (Class::Universal, 17) => true,
       _ => false,
     }
   }
@@ -317,14 +316,14 @@ impl fmt::Display for Len {
   }
 }
 
-/// Given an iterator over a byte stream, read and return a TagLen struct.
+/// Given an iterator over a byte stream, read and return a `TagLen` struct.
 pub fn read_taglen<I: Iterator<Item=io::Result<u8>>>(bytes: &mut I) -> Result<(Tag, Len), err::DecodeError> {
   let tag = try!(Tag::read_tag(bytes));
   let len = try!(Len::read_len(bytes));
   Ok((tag, len))
 }
 
-/// Write the ASN.1 representation of this TagNum struct to the given writer.
+/// Write the ASN.1 representation of this `TagNum` struct to the given writer.
 pub fn write_taglen<W: io::Write>(tag: Tag, len: Len, writer: &mut W) -> Result<(), err::EncodeError> {
   try!(tag.write_tag(writer));
   try!(len.write_len(writer));

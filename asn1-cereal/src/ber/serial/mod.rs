@@ -11,7 +11,7 @@
 //! the code required to serialize it to an ASN.1 sequence, or to deserialize
 //! an ASN.1 sequence into an instance of the struct.
 //!
-//! The example then uses the BerSerialize::serialize function to encode
+//! The example then uses the `BerSerialize::serialize` function to encode
 //! the struct to a DER-encoded byte stream.
 //!
 //!
