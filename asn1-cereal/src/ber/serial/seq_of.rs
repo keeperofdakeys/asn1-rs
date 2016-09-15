@@ -30,8 +30,9 @@ macro_rules! asn1_sequence_of_serialize {
 macro_rules! asn1_sequence_of_deserialize {
   ($rs_type:ty) => (
     impl $crate::BerDeserialize for $rs_type {
-      fn deserialize_value<E: $crate::ber::BerEncRules, I: Iterator<Item=std::io::Result<u8>>>
-          (e: E, reader: &mut I, len: $crate::tag::Len) -> Result<Self, $crate::err::DecodeError> {
+      fn deserialize_with_tag<E: $crate::ber::BerEncRules, I: Iterator<Item=std::io::Result<u8>>>
+          (e: E, reader: &mut I, tag: $crate::tag::Tag, len: $crate::tag::Len) ->
+          Result<Self, $crate::err::DecodeError> {
         struct SeqOfDecoder<T, F, J: Iterator<Item=std::io::Result<u8>>> {
           len: $crate::tag::Len,
           reader: $crate::byte::ByteReader<J>,
@@ -54,18 +55,13 @@ macro_rules! asn1_sequence_of_deserialize {
               Some(std::cmp::Ordering::Less) => return Some(Err($crate::err::DecodeError::GreaterLen)),
               // Finish loop when equal, we must be finished.
               Some(std::cmp::Ordering::Equal) => return None,
-              // Continue when we are still decoding.
-              Some(std::cmp::Ordering::Greater) => {},
-              // Continue when using indefinite length encoding.
-              None => {},
+              // Continue when we are still decoding, or using
+              // indefinite length encoding.
+              Some(std::cmp::Ordering::Greater) | None => {},
             }
 
-            let tag = match $crate::tag::Tag::read_tag(&mut self.reader) {
+            let (tag, len) = match $crate::tag::read_taglen(&mut self.reader) {
               Ok(t) => t,
-              Err(e) => return Some(Err(e)),
-            };
-            let len = match $crate::tag::Len::read_len(&mut self.reader) {
-              Ok(l) => l,
               Err(e) => return Some(Err(e)),
             };
 
@@ -79,7 +75,21 @@ macro_rules! asn1_sequence_of_deserialize {
           }
         }
 
-        let mut decoder = SeqOfDecoder { e: e, len: len.into(), reader: $crate::byte::ByteReader::new(reader), _p: None };
+        if tag != <Self as $crate::Asn1Info>::asn1_tag() {
+          return Err($crate::err::DecodeError::TagTypeMismatch);
+        }
+
+        if len == $crate::tag::Len::Indef &&
+           E::len_rules() == $crate::ber::enc::LenEnc::Definite {
+          return Err($crate::err::DecodeError::IndefiniteLen);
+        }
+
+        let mut decoder = SeqOfDecoder {
+          e: e,
+          len: len.into(),
+          reader: $crate::byte::ByteReader::new(reader),
+          _p: None
+        };
         let v: Result<$rs_type, _> = std::iter::FromIterator::from_iter(decoder.by_ref());
         Ok(try!(v))
       }

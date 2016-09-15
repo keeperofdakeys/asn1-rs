@@ -84,7 +84,7 @@ pub trait BerDeserialize: Asn1Info + Sized {
         return Err(err::DecodeError::IndefiniteLen);
       // If this element is primitve, the length isn't allowed to be indefinite length.
       } else if !tag.constructed {
-       return Err(err::DecodeError::PrimIndef)
+        return Err(err::DecodeError::PrimIndef)
       }
     }
     // Read the main data.
@@ -110,5 +110,8 @@ pub trait BerDeserialize: Asn1Info + Sized {
   /// The data length must be explicitly passed to this function. For primitive types,
   /// an error will be returned if this length is Indefinite.
   fn deserialize_value<E: enc::BerEncRules, I: Iterator<Item=io::Result<u8>>>
-    (e: E, reader: &mut I, len: tag::Len) -> Result<Self, err::DecodeError>;
+    (e: E, reader: &mut I, len: tag::Len) -> Result<Self, err::DecodeError> {
+    let (_, _, _) = (e, reader, len);
+    unimplemented!();
+  }
 }
