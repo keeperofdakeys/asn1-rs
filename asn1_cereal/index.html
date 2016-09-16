@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-0' class='srclink' href='../src/asn1_cereal/src/lib.rs.html#1-16' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-0' class='srclink' href='../src/asn1_cereal/src/lib.rs.html#1-20' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'>
 <h1 id='asn1-cereal' class='section-header'><a href='#asn1-cereal'>asn1-cereal</a></h1>
 <p>A collection of encoders and decoders for BER, DER and ASN.1.</p>
@@ -55,8 +55,10 @@
 <p>The grains of this library are a collection of traits and macros, that
 allow serialization and deserialization of rust types to and from ASN.1.</p>
 
-<p>New users of this library probably want to start with the <a href="serial/index.html"><code>serial</code></a> library.</p>
-</div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<p>The <code>Asn1Info</code>, <code>BerSerialize</code> and <code>BerDeserialize</code> traits are what
+most users will want to use.</p>
+</div><h2 id='reexports' class='section-header'><a href="#reexports">Reexports</a></h2>
+<table><tr><td><code>pub use info::<a class='trait' href='../asn1_cereal/info/trait.Asn1Info.html' title='asn1_cereal::info::Asn1Info'>Asn1Info</a>;</code></td></tr><tr><td><code>pub use ber::serial::traits::{<a class='trait' href='../asn1_cereal/ber/serial/traits/trait.BerSerialize.html' title='asn1_cereal::ber::serial::traits::BerSerialize'>BerSerialize</a>, <a class='trait' href='../asn1_cereal/ber/serial/traits/trait.BerDeserialize.html' title='asn1_cereal::ber::serial::traits::BerDeserialize'>BerDeserialize</a>};</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
 <table>
                        <tr class=' module-item'>
                            <td><a class='mod' href='ber/index.html'
@@ -73,13 +75,6 @@ allow serialization and deserialization of rust types to and from ASN.1.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
-                           <td><a class='mod' href='enc/index.html'
-                                  title='asn1_cereal::enc'>enc</a></td>
-                           <td class='docblock short'>
-                                <p>Encoding rules to use when encoding or decoding ASN.1.</p>
-                           </td>
-                       </tr>
-                       <tr class=' module-item'>
                            <td><a class='mod' href='err/index.html'
                                   title='asn1_cereal::err'>err</a></td>
                            <td class='docblock short'>
@@ -87,10 +82,10 @@ allow serialization and deserialization of rust types to and from ASN.1.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
-                           <td><a class='mod' href='serial/index.html'
-                                  title='asn1_cereal::serial'>serial</a></td>
+                           <td><a class='mod' href='info/index.html'
+                                  title='asn1_cereal::info'>info</a></td>
                            <td class='docblock short'>
-                                <p>Traits for serializing and deserializing rust types from/to ASN.1.</p>
+                                
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -134,7 +129,7 @@ allow serialization and deserialization of rust types to and from ASN.1.</p>
                                   title='asn1_cereal::asn1_newtype!'>asn1_newtype!</a></td>
                            <td class='docblock short'>
                                 <p>This macro is a compact way of defining both of the
-Asn1 serialization traits - Asn1Serialize and Asn1Deserialize
+Asn1 serialization traits - BerSerialize and BerDeserialize
 - for a rust newtype, that represents an ASN.1 type definition.</p>
                            </td>
                        </tr>
@@ -142,14 +137,14 @@ Asn1 serialization traits - Asn1Serialize and Asn1Deserialize
                            <td><a class='macro' href='macro.asn1_newtype_deserialize!.html'
                                   title='asn1_cereal::asn1_newtype_deserialize!'>asn1_newtype_deserialize!</a></td>
                            <td class='docblock short'>
-                                <p>This macro defines the Asn1Serialize trait for a rust newtype.</p>
+                                <p>This macro defines the BerSerialize trait for a rust newtype.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class='macro' href='macro.asn1_newtype_serialize!.html'
                                   title='asn1_cereal::asn1_newtype_serialize!'>asn1_newtype_serialize!</a></td>
                            <td class='docblock short'>
-                                <p>This macro defines the Asn1Serialize trait for a rust newtype.</p>
+                                <p>This macro defines the BerSerialize trait for a rust newtype.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -157,7 +152,7 @@ Asn1 serialization traits - Asn1Serialize and Asn1Deserialize
                                   title='asn1_cereal::asn1_sequence!'>asn1_sequence!</a></td>
                            <td class='docblock short'>
                                 <p>This macro is a compact way of defining all three of the
-Asn1 traits - Asn1Info, Asn1Serialize and Asn1Deserialize -
+Asn1 traits - Asn1Info, BerSerialize and BerDeserialize -
 for a rust struct, that represents an ASN.1 sequence.</p>
                            </td>
                        </tr>
@@ -165,7 +160,7 @@ for a rust struct, that represents an ASN.1 sequence.</p>
                            <td><a class='macro' href='macro.asn1_sequence_deserialize!.html'
                                   title='asn1_cereal::asn1_sequence_deserialize!'>asn1_sequence_deserialize!</a></td>
                            <td class='docblock short'>
-                                <p>This macro defines the Asn1Deserialize trait for a rust struct. The code generated
+                                <p>This macro defines the BerDeserialize trait for a rust struct. The code generated
 will deserialize the specified fields in the order that they are given.</p>
                            </td>
                        </tr>
@@ -179,10 +174,31 @@ class or tag, consider using the asn1_info! macro.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
+                           <td><a class='macro' href='macro.asn1_sequence_of!.html'
+                                  title='asn1_cereal::asn1_sequence_of!'>asn1_sequence_of!</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='macro' href='macro.asn1_sequence_of_deserialize!.html'
+                                  title='asn1_cereal::asn1_sequence_of_deserialize!'>asn1_sequence_of_deserialize!</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='macro' href='macro.asn1_sequence_of_serialize!.html'
+                                  title='asn1_cereal::asn1_sequence_of_serialize!'>asn1_sequence_of_serialize!</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
                            <td><a class='macro' href='macro.asn1_sequence_serialize!.html'
                                   title='asn1_cereal::asn1_sequence_serialize!'>asn1_sequence_serialize!</a></td>
                            <td class='docblock short'>
-                                <p>This macro defines the Asn1Serialize trait for a rust struct. The code generated
+                                <p>This macro defines the BerSerialize trait for a rust struct. The code generated
 will serialize the specified fields in the order that they are given.</p>
                            </td>
                        </tr></table></section>

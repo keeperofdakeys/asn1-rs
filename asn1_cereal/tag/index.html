@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-504' class='srclink' href='../../src/asn1_cereal/src/tag.rs.html#1-575' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-4' class='srclink' href='../../src/asn1_cereal/src/tag.rs.html#1-543' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>Encoding and decoding of tag and length bytes for BER.</p>
 </div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
 <table>
@@ -56,13 +56,6 @@
                                   title='asn1_cereal::tag::Tag'>Tag</a></td>
                            <td class='docblock short'>
                                 <p>A struct containing the information from an ASN.1 tag, which represents an ASN.1 element.</p>
-                           </td>
-                       </tr>
-                       <tr class=' module-item'>
-                           <td><a class='struct' href='struct.TagLen.html'
-                                  title='asn1_cereal::tag::TagLen'>TagLen</a></td>
-                           <td class='docblock short'>
-                                <p>A struct containing the ASN.1 tag and length of an ASN.1 element.</p>
                            </td>
                        </tr></table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
 <table>
@@ -78,6 +71,21 @@
                                   title='asn1_cereal::tag::Len'>Len</a></td>
                            <td class='docblock short'>
                                 <p>An enum representing the length of an ASN.1 element.</p>
+                           </td>
+                       </tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.read_taglen.html'
+                                  title='asn1_cereal::tag::read_taglen'>read_taglen</a></td>
+                           <td class='docblock short'>
+                                <p>Given an iterator over a byte stream, read and return a <code>TagLen</code> struct.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.write_taglen.html'
+                                  title='asn1_cereal::tag::write_taglen'>write_taglen</a></td>
+                           <td class='docblock short'>
+                                <p>Write the ASN.1 representation of this <code>TagNum</code> struct to the given writer.</p>
                            </td>
                        </tr></table><h2 id='types' class='section-header'><a href="#types">Type Definitions</a></h2>
 <table>

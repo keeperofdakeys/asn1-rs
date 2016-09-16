@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `serial` mod in crate `asn1_cereal`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, serial">
+
+    <title>asn1_cereal::ber::serial - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../../index.html'>asn1_cereal</a>::<wbr><a href='../index.html'>ber</a></p><script>window.sidebarCurrent = {name: 'serial', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Module <a href='../../index.html'>asn1_cereal</a>::<wbr><a href='../index.html'>ber</a>::<wbr><a class='mod' href=''>serial</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-505' class='srclink' href='../../../src/asn1_cereal/src/ber/serial/mod.rs.html#1-72' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>Traits for serializing and deserializing rust types from/to ASN.1.</p>
+
+<p>The traits in this module can be used to implement serialization and
+deserialization for a Rust type from/to ASN.1. For built-in types,
+this module provides an implementation already. For more complex
+types (like structs and enumms), macros are provided to generate
+an implementation for them.</p>
+
+<h1 id='usage' class='section-header'><a href='#usage'>Usage</a></h1>
+<p>The below example defines a Rust struct, and uses a macro to generate
+the code required to serialize it to an ASN.1 sequence, or to deserialize
+an ASN.1 sequence into an instance of the struct.</p>
+
+<p>The example then uses the <code>BerSerialize::serialize</code> function to encode
+the struct to a DER-encoded byte stream.</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='attribute'>#[<span class='ident'>macro_use</span>]</span> <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>asn1_cereal</span>; <span class='kw'>fn</span> <span class='ident'>main</span>() {
+  <span class='kw'>struct</span> <span class='ident'>ShortSequence</span> {
+    <span class='ident'>z</span>: <span class='ident'>u64</span>,
+    <span class='ident'>y</span>: <span class='ident'>u32</span>,
+  }
+
+  <span class='macro'>asn1_sequence</span><span class='macro'>!</span>(
+    <span class='ident'>ShortSequence</span>,
+    <span class='string'>&quot;SHORT_SEQUENCE&quot;</span>,
+    <span class='ident'>z</span>,
+    <span class='ident'>y</span>
+  );
+
+  <span class='kw'>use</span> <span class='ident'>asn1_cereal</span>::<span class='ident'>BerSerialize</span>;
+
+  <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='ident'>ShortSequence</span>{ <span class='ident'>z</span>: <span class='number'>1</span>, <span class='ident'>y</span>: <span class='number'>2</span> };
+  <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>bytes</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
+  <span class='ident'>BerSerialize</span>::<span class='ident'>serialize</span>(<span class='kw-2'>&amp;</span><span class='ident'>data</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>bytes</span>).<span class='ident'>unwrap</span>();
+}</pre>
+</div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='assign/index.html'
+                                  title='asn1_cereal::ber::serial::assign'>assign</a></td>
+                           <td class='docblock short'>
+                                <p>Macros to generate the implementation of the serialization traits for Rust
+newtypes, as ASN.1 type assignments.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='choice/index.html'
+                                  title='asn1_cereal::ber::serial::choice'>choice</a></td>
+                           <td class='docblock short'>
+                                <p>Macros to generate the implementation of the serialization traits for Rust
+enums, as ASN.1 choice.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='int/index.html'
+                                  title='asn1_cereal::ber::serial::int'>int</a></td>
+                           <td class='docblock short'>
+                                <p>Implementation of the serialization traits for Rust integers.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='seq/index.html'
+                                  title='asn1_cereal::ber::serial::seq'>seq</a></td>
+                           <td class='docblock short'>
+                                <p>Macros to generate the implementation of the serialization traits for Rust
+structs, as ASN.1 sequences.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='seq_of/index.html'
+                                  title='asn1_cereal::ber::serial::seq_of'>seq_of</a></td>
+                           <td class='docblock short'>
+                                <p>Macros to generate the implementation of the serialization traits for Rust
+iterators, as ASN.1 sequence of.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='str/index.html'
+                                  title='asn1_cereal::ber::serial::str'>str</a></td>
+                           <td class='docblock short'>
+                                <p>Implementation of the serialization traits for Rust strings.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='traits/index.html'
+                                  title='asn1_cereal::ber::serial::traits'>traits</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr></table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "asn1_cereal";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script defer src="../../../search-index.js"></script>
+</body>
+</html>

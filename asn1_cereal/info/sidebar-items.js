@@ -1,0 +1,1 @@
+initSidebarItems({"trait":[["Asn1Info","Provides ASN.1 information about a Rust type, including the BER tag and ASN.1 type."]]});
