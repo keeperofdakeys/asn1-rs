@@ -19,7 +19,7 @@ macro_rules! ber_sequence_of_serialize {
     fn serialize_value<E: $crate::BerEncRules, W: ::std::io::Write>
         (&self, e: E, writer: &mut W) -> Result<(), $crate::err::EncodeError> {
       // Call serialize_enc on each item.
-      for item in self.iter() {
+      for item in (self).into_iter() {
         try!($crate::BerSerialize::serialize_enc(item, e, writer));
       }
       Ok(())
@@ -116,5 +116,5 @@ macro_rules! ber_sequence_of_deserialize {
   );
 }
 
-asn1_info!(Vec<T> => T, 0x3, 0x1, true, "TYPE2");
+asn1_info!(Vec<T> => T, ::tag::Class::Universal, 16, true, "SEQUENCE OF");
 ber_sequence_of!(Vec<T> => T);
