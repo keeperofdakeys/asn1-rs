@@ -2,6 +2,11 @@
 name = "asn1-cereal"
 version = "0.1.0"
 authors = ["Josh <keeperofdakeys@gmail.com>"]
+description = "ASN.1 and BER serialization"
+repository = "https://github.com/keeperofdakeys/asn1-rs"
+documentation = "https://docs.rs/asn1-cereal"
+keywords = ["asn1", "ber", "der"]
+license = "MIT/APACHE"
 
 [lib]
 path="src/lib.rs"
