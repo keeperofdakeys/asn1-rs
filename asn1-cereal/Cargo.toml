@@ -6,7 +6,7 @@ description = "ASN.1 and BER serialization"
 repository = "https://github.com/keeperofdakeys/asn1-rs"
 documentation = "https://docs.rs/asn1-cereal"
 keywords = ["asn1", "ber", "der"]
-license = "MIT/APACHE"
+license = "MIT/Apache-2.0"
 
 [lib]
 path="src/lib.rs"
