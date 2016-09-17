@@ -37,30 +37,6 @@
 //! }
 //! ```
 
-#[macro_export]
-/// This macro defines the Asn1Info trait for a rust type.
-///
-/// This information is used to match tag information during deserialization,
-/// so it should match the expected values in the ASN.1 stream.
-macro_rules! asn1_info {
-  ($rs_type:ty, $class:expr, $tagnum:expr, $constructed:expr, $asn1_ty:expr) => (
-    impl $crate::Asn1Info for $rs_type {
-      fn asn1_tag() -> $crate::tag::Tag {
-        $crate::tag::Tag {
-          class: ($class as u8).into(),
-          tagnum: $tagnum as $crate::tag::TagNum,
-          constructed: $constructed,
-
-        }
-      }
-
-      fn asn1_type() -> $crate::tag::Type {
-        $crate::tag::Type::from($asn1_ty)
-      }
-    }
-  )
-}
-
 pub mod traits;
 mod prim;
 

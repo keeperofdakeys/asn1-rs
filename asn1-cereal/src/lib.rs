@@ -13,6 +13,7 @@
 pub mod tag;
 pub mod err;
 pub mod byte;
+#[macro_use]
 pub mod info;
 pub mod ber;
 

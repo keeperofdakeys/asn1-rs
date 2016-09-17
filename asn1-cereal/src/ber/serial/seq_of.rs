@@ -6,33 +6,44 @@ macro_rules! ber_sequence_of {
   ($rs_type:ty) => (
     ber_sequence_of_serialize!($rs_type);
     ber_sequence_of_deserialize!($rs_type);
-  )
+  );
+  ($rs_type:ty => $gen:ident) => (
+    ber_sequence_of_serialize!($rs_type => $gen);
+    ber_sequence_of_deserialize!($rs_type => $gen);
+  );
 }
 
 #[macro_export]
 macro_rules! ber_sequence_of_serialize {
-  ($rs_type:ty) => (
-    impl $crate::BerSerialize for $rs_type
-        where $rs_type: std::iter::IntoIterator {
-      fn serialize_value<E: $crate::BerEncRules, W: std::io::Write>
-          (&self, e: E, writer: &mut W) -> Result<(), $crate::err::EncodeError> {
-        // Call serialize_enc on each item.
-        for item in self.iter() {
-          try!($crate::BerSerialize::serialize_enc(item, e, writer));
-        }
-        Ok(())
+  (impl: $rs_type:ty) => (
+    fn serialize_value<E: $crate::BerEncRules, W: ::std::io::Write>
+        (&self, e: E, writer: &mut W) -> Result<(), $crate::err::EncodeError> {
+      // Call serialize_enc on each item.
+      for item in self.iter() {
+        try!($crate::BerSerialize::serialize_enc(item, e, writer));
       }
+      Ok(())
     }
-  )
+  );
+  ($rs_type:ty) => (
+    impl $crate::BerSerialize for $rs_type {
+      ber_sequence_of_serialize!{impl: $rs_type}
+    }
+  );
+  ($rs_type:ty => $gen:ident) => (
+    impl<$gen: $crate::BerSerialize> $crate::BerSerialize for $rs_type {
+      ber_sequence_of_serialize!{impl: $rs_type}
+    }
+  );
 }
 
 #[macro_export]
 macro_rules! ber_sequence_of_deserialize {
-  (impl => $rs_type:ty) => (
-    fn deserialize_with_tag<E: $crate::BerEncRules, I: Iterator<Item=std::io::Result<u8>>>
+  (impl: $rs_type:ty) => (
+    fn deserialize_with_tag<E: $crate::BerEncRules, I: Iterator<Item=::std::io::Result<u8>>>
         (e: E, reader: &mut I, tag: $crate::tag::Tag, len: $crate::tag::Len) ->
         Result<Self, $crate::err::DecodeError> {
-      struct SeqOfDecoder<T, F, J: Iterator<Item=std::io::Result<u8>>> {
+      struct SeqOfDecoder<T, F, J: Iterator<Item=::std::io::Result<u8>>> {
         len: $crate::tag::Len,
         reader: $crate::byte::ByteReader<J>,
         e: F,
@@ -41,7 +52,7 @@ macro_rules! ber_sequence_of_deserialize {
 
       impl<T, F, J> Iterator for SeqOfDecoder<T, F, J> where
           F: $crate::BerEncRules,
-          J: Iterator<Item=std::io::Result<u8>>,
+          J: Iterator<Item=::std::io::Result<u8>>,
           T: $crate::BerDeserialize {
         type Item = Result<T, $crate::err::DecodeError>;
 
@@ -51,12 +62,12 @@ macro_rules! ber_sequence_of_deserialize {
           // Put this first to handle zero-length elements.
           match self.len.partial_cmp(&self.reader.count) {
             // Return an error when we've decoded too much.
-            Some(std::cmp::Ordering::Less) => return Some(Err($crate::err::DecodeError::GreaterLen)),
+            Some(::std::cmp::Ordering::Less) => return Some(Err($crate::err::DecodeError::GreaterLen)),
             // Finish loop when equal, we must be finished.
-            Some(std::cmp::Ordering::Equal) => return None,
+            Some(::std::cmp::Ordering::Equal) => return None,
             // Continue when we are still decoding, or using
             // indefinite length encoding.
-            Some(std::cmp::Ordering::Greater) | None => {},
+            Some(::std::cmp::Ordering::Greater) | None => {},
           }
 
           let (tag, len) = match $crate::tag::read_taglen(&mut self.reader) {
@@ -89,23 +100,21 @@ macro_rules! ber_sequence_of_deserialize {
         reader: $crate::byte::ByteReader::new(reader),
         _p: None
       };
-      let v: Result<$rs_type, _> = std::iter::FromIterator::from_iter(decoder.by_ref());
+      let v: Result<$rs_type, _> = ::std::iter::FromIterator::from_iter(decoder.by_ref());
       Ok(try!(v))
     }
   );
   ($rs_type:ty) => (
     impl $crate::BerDeserialize for $rs_type {
-      ber_sequence_of_deserialize!{impl => $rs_type}
+      ber_sequence_of_deserialize!{impl: $rs_type}
     }
   );
-  ($rs_type:ty, $gen:tt) => (
-    impl<$gen> $crate::BerDeserialize for $rs_type {
-      ber_sequence_of_deserialize!{impl => $rs_type}
+  ($rs_type:ty => $gen:ident) => (
+    impl<$gen: $crate::BerDeserialize> $crate::BerDeserialize for $rs_type {
+      ber_sequence_of_deserialize!{impl: $rs_type}
     }
   );
 }
 
-use std;
-
-asn1_info!(Vec<u64>, 0x3, 0x1, true, "TYPE2");
-ber_sequence_of!(Vec<u64>);
+asn1_info!(Vec<T> => T, 0x3, 0x1, true, "TYPE2");
+ber_sequence_of!(Vec<T> => T);
