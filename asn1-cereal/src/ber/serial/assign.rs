@@ -1,8 +1,8 @@
 //! Macros to generate the implementation of the serialization traits for Rust
 //! newtypes, as ASN.1 type assignments.
 //!
-//! You can either define both `asn1_info!` and `asn1_newtype!`, or all three
-//! of `asn1_info!`, `asn1_newtype_serialize!` and `asn1_newtype_deserialize!`.
+//! You can either define both `asn1_info!` and `ber_newtype!`, or all three
+//! of `asn1_info!`, `ber_newtype_serialize!` and `ber_newtype_deserialize!`.
 //!
 //! IE:
 //!
@@ -21,19 +21,19 @@
 //!   }
 //!
 //!   asn1_sequence_info!(Type1, "TYPE1");
-//!   asn1_sequence_serialize!(Type1, a);
-//!   asn1_sequence_deserialize!(Type1, a);
+//!   ber_sequence_serialize!(Type1, a);
+//!   ber_sequence_deserialize!(Type1, a);
 //!
 //!   struct Type2 (Type1);
 //!   asn1_info!(Type2, 0x3, 0x1, true, "TYPE2");
-//!   asn1_newtype!(Type2);
+//!   ber_newtype!(Type2);
 //!
 //!   // OR
 //!
 //!   struct Type3 (Type1);
 //!   asn1_info!(Type3, 0x3, 0x1, true, "TYPE3");
-//!   asn1_newtype_serialize!(Type3);
-//!   asn1_newtype_deserialize!(Type3);
+//!   ber_newtype_serialize!(Type3);
+//!   ber_newtype_deserialize!(Type3);
 //! }
 //! ```
 
@@ -41,19 +41,19 @@
 /// This macro is a compact way of defining both of the
 /// Asn1 serialization traits - BerSerialize and BerDeserialize
 /// - for a rust newtype, that represents an ASN.1 type definition.
-macro_rules! asn1_newtype {
+macro_rules! ber_newtype {
   ($rs_type:ident) => (
-    asn1_newtype_serialize!($rs_type);
-    asn1_newtype_deserialize!($rs_type);
+    ber_newtype_serialize!($rs_type);
+    ber_newtype_deserialize!($rs_type);
   )
 }
 
 #[macro_export]
 /// This macro defines the BerSerialize trait for a rust newtype.
-macro_rules! asn1_newtype_serialize {
+macro_rules! ber_newtype_serialize {
   ($rs_type:ident) => (
     impl $crate::BerSerialize for $rs_type {
-      fn serialize_enc<E: $crate::ber::BerEncRules, W: std::io::Write>
+      fn serialize_enc<E: $crate::BerEncRules, W: std::io::Write>
           (&self, e: E, writer: &mut W) -> Result<(), $crate::err::EncodeError> {
         // If encoding uses implicit tag, skip our tag.
         if E::tag_rules() == $crate::ber::enc::TagEnc::Implicit {
@@ -80,7 +80,7 @@ macro_rules! asn1_newtype_serialize {
         Ok(())
       }
 
-      fn serialize_value<E: $crate::ber::BerEncRules, W: std::io::Write>
+      fn serialize_value<E: $crate::BerEncRules, W: std::io::Write>
           (&self, e: E, writer: &mut W) -> Result<(), $crate::err::EncodeError> {
         self.0.serialize_enc(e, writer)
       }
@@ -90,10 +90,10 @@ macro_rules! asn1_newtype_serialize {
 
 #[macro_export]
 /// This macro defines the BerSerialize trait for a rust newtype.
-macro_rules! asn1_newtype_deserialize {
+macro_rules! ber_newtype_deserialize {
   ($rs_type:ident) => (
     impl $crate::BerDeserialize for $rs_type {
-      fn _deserialize_with_tag<E: $crate::ber::BerEncRules, I: Iterator<Item=std::io::Result<u8>>>
+      fn _deserialize_with_tag<E: $crate::BerEncRules, I: Iterator<Item=std::io::Result<u8>>>
           (e: E, reader: &mut I, tag: $crate::tag::Tag, len: $crate::tag::Len)
           -> Option<Result<Self, $crate::err::DecodeError>> {
         let my_tag = <Self as $crate::Asn1Info>::asn1_tag();

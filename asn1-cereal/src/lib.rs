@@ -4,9 +4,8 @@
 //! The grains of this library are a collection of traits and macros, that
 //! allow serialization and deserialization of rust types to and from ASN.1.
 //!
-//! New users of this library probably want to start with the [`serial`] library.
-//!
-//! [`serial`]: serial/index.html
+//! The `Asn1Info`, `BerSerialize` and `BerDeserialize` traits are what
+//! most users will want to use.
 
 #![cfg_attr(feature="clippy", feature(plugin))]
 #![cfg_attr(feature="clippy", plugin(clippy))]
@@ -19,4 +18,4 @@ pub mod ber;
 
 pub use info::Asn1Info;
 pub use ber::serial::traits::{BerSerialize, BerDeserialize};
-pub use tag::{Type, Class, LenNum, Len, Tag};
+pub use ber::enc::{BER, DER, BERAlt, BerEncRules};

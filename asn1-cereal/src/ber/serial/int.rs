@@ -5,13 +5,12 @@ use std::io;
 use ::{BerSerialize, BerDeserialize, Asn1Info};
 use tag;
 use err;
-use ber;
 use byte::{read_byte, write_byte};
 
 use std::cmp;
 
 /// Generate the ASN.1 int implementation for an int type.
-macro_rules! asn1_cereal_int {
+macro_rules! ber_cereal_int {
   ($rs_type:ty, 1, $unsigned:expr) => (
     impl Asn1Info for $rs_type {
       fn asn1_tag() -> tag::Tag {
@@ -28,7 +27,7 @@ macro_rules! asn1_cereal_int {
     }
 
     impl BerSerialize for $rs_type {
-      fn serialize_value<E: ber::BerEncRules, W: io::Write>
+      fn serialize_value<E: ::BerEncRules, W: io::Write>
           (&self, _: E, writer: &mut W) -> Result<(), err::EncodeError> {
         try!(write_byte(writer, *self as u8));
         Ok(())
@@ -51,7 +50,7 @@ macro_rules! asn1_cereal_int {
     }
 
     impl BerSerialize for $rs_type {
-      fn serialize_value<E: ber::BerEncRules, W: io::Write>
+      fn serialize_value<E: ::BerEncRules, W: io::Write>
           (&self, _: E, writer: &mut W) -> Result<(), err::EncodeError> {
         let mut started = false;
         // Loop through bytes in int backwards, start writing when first non-zero byte is encounted.
@@ -82,7 +81,7 @@ macro_rules! asn1_cereal_int {
     }
 
     impl BerDeserialize for $rs_type {
-      fn deserialize_value<E: ber::BerEncRules, I: Iterator<Item=io::Result<u8>>>
+      fn deserialize_value<E: ::BerEncRules, I: Iterator<Item=io::Result<u8>>>
           (_: E, reader: &mut I, len: tag::Len) -> Result<Self, err::DecodeError> {
         let len_num = try!(len.as_num().ok_or(err::DecodeError::PrimIndef));
 
@@ -106,26 +105,26 @@ macro_rules! asn1_cereal_int {
   );
 }
 
-asn1_cereal_int!(i8, 1, false);
-asn1_cereal_int!(i16, 2, false);
-asn1_cereal_int!(i32, 4, false);
-asn1_cereal_int!(i64, 8, false);
+ber_cereal_int!(i8, 1, false);
+ber_cereal_int!(i16, 2, false);
+ber_cereal_int!(i32, 4, false);
+ber_cereal_int!(i64, 8, false);
 
-asn1_cereal_int!(u8, 1, true);
-asn1_cereal_int!(u16, 2, true);
-asn1_cereal_int!(u32, 4, true);
-asn1_cereal_int!(u64, 8, true);
-
-#[cfg(target_pointer_width = "16")]
-asn1_cereal_int! { isize, 2, false }
-#[cfg(target_pointer_width = "32")]
-asn1_cereal_int! { isize, 4, false }
-#[cfg(target_pointer_width = "64")]
-asn1_cereal_int! { isize, 8, false }
+ber_cereal_int!(u8, 1, true);
+ber_cereal_int!(u16, 2, true);
+ber_cereal_int!(u32, 4, true);
+ber_cereal_int!(u64, 8, true);
 
 #[cfg(target_pointer_width = "16")]
-asn1_cereal_int! { usize, 2, true }
+ber_cereal_int! { isize, 2, false }
 #[cfg(target_pointer_width = "32")]
-asn1_cereal_int! { usize, 4, true }
+ber_cereal_int! { isize, 4, false }
 #[cfg(target_pointer_width = "64")]
-asn1_cereal_int! { usize, 8, true }
+ber_cereal_int! { isize, 8, false }
+
+#[cfg(target_pointer_width = "16")]
+ber_cereal_int! { usize, 2, true }
+#[cfg(target_pointer_width = "32")]
+ber_cereal_int! { usize, 4, true }
+#[cfg(target_pointer_width = "64")]
+ber_cereal_int! { usize, 8, true }

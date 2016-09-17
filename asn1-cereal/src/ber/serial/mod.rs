@@ -22,7 +22,7 @@
 //!     y: u32,
 //!   }
 //!
-//!   asn1_sequence!(
+//!   ber_sequence!(
 //!     ShortSequence,
 //!     "SHORT_SEQUENCE",
 //!     z,

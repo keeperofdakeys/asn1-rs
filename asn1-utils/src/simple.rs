@@ -4,8 +4,7 @@ extern crate argparse;
 
 use std::io;
 
-use asn1_cereal::{BerSerialize, BerDeserialize};
-use asn1_cereal::ber::{DER, BER, BERAlt};
+use asn1_cereal::{BerSerialize, BerDeserialize, DER, BER, BERAlt};
 use argparse::{ArgumentParser, StoreTrue};
 
 fn main() {
@@ -18,17 +17,17 @@ fn main() {
 
   if opts.dump {
     let mut writer = io::BufWriter::new(&mut output);
-    seq.serialize_enc(DER, &mut writer).unwrap();
+    seq.serialize_enc(BERAlt, &mut writer).unwrap();
     return;
   }
   {
     let mut writer = io::BufWriter::new(&mut buffer);
-    seq.serialize_enc(DER, &mut writer).unwrap();
+    seq.serialize_enc(BERAlt, &mut writer).unwrap();
   }
   println!("{:?}", buffer);
   {
     let mut reader = buffer.iter().map(|x| Ok(*x) as Result<u8, std::io::Error>);
-    let seq = IntSequence::deserialize_enc(DER, &mut reader).unwrap();
+    let seq = IntSequence::deserialize_enc(BERAlt, &mut reader).unwrap();
     println!("{:?}", seq);
   }
 }
@@ -44,7 +43,7 @@ asn1_info!(
   "SOMESTRING"
 );
 
-asn1_newtype!(SomeString);
+ber_newtype!(SomeString);
 
 #[derive(Debug)]
 struct IntSequence {
@@ -53,7 +52,7 @@ struct IntSequence {
   c: SomeString,
 }
 
-asn1_sequence!(
+ber_sequence!(
   IntSequence,
   "INTSEQ",
   a,

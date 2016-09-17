@@ -1,8 +1,14 @@
-//! Encoding rules to use when encoding or decoding ASN.1.
+//! Encoding rules to use for BER.
 //!
-//! The defaults are to use the DER encoding during serialization,
-//! and to use the BER encoding during deserliazation (all valid
-//! BER is accepted, including DER).
+//! This module provides encoding rules that can be used with
+//! the `BerSerialize` and `BerDerserialize` traits.
+//!
+//! ```
+//! use asn1_cereal::{BerSerialize, DER};
+//!
+//! let mut bytes: Vec<u8> = Vec::new();
+//! let _ = BerSerialize::serialize_enc(&4u64, DER, &mut bytes);
+//! ```
 
 #[derive(PartialEq)]
 /// An enum which determines how tags are encoded.

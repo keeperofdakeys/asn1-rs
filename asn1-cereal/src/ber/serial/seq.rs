@@ -1,8 +1,8 @@
 //! Macros to generate the implementation of the serialization traits for Rust
 //! structs, as ASN.1 sequences.
 //!
-//! You can either use the shortcut `asn1_sequence!` macro, or each of
-//! `asn1_sequence_info!`, `asn1_sequence_serialize!` and `asn1_sequence_deserialize!`.
+//! You can either use the shortcut `ber_sequence!` macro, or each of
+//! `asn1_sequence_info!`, `ber_sequence_serialize!` and `ber_sequence_deserialize!`.
 //!
 //! ```
 //! #[macro_use] extern crate asn1_cereal; fn main() {
@@ -11,7 +11,7 @@
 //!     y: u32,
 //!   }
 //!
-//!   asn1_sequence!(
+//!   ber_sequence!(
 //!     ShortSequence,
 //!     "SHORT_SEQUENCE",
 //!     z,
@@ -27,8 +27,8 @@
 //!   }
 //!
 //!   asn1_sequence_info!(SomeSequence, "SOME_SEQUENCE");
-//!   asn1_sequence_serialize!(SomeSequence, a, b, c);
-//!   asn1_sequence_deserialize!(SomeSequence, a, b, c);
+//!   ber_sequence_serialize!(SomeSequence, a, b, c);
+//!   ber_sequence_deserialize!(SomeSequence, a, b, c);
 //! }
 //! ```
 //!
@@ -43,11 +43,11 @@
 /// that they are encoded to, and decoded from ASN.1. If some form of
 /// procedural macros are eventually stabilised, listing the fields
 /// in the macro might no longer be required.
-macro_rules! asn1_sequence {
+macro_rules! ber_sequence {
   ($rs_type:ident, $asn1_ty:expr, $($item:ident),*) => (
     asn1_sequence_info!($rs_type, $asn1_ty);
-    asn1_sequence_serialize!($rs_type, $($item),*);
-    asn1_sequence_deserialize!($rs_type, $($item),*);
+    ber_sequence_serialize!($rs_type, $($item),*);
+    ber_sequence_deserialize!($rs_type, $($item),*);
   )
 }
 
@@ -76,10 +76,10 @@ macro_rules! asn1_sequence_info {
 #[macro_export]
 /// This macro defines the BerSerialize trait for a rust struct. The code generated
 /// will serialize the specified fields in the order that they are given.
-macro_rules! asn1_sequence_serialize {
+macro_rules! ber_sequence_serialize {
   ($rs_type:ty, $($item:ident),*) => (
     impl $crate::BerSerialize for $rs_type {
-      fn serialize_value<E: $crate::ber::BerEncRules, W: std::io::Write>
+      fn serialize_value<E: $crate::BerEncRules, W: std::io::Write>
           (&self, e: E, writer: &mut W) -> Result<(), $crate::err::EncodeError> {
         let mut bytes = Vec::new();
         let mut count: u64 = 0;
@@ -113,10 +113,10 @@ macro_rules! asn1_sequence_serialize {
 #[macro_export]
 /// This macro defines the BerDeserialize trait for a rust struct. The code generated
 /// will deserialize the specified fields in the order that they are given.
-macro_rules! asn1_sequence_deserialize {
+macro_rules! ber_sequence_deserialize {
   ($rs_type:ident, $($item:ident),*) => (
     impl $crate::BerDeserialize for $rs_type {
-      fn deserialize_value<E: $crate::ber::BerEncRules, I: Iterator<Item=std::io::Result<u8>>>
+      fn deserialize_value<E: $crate::BerEncRules, I: Iterator<Item=std::io::Result<u8>>>
           (e: E, reader: &mut I, _: $crate::tag::Len) -> Result<Self, $crate::err::DecodeError> {
         let mut count: u64 = 0;
         $(

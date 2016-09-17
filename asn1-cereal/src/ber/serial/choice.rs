@@ -1,8 +1,8 @@
 //! Macros to generate the implementation of the serialization traits for Rust
 //! enums, as ASN.1 choice.
 //!
-//! You can either define both `asn1_info!` and `asn1_choice!`, or all three
-//! of `asn1_info!`, `asn1_choice_serialize!` and `asn1_choice_deserialize!`.
+//! You can either define both `asn1_info!` and `ber_choice!`, or all three
+//! of `asn1_info!`, `ber_choice_serialize!` and `ber_choice_deserialize!`.
 //!
 //! ```
 //! #[macro_use] extern crate asn1_cereal; fn main() {
@@ -17,29 +17,29 @@
 //!   };
 //!
 //!   asn1_info!(Enum1, 0x3, 0x1, true, "CHOICE1");
-//!   asn1_choice!(Enum1, A, B);
+//!   ber_choice!(Enum1, A, B);
 //!
 //!   // OR
 //!
 //!   asn1_info!(Enum2, 0x3, 0x1, true, "CHOICE2");
-//!   asn1_choice_serialize!(Enum2);
-//!   asn1_choice_deserialize!(Enum2, A, B);
+//!   ber_choice_serialize!(Enum2);
+//!   ber_choice_deserialize!(Enum2, A, B);
 //! }
 //! ```
 
 #[macro_export]
-macro_rules! asn1_choice {
+macro_rules! ber_choice {
   ($rs_type:ident, $($item:ident),*) => (
-    asn1_choice_serialize!($rs_type);
-    asn1_choice_deserialize!($rs_type, $($item),*);
+    ber_choice_serialize!($rs_type);
+    ber_choice_deserialize!($rs_type, $($item),*);
   )
 }
 
 #[macro_export]
-macro_rules! asn1_choice_serialize {
+macro_rules! ber_choice_serialize {
   ($rs_type:ident) => (
     impl $crate::BerSerialize for $rs_type {
-      fn serialize_enc<E: $crate::ber::BerEncRules, W: std::io::Write>
+      fn serialize_enc<E: $crate::BerEncRules, W: std::io::Write>
           (&self, e: E, writer: &mut W) -> Result<(), $crate::err::EncodeError> {
         // FIXME: Can't call self.0 to call function on inner type.
         //
@@ -48,7 +48,7 @@ macro_rules! asn1_choice_serialize {
         unimplemented!();
       }
 
-      fn serialize_value<E: $crate::ber::BerEncRules, W: std::io::Write>
+      fn serialize_value<E: $crate::BerEncRules, W: std::io::Write>
           (&self, e: E, writer: &mut W) -> Result<(), $crate::err::EncodeError> {
         // FIXME: Can't call self.0 to call function on inner type.
         //
@@ -61,7 +61,7 @@ macro_rules! asn1_choice_serialize {
 }
 
 #[macro_export]
-macro_rules! asn1_choice_deserialize {
+macro_rules! ber_choice_deserialize {
   ($rs_type:ident, $($item:ident),*) => (
     impl $crate::BerDeserialize for $rs_type {
       // FIXME: We can't call asn1_tag() on the inner type of the enum variant,
@@ -78,7 +78,7 @@ macro_rules! asn1_choice_deserialize {
       //   }
       // }
 
-      fn deserialize_value<E: $crate::ber::BerEncRules, I: Iterator<Item=std::io::Result<u8>>>
+      fn deserialize_value<E: $crate::BerEncRules, I: Iterator<Item=std::io::Result<u8>>>
           (e: E, reader: &mut I, _: $crate::tag::Len) -> Result<Self, $crate::err::DecodeError> {
         // This should never be called?
         unimplemented!();
