@@ -1,0 +1,11 @@
+[package]
+name = "asn1-nom"
+version = "0.1.0"
+authors = ["Josh <keeperofdakeys@gmail.com>"]
+
+[[bin]]
+path = "src/lib.rs"
+name = "run"
+
+[dependencies]
+nom = "^1.2"
