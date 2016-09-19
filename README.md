@@ -5,20 +5,22 @@ The grains of this library are a collection of traits and macros, that
 allow serialization and deserialization of rust types to and from ASN.1.
 For example, the following will encode this struct as an ASN.1 sequence.
 
-    #[macro_use]
-    extern crate asn1_cereal;
+```rust
+#[macro_use]
+extern crate asn1_cereal;
 
-    struct ShortSequence {
-      z: u64,
-      y: u32,
-    }
-    
-    asn1_sequence!(
-      ShortSequence,
-      "SHORT_SEQUENCE",
-      z,
-      y
-    );
+struct ShortSequence {
+  z: u64,
+  y: u32,
+}
+
+asn1_sequence!(
+  ShortSequence,
+  "SHORT_SEQUENCE",
+  z,
+  y
+);
+```
 
 The asn1\_sequence! macro generates the trait implementation for each type,
 which in turn call the serialize/deserialize method for each struct
