@@ -1,4 +1,6 @@
 # asn1-cereal
+[![Crates.io](https://img.shields.io/crates/v/asn1-cereal.svg?maxAge=2592000)](https://crates.io/crates/asn1-cereal)
+
 A collection of encoders and decoders for BER, DER and ASN.1.
 
 The grains of this library are a collection of traits and macros that
