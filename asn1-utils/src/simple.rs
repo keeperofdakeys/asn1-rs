@@ -48,7 +48,7 @@ ber_newtype!(SomeString);
 #[derive(Debug)]
 struct IntSequence {
   a: u64,
-  b: Vec<u64>,
+  b: Vec<i32>,
   c: SomeString,
 }
 
