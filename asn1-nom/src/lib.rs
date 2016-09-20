@@ -5,9 +5,20 @@ extern crate nom;
 //                             -- [ISO10646] characters
 
 #[derive(Debug)]
-struct Asn1Type {
+enum Asn1Type {
+  Type(String),
+  Seq(Asn1Seq),
+}
+
+#[derive(Debug)]
+struct Asn1Def {
   name: String,
-  assign: String
+  assign: Asn1Type,
+}
+
+#[derive(Debug)]
+struct Asn1Seq {
+  fields: Vec<Asn1Def>,
 }
 
 named!(type_name <&[u8], String>, chain!(
@@ -15,15 +26,22 @@ named!(type_name <&[u8], String>, chain!(
   || String::from_utf8(Vec::from(s)).unwrap()
 ));
 
-named!(type_assignment <&[u8], Asn1Type>, chain!(
+named!(type_assignment <&[u8], Asn1Def>, chain!(
   opt!(nom::multispace) ~
   name: type_name ~
   take_until_and_consume!("::=") ~
   opt!(nom::multispace) ~
   assign: type_name,
-  || Asn1Type {
+  || Asn1Def {
     name: name,
-    assign: assign,
+    assign: Asn1Type::Type(assign),
+  }
+));
+
+named!(type_sequence <&[u8], Asn1Seq>, chain!(
+  tag!("SEQUNECE"),
+  || Asn1Seq {
+    fields: Vec::new(),
   }
 ));
 
