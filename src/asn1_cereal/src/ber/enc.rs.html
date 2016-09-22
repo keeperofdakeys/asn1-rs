@@ -162,12 +162,24 @@
 <span id="118">118</span>
 <span id="119">119</span>
 <span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
 </pre><pre class='rust '>
-<span class='doccomment'>//! Encoding rules to use when encoding or decoding ASN.1.</span>
+<span class='doccomment'>//! Encoding rules to use for BER.</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! The defaults are to use the DER encoding during serialization,</span>
-<span class='doccomment'>//! and to use the BER encoding during deserliazation (all valid</span>
-<span class='doccomment'>//! BER is accepted, including DER).</span>
+<span class='doccomment'>//! This module provides encoding rules that can be used with</span>
+<span class='doccomment'>//! the `BerSerialize` and `BerDerserialize` traits.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! ```</span>
+<span class='doccomment'>//! use asn1_cereal::{BerSerialize, DER};</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! let mut bytes: Vec&lt;u8&gt; = Vec::new();</span>
+<span class='doccomment'>//! let _ = BerSerialize::serialize_enc(&amp;4u64, DER, &amp;mut bytes);</span>
+<span class='doccomment'>//! ```</span>
 
 <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>PartialEq</span>)]</span>
 <span class='doccomment'>/// An enum which determines how tags are encoded.</span>

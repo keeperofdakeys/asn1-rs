@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-0' class='srclink' href='../src/asn1_cereal/src/lib.rs.html#1-20' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-0' class='srclink' href='../src/asn1_cereal/src/lib.rs.html#1-44' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'>
 <h1 id='asn1-cereal' class='section-header'><a href='#asn1-cereal'>asn1-cereal</a></h1>
 <p>A collection of encoders and decoders for BER, DER and ASN.1.</p>
@@ -57,8 +57,29 @@ allow serialization and deserialization of rust types to and from ASN.1.</p>
 
 <p>The <code>Asn1Info</code>, <code>BerSerialize</code> and <code>BerDeserialize</code> traits are what
 most users will want to use.</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='attribute'>#[<span class='ident'>macro_use</span>]</span> <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>asn1_cereal</span>; <span class='kw'>fn</span> <span class='ident'>main</span>() {
+  <span class='kw'>struct</span> <span class='ident'>ShortSequence</span> {
+    <span class='ident'>z</span>: <span class='ident'>u64</span>,
+    <span class='ident'>y</span>: <span class='ident'>u32</span>,
+  }
+
+  <span class='macro'>ber_sequence</span><span class='macro'>!</span>(
+    <span class='ident'>ShortSequence</span>,
+    <span class='string'>&quot;SHORT_SEQUENCE&quot;</span>,
+    <span class='ident'>z</span>,
+    <span class='ident'>y</span>
+  );
+
+  <span class='kw'>use</span> <span class='ident'>asn1_cereal</span>::<span class='ident'>BerSerialize</span>;
+
+  <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='ident'>ShortSequence</span>{ <span class='ident'>z</span>: <span class='number'>1</span>, <span class='ident'>y</span>: <span class='number'>2</span> };
+  <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>bytes</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
+  <span class='ident'>BerSerialize</span>::<span class='ident'>serialize</span>(<span class='kw-2'>&amp;</span><span class='ident'>data</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>bytes</span>).<span class='ident'>unwrap</span>();
+}</pre>
 </div><h2 id='reexports' class='section-header'><a href="#reexports">Reexports</a></h2>
-<table><tr><td><code>pub use info::<a class='trait' href='../asn1_cereal/info/trait.Asn1Info.html' title='asn1_cereal::info::Asn1Info'>Asn1Info</a>;</code></td></tr><tr><td><code>pub use ber::serial::traits::{<a class='trait' href='../asn1_cereal/ber/serial/traits/trait.BerSerialize.html' title='asn1_cereal::ber::serial::traits::BerSerialize'>BerSerialize</a>, <a class='trait' href='../asn1_cereal/ber/serial/traits/trait.BerDeserialize.html' title='asn1_cereal::ber::serial::traits::BerDeserialize'>BerDeserialize</a>};</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table><tr><td><code>pub use info::<a class='trait' href='../asn1_cereal/info/trait.Asn1Info.html' title='asn1_cereal::info::Asn1Info'>Asn1Info</a>;</code></td></tr><tr><td><code>pub use ber::serial::traits::{<a class='trait' href='../asn1_cereal/ber/serial/traits/trait.BerSerialize.html' title='asn1_cereal::ber::serial::traits::BerSerialize'>BerSerialize</a>, <a class='trait' href='../asn1_cereal/ber/serial/traits/trait.BerDeserialize.html' title='asn1_cereal::ber::serial::traits::BerDeserialize'>BerDeserialize</a>};</code></td></tr><tr><td><code>pub use ber::enc::{<a class='struct' href='../asn1_cereal/ber/enc/struct.BER.html' title='asn1_cereal::ber::enc::BER'>BER</a>, <a class='struct' href='../asn1_cereal/ber/enc/struct.DER.html' title='asn1_cereal::ber::enc::DER'>DER</a>, <a class='struct' href='../asn1_cereal/ber/enc/struct.BERAlt.html' title='asn1_cereal::ber::enc::BERAlt'>BERAlt</a>, <a class='trait' href='../asn1_cereal/ber/enc/trait.BerEncRules.html' title='asn1_cereal::ber::enc::BerEncRules'>BerEncRules</a>};</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
 <table>
                        <tr class=' module-item'>
                            <td><a class='mod' href='ber/index.html'
@@ -97,71 +118,10 @@ most users will want to use.</p>
                        </tr></table><h2 id='macros' class='section-header'><a href="#macros">Macros</a></h2>
 <table>
                        <tr class=' module-item'>
-                           <td><a class='macro' href='macro.asn1_choice!.html'
-                                  title='asn1_cereal::asn1_choice!'>asn1_choice!</a></td>
-                           <td class='docblock short'>
-                                
-                           </td>
-                       </tr>
-                       <tr class=' module-item'>
-                           <td><a class='macro' href='macro.asn1_choice_deserialize!.html'
-                                  title='asn1_cereal::asn1_choice_deserialize!'>asn1_choice_deserialize!</a></td>
-                           <td class='docblock short'>
-                                
-                           </td>
-                       </tr>
-                       <tr class=' module-item'>
-                           <td><a class='macro' href='macro.asn1_choice_serialize!.html'
-                                  title='asn1_cereal::asn1_choice_serialize!'>asn1_choice_serialize!</a></td>
-                           <td class='docblock short'>
-                                
-                           </td>
-                       </tr>
-                       <tr class=' module-item'>
                            <td><a class='macro' href='macro.asn1_info!.html'
                                   title='asn1_cereal::asn1_info!'>asn1_info!</a></td>
                            <td class='docblock short'>
                                 <p>This macro defines the Asn1Info trait for a rust type.</p>
-                           </td>
-                       </tr>
-                       <tr class=' module-item'>
-                           <td><a class='macro' href='macro.asn1_newtype!.html'
-                                  title='asn1_cereal::asn1_newtype!'>asn1_newtype!</a></td>
-                           <td class='docblock short'>
-                                <p>This macro is a compact way of defining both of the
-Asn1 serialization traits - BerSerialize and BerDeserialize
-- for a rust newtype, that represents an ASN.1 type definition.</p>
-                           </td>
-                       </tr>
-                       <tr class=' module-item'>
-                           <td><a class='macro' href='macro.asn1_newtype_deserialize!.html'
-                                  title='asn1_cereal::asn1_newtype_deserialize!'>asn1_newtype_deserialize!</a></td>
-                           <td class='docblock short'>
-                                <p>This macro defines the BerSerialize trait for a rust newtype.</p>
-                           </td>
-                       </tr>
-                       <tr class=' module-item'>
-                           <td><a class='macro' href='macro.asn1_newtype_serialize!.html'
-                                  title='asn1_cereal::asn1_newtype_serialize!'>asn1_newtype_serialize!</a></td>
-                           <td class='docblock short'>
-                                <p>This macro defines the BerSerialize trait for a rust newtype.</p>
-                           </td>
-                       </tr>
-                       <tr class=' module-item'>
-                           <td><a class='macro' href='macro.asn1_sequence!.html'
-                                  title='asn1_cereal::asn1_sequence!'>asn1_sequence!</a></td>
-                           <td class='docblock short'>
-                                <p>This macro is a compact way of defining all three of the
-Asn1 traits - Asn1Info, BerSerialize and BerDeserialize -
-for a rust struct, that represents an ASN.1 sequence.</p>
-                           </td>
-                       </tr>
-                       <tr class=' module-item'>
-                           <td><a class='macro' href='macro.asn1_sequence_deserialize!.html'
-                                  title='asn1_cereal::asn1_sequence_deserialize!'>asn1_sequence_deserialize!</a></td>
-                           <td class='docblock short'>
-                                <p>This macro defines the BerDeserialize trait for a rust struct. The code generated
-will deserialize the specified fields in the order that they are given.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -174,29 +134,90 @@ class or tag, consider using the asn1_info! macro.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
-                           <td><a class='macro' href='macro.asn1_sequence_of!.html'
-                                  title='asn1_cereal::asn1_sequence_of!'>asn1_sequence_of!</a></td>
+                           <td><a class='macro' href='macro.ber_choice!.html'
+                                  title='asn1_cereal::ber_choice!'>ber_choice!</a></td>
                            <td class='docblock short'>
                                 
                            </td>
                        </tr>
                        <tr class=' module-item'>
-                           <td><a class='macro' href='macro.asn1_sequence_of_deserialize!.html'
-                                  title='asn1_cereal::asn1_sequence_of_deserialize!'>asn1_sequence_of_deserialize!</a></td>
+                           <td><a class='macro' href='macro.ber_choice_deserialize!.html'
+                                  title='asn1_cereal::ber_choice_deserialize!'>ber_choice_deserialize!</a></td>
                            <td class='docblock short'>
                                 
                            </td>
                        </tr>
                        <tr class=' module-item'>
-                           <td><a class='macro' href='macro.asn1_sequence_of_serialize!.html'
-                                  title='asn1_cereal::asn1_sequence_of_serialize!'>asn1_sequence_of_serialize!</a></td>
+                           <td><a class='macro' href='macro.ber_choice_serialize!.html'
+                                  title='asn1_cereal::ber_choice_serialize!'>ber_choice_serialize!</a></td>
                            <td class='docblock short'>
                                 
                            </td>
                        </tr>
                        <tr class=' module-item'>
-                           <td><a class='macro' href='macro.asn1_sequence_serialize!.html'
-                                  title='asn1_cereal::asn1_sequence_serialize!'>asn1_sequence_serialize!</a></td>
+                           <td><a class='macro' href='macro.ber_newtype!.html'
+                                  title='asn1_cereal::ber_newtype!'>ber_newtype!</a></td>
+                           <td class='docblock short'>
+                                <p>This macro is a compact way of defining both of the
+Asn1 serialization traits - BerSerialize and BerDeserialize
+- for a rust newtype, that represents an ASN.1 type definition.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='macro' href='macro.ber_newtype_deserialize!.html'
+                                  title='asn1_cereal::ber_newtype_deserialize!'>ber_newtype_deserialize!</a></td>
+                           <td class='docblock short'>
+                                <p>This macro defines the BerSerialize trait for a rust newtype.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='macro' href='macro.ber_newtype_serialize!.html'
+                                  title='asn1_cereal::ber_newtype_serialize!'>ber_newtype_serialize!</a></td>
+                           <td class='docblock short'>
+                                <p>This macro defines the BerSerialize trait for a rust newtype.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='macro' href='macro.ber_sequence!.html'
+                                  title='asn1_cereal::ber_sequence!'>ber_sequence!</a></td>
+                           <td class='docblock short'>
+                                <p>This macro is a compact way of defining all three of the
+Asn1 traits - Asn1Info, BerSerialize and BerDeserialize -
+for a rust struct, that represents an ASN.1 sequence.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='macro' href='macro.ber_sequence_deserialize!.html'
+                                  title='asn1_cereal::ber_sequence_deserialize!'>ber_sequence_deserialize!</a></td>
+                           <td class='docblock short'>
+                                <p>This macro defines the BerDeserialize trait for a rust struct. The code generated
+will deserialize the specified fields in the order that they are given.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='macro' href='macro.ber_sequence_of!.html'
+                                  title='asn1_cereal::ber_sequence_of!'>ber_sequence_of!</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='macro' href='macro.ber_sequence_of_deserialize!.html'
+                                  title='asn1_cereal::ber_sequence_of_deserialize!'>ber_sequence_of_deserialize!</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='macro' href='macro.ber_sequence_of_serialize!.html'
+                                  title='asn1_cereal::ber_sequence_of_serialize!'>ber_sequence_of_serialize!</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='macro' href='macro.ber_sequence_serialize!.html'
+                                  title='asn1_cereal::ber_sequence_serialize!'>ber_sequence_serialize!</a></td>
                            <td class='docblock short'>
                                 <p>This macro defines the BerSerialize trait for a rust struct. The code generated
 will serialize the specified fields in the order that they are given.</p>

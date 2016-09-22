@@ -47,12 +47,12 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-954' class='srclink' href='../../../../src/asn1_cereal/src/ber/serial/assign.rs.html#1-123' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-924' class='srclink' href='../../../../src/asn1_cereal/src/ber/serial/assign.rs.html#1-123' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>Macros to generate the implementation of the serialization traits for Rust
 newtypes, as ASN.1 type assignments.</p>
 
-<p>You can either define both <code>asn1_info!</code> and <code>asn1_newtype!</code>, or all three
-of <code>asn1_info!</code>, <code>asn1_newtype_serialize!</code> and <code>asn1_newtype_deserialize!</code>.</p>
+<p>You can either define both <code>asn1_info!</code> and <code>ber_newtype!</code>, or all three
+of <code>asn1_info!</code>, <code>ber_newtype_serialize!</code> and <code>ber_newtype_deserialize!</code>.</p>
 
 <p>IE:</p>
 
@@ -70,19 +70,19 @@ TYPE1 ::= TYPE2
   }
 
   <span class='macro'>asn1_sequence_info</span><span class='macro'>!</span>(<span class='ident'>Type1</span>, <span class='string'>&quot;TYPE1&quot;</span>);
-  <span class='macro'>asn1_sequence_serialize</span><span class='macro'>!</span>(<span class='ident'>Type1</span>, <span class='ident'>a</span>);
-  <span class='macro'>asn1_sequence_deserialize</span><span class='macro'>!</span>(<span class='ident'>Type1</span>, <span class='ident'>a</span>);
+  <span class='macro'>ber_sequence_serialize</span><span class='macro'>!</span>(<span class='ident'>Type1</span>, <span class='ident'>a</span>);
+  <span class='macro'>ber_sequence_deserialize</span><span class='macro'>!</span>(<span class='ident'>Type1</span>, <span class='ident'>a</span>);
 
   <span class='kw'>struct</span> <span class='ident'>Type2</span> (<span class='ident'>Type1</span>);
   <span class='macro'>asn1_info</span><span class='macro'>!</span>(<span class='ident'>Type2</span>, <span class='number'>0x3</span>, <span class='number'>0x1</span>, <span class='bool-val'>true</span>, <span class='string'>&quot;TYPE2&quot;</span>);
-  <span class='macro'>asn1_newtype</span><span class='macro'>!</span>(<span class='ident'>Type2</span>);
+  <span class='macro'>ber_newtype</span><span class='macro'>!</span>(<span class='ident'>Type2</span>);
 
   <span class='comment'>// OR</span>
 
   <span class='kw'>struct</span> <span class='ident'>Type3</span> (<span class='ident'>Type1</span>);
   <span class='macro'>asn1_info</span><span class='macro'>!</span>(<span class='ident'>Type3</span>, <span class='number'>0x3</span>, <span class='number'>0x1</span>, <span class='bool-val'>true</span>, <span class='string'>&quot;TYPE3&quot;</span>);
-  <span class='macro'>asn1_newtype_serialize</span><span class='macro'>!</span>(<span class='ident'>Type3</span>);
-  <span class='macro'>asn1_newtype_deserialize</span><span class='macro'>!</span>(<span class='ident'>Type3</span>);
+  <span class='macro'>ber_newtype_serialize</span><span class='macro'>!</span>(<span class='ident'>Type3</span>);
+  <span class='macro'>ber_newtype_deserialize</span><span class='macro'>!</span>(<span class='ident'>Type3</span>);
 }</pre>
 </div></section>
     <section id='search' class="content hidden"></section>

@@ -47,12 +47,12 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-955' class='srclink' href='../../../../src/asn1_cereal/src/ber/serial/choice.rs.html#1-88' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-925' class='srclink' href='../../../../src/asn1_cereal/src/ber/serial/choice.rs.html#1-88' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>Macros to generate the implementation of the serialization traits for Rust
 enums, as ASN.1 choice.</p>
 
-<p>You can either define both <code>asn1_info!</code> and <code>asn1_choice!</code>, or all three
-of <code>asn1_info!</code>, <code>asn1_choice_serialize!</code> and <code>asn1_choice_deserialize!</code>.</p>
+<p>You can either define both <code>asn1_info!</code> and <code>ber_choice!</code>, or all three
+of <code>asn1_info!</code>, <code>ber_choice_serialize!</code> and <code>ber_choice_deserialize!</code>.</p>
 
 <pre class='rust rust-example-rendered'>
 <span class='attribute'>#[<span class='ident'>macro_use</span>]</span> <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>asn1_cereal</span>; <span class='kw'>fn</span> <span class='ident'>main</span>() {
@@ -67,13 +67,13 @@ of <code>asn1_info!</code>, <code>asn1_choice_serialize!</code> and <code>asn1_c
   };
 
   <span class='macro'>asn1_info</span><span class='macro'>!</span>(<span class='ident'>Enum1</span>, <span class='number'>0x3</span>, <span class='number'>0x1</span>, <span class='bool-val'>true</span>, <span class='string'>&quot;CHOICE1&quot;</span>);
-  <span class='macro'>asn1_choice</span><span class='macro'>!</span>(<span class='ident'>Enum1</span>, <span class='ident'>A</span>, <span class='ident'>B</span>);
+  <span class='macro'>ber_choice</span><span class='macro'>!</span>(<span class='ident'>Enum1</span>, <span class='ident'>A</span>, <span class='ident'>B</span>);
 
   <span class='comment'>// OR</span>
 
   <span class='macro'>asn1_info</span><span class='macro'>!</span>(<span class='ident'>Enum2</span>, <span class='number'>0x3</span>, <span class='number'>0x1</span>, <span class='bool-val'>true</span>, <span class='string'>&quot;CHOICE2&quot;</span>);
-  <span class='macro'>asn1_choice_serialize</span><span class='macro'>!</span>(<span class='ident'>Enum2</span>);
-  <span class='macro'>asn1_choice_deserialize</span><span class='macro'>!</span>(<span class='ident'>Enum2</span>, <span class='ident'>A</span>, <span class='ident'>B</span>);
+  <span class='macro'>ber_choice_serialize</span><span class='macro'>!</span>(<span class='ident'>Enum2</span>);
+  <span class='macro'>ber_choice_deserialize</span><span class='macro'>!</span>(<span class='ident'>Enum2</span>, <span class='ident'>A</span>, <span class='ident'>B</span>);
 }</pre>
 </div></section>
     <section id='search' class="content hidden"></section>

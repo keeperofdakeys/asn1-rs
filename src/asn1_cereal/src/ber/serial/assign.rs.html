@@ -169,8 +169,8 @@
 <span class='doccomment'>//! Macros to generate the implementation of the serialization traits for Rust</span>
 <span class='doccomment'>//! newtypes, as ASN.1 type assignments.</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! You can either define both `asn1_info!` and `asn1_newtype!`, or all three</span>
-<span class='doccomment'>//! of `asn1_info!`, `asn1_newtype_serialize!` and `asn1_newtype_deserialize!`.</span>
+<span class='doccomment'>//! You can either define both `asn1_info!` and `ber_newtype!`, or all three</span>
+<span class='doccomment'>//! of `asn1_info!`, `ber_newtype_serialize!` and `ber_newtype_deserialize!`.</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! IE:</span>
 <span class='doccomment'>//!</span>
@@ -189,19 +189,19 @@
 <span class='doccomment'>//!   }</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//!   asn1_sequence_info!(Type1, &quot;TYPE1&quot;);</span>
-<span class='doccomment'>//!   asn1_sequence_serialize!(Type1, a);</span>
-<span class='doccomment'>//!   asn1_sequence_deserialize!(Type1, a);</span>
+<span class='doccomment'>//!   ber_sequence_serialize!(Type1, a);</span>
+<span class='doccomment'>//!   ber_sequence_deserialize!(Type1, a);</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//!   struct Type2 (Type1);</span>
 <span class='doccomment'>//!   asn1_info!(Type2, 0x3, 0x1, true, &quot;TYPE2&quot;);</span>
-<span class='doccomment'>//!   asn1_newtype!(Type2);</span>
+<span class='doccomment'>//!   ber_newtype!(Type2);</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//!   // OR</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//!   struct Type3 (Type1);</span>
 <span class='doccomment'>//!   asn1_info!(Type3, 0x3, 0x1, true, &quot;TYPE3&quot;);</span>
-<span class='doccomment'>//!   asn1_newtype_serialize!(Type3);</span>
-<span class='doccomment'>//!   asn1_newtype_deserialize!(Type3);</span>
+<span class='doccomment'>//!   ber_newtype_serialize!(Type3);</span>
+<span class='doccomment'>//!   ber_newtype_deserialize!(Type3);</span>
 <span class='doccomment'>//! }</span>
 <span class='doccomment'>//! ```</span>
 
@@ -209,19 +209,19 @@
 <span class='doccomment'>/// This macro is a compact way of defining both of the</span>
 <span class='doccomment'>/// Asn1 serialization traits - BerSerialize and BerDeserialize</span>
 <span class='doccomment'>/// - for a rust newtype, that represents an ASN.1 type definition.</span>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>asn1_newtype</span> {
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>ber_newtype</span> {
   (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ident</span>) <span class='op'>=&gt;</span> (
-    <span class='macro'>asn1_newtype_serialize</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>);
-    <span class='macro'>asn1_newtype_deserialize</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>);
+    <span class='macro'>ber_newtype_serialize</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>);
+    <span class='macro'>ber_newtype_deserialize</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>);
   )
 }
 
 <span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
 <span class='doccomment'>/// This macro defines the BerSerialize trait for a rust newtype.</span>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>asn1_newtype_serialize</span> {
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>ber_newtype_serialize</span> {
   (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ident</span>) <span class='op'>=&gt;</span> (
     <span class='kw'>impl</span> <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerSerialize</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span> {
-      <span class='kw'>fn</span> <span class='ident'>serialize_enc</span><span class='op'>&lt;</span><span class='ident'>E</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>ber</span>::<span class='ident'>BerEncRules</span>, <span class='ident'>W</span>: <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>Write</span><span class='op'>&gt;</span>
+      <span class='kw'>fn</span> <span class='ident'>serialize_enc</span><span class='op'>&lt;</span><span class='ident'>E</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerEncRules</span>, <span class='ident'>W</span>: <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>Write</span><span class='op'>&gt;</span>
           (<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>e</span>: <span class='ident'>E</span>, <span class='ident'>writer</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>err</span>::<span class='ident'>EncodeError</span><span class='op'>&gt;</span> {
         <span class='comment'>// If encoding uses implicit tag, skip our tag.</span>
         <span class='kw'>if</span> <span class='ident'>E</span>::<span class='ident'>tag_rules</span>() <span class='op'>==</span> <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>ber</span>::<span class='ident'>enc</span>::<span class='ident'>TagEnc</span>::<span class='ident'>Implicit</span> {
@@ -248,7 +248,7 @@
         <span class='prelude-val'>Ok</span>(())
       }
 
-      <span class='kw'>fn</span> <span class='ident'>serialize_value</span><span class='op'>&lt;</span><span class='ident'>E</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>ber</span>::<span class='ident'>BerEncRules</span>, <span class='ident'>W</span>: <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>Write</span><span class='op'>&gt;</span>
+      <span class='kw'>fn</span> <span class='ident'>serialize_value</span><span class='op'>&lt;</span><span class='ident'>E</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerEncRules</span>, <span class='ident'>W</span>: <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>Write</span><span class='op'>&gt;</span>
           (<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>e</span>: <span class='ident'>E</span>, <span class='ident'>writer</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>err</span>::<span class='ident'>EncodeError</span><span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>serialize_enc</span>(<span class='ident'>e</span>, <span class='ident'>writer</span>)
       }
@@ -258,10 +258,10 @@
 
 <span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
 <span class='doccomment'>/// This macro defines the BerSerialize trait for a rust newtype.</span>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>asn1_newtype_deserialize</span> {
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>ber_newtype_deserialize</span> {
   (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ident</span>) <span class='op'>=&gt;</span> (
     <span class='kw'>impl</span> <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerDeserialize</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span> {
-      <span class='kw'>fn</span> <span class='ident'>_deserialize_with_tag</span><span class='op'>&lt;</span><span class='ident'>E</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>ber</span>::<span class='ident'>BerEncRules</span>, <span class='ident'>I</span>: <span class='ident'>Iterator</span><span class='op'>&lt;</span><span class='ident'>Item</span><span class='op'>=</span><span class='ident'>std</span>::<span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span>
+      <span class='kw'>fn</span> <span class='ident'>_deserialize_with_tag</span><span class='op'>&lt;</span><span class='ident'>E</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerEncRules</span>, <span class='ident'>I</span>: <span class='ident'>Iterator</span><span class='op'>&lt;</span><span class='ident'>Item</span><span class='op'>=</span><span class='ident'>std</span>::<span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span>
           (<span class='ident'>e</span>: <span class='ident'>E</span>, <span class='ident'>reader</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>I</span>, <span class='ident'>tag</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>Tag</span>, <span class='ident'>len</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>Len</span>)
           <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='self'>Self</span>, <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>err</span>::<span class='ident'>DecodeError</span><span class='op'>&gt;&gt;</span> {
         <span class='kw'>let</span> <span class='ident'>my_tag</span> <span class='op'>=</span> <span class='op'>&lt;</span><span class='self'>Self</span> <span class='kw'>as</span> <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>Asn1Info</span><span class='op'>&gt;</span>::<span class='ident'>asn1_tag</span>();

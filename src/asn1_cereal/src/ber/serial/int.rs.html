@@ -172,7 +172,6 @@
 <span id="128">128</span>
 <span id="129">129</span>
 <span id="130">130</span>
-<span id="131">131</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Implementation of the serialization traits for Rust integers.</span>
 
@@ -181,13 +180,12 @@
 <span class='kw'>use</span> ::{<span class='ident'>BerSerialize</span>, <span class='ident'>BerDeserialize</span>, <span class='ident'>Asn1Info</span>};
 <span class='kw'>use</span> <span class='ident'>tag</span>;
 <span class='kw'>use</span> <span class='ident'>err</span>;
-<span class='kw'>use</span> <span class='ident'>ber</span>;
 <span class='kw'>use</span> <span class='ident'>byte</span>::{<span class='ident'>read_byte</span>, <span class='ident'>write_byte</span>};
 
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>cmp</span>;
 
 <span class='doccomment'>/// Generate the ASN.1 int implementation for an int type.</span>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>asn1_cereal_int</span> {
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>ber_cereal_int</span> {
   (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ty</span>, <span class='number'>1</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>unsigned</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> (
     <span class='kw'>impl</span> <span class='ident'>Asn1Info</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span> {
       <span class='kw'>fn</span> <span class='ident'>asn1_tag</span>() <span class='op'>-&gt;</span> <span class='ident'>tag</span>::<span class='ident'>Tag</span> {
@@ -204,7 +202,7 @@
     }
 
     <span class='kw'>impl</span> <span class='ident'>BerSerialize</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span> {
-      <span class='kw'>fn</span> <span class='ident'>serialize_value</span><span class='op'>&lt;</span><span class='ident'>E</span>: <span class='ident'>ber</span>::<span class='ident'>BerEncRules</span>, <span class='ident'>W</span>: <span class='ident'>io</span>::<span class='ident'>Write</span><span class='op'>&gt;</span>
+      <span class='kw'>fn</span> <span class='ident'>serialize_value</span><span class='op'>&lt;</span><span class='ident'>E</span>: ::<span class='ident'>BerEncRules</span>, <span class='ident'>W</span>: <span class='ident'>io</span>::<span class='ident'>Write</span><span class='op'>&gt;</span>
           (<span class='kw-2'>&amp;</span><span class='self'>self</span>, _: <span class='ident'>E</span>, <span class='ident'>writer</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>err</span>::<span class='ident'>EncodeError</span><span class='op'>&gt;</span> {
         <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>write_byte</span>(<span class='ident'>writer</span>, <span class='op'>*</span><span class='self'>self</span> <span class='kw'>as</span> <span class='ident'>u8</span>));
         <span class='prelude-val'>Ok</span>(())
@@ -227,7 +225,7 @@
     }
 
     <span class='kw'>impl</span> <span class='ident'>BerSerialize</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span> {
-      <span class='kw'>fn</span> <span class='ident'>serialize_value</span><span class='op'>&lt;</span><span class='ident'>E</span>: <span class='ident'>ber</span>::<span class='ident'>BerEncRules</span>, <span class='ident'>W</span>: <span class='ident'>io</span>::<span class='ident'>Write</span><span class='op'>&gt;</span>
+      <span class='kw'>fn</span> <span class='ident'>serialize_value</span><span class='op'>&lt;</span><span class='ident'>E</span>: ::<span class='ident'>BerEncRules</span>, <span class='ident'>W</span>: <span class='ident'>io</span>::<span class='ident'>Write</span><span class='op'>&gt;</span>
           (<span class='kw-2'>&amp;</span><span class='self'>self</span>, _: <span class='ident'>E</span>, <span class='ident'>writer</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>err</span>::<span class='ident'>EncodeError</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>started</span> <span class='op'>=</span> <span class='bool-val'>false</span>;
         <span class='comment'>// Loop through bytes in int backwards, start writing when first non-zero byte is encounted.</span>
@@ -258,7 +256,7 @@
     }
 
     <span class='kw'>impl</span> <span class='ident'>BerDeserialize</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span> {
-      <span class='kw'>fn</span> <span class='ident'>deserialize_value</span><span class='op'>&lt;</span><span class='ident'>E</span>: <span class='ident'>ber</span>::<span class='ident'>BerEncRules</span>, <span class='ident'>I</span>: <span class='ident'>Iterator</span><span class='op'>&lt;</span><span class='ident'>Item</span><span class='op'>=</span><span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span>
+      <span class='kw'>fn</span> <span class='ident'>deserialize_value</span><span class='op'>&lt;</span><span class='ident'>E</span>: ::<span class='ident'>BerEncRules</span>, <span class='ident'>I</span>: <span class='ident'>Iterator</span><span class='op'>&lt;</span><span class='ident'>Item</span><span class='op'>=</span><span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span>
           (_: <span class='ident'>E</span>, <span class='ident'>reader</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>I</span>, <span class='ident'>len</span>: <span class='ident'>tag</span>::<span class='ident'>Len</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='self'>Self</span>, <span class='ident'>err</span>::<span class='ident'>DecodeError</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='ident'>len_num</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>len</span>.<span class='ident'>as_num</span>().<span class='ident'>ok_or</span>(<span class='ident'>err</span>::<span class='ident'>DecodeError</span>::<span class='ident'>PrimIndef</span>));
 
@@ -282,29 +280,29 @@
   );
 }
 
-<span class='macro'>asn1_cereal_int</span><span class='macro'>!</span>(<span class='ident'>i8</span>, <span class='number'>1</span>, <span class='bool-val'>false</span>);
-<span class='macro'>asn1_cereal_int</span><span class='macro'>!</span>(<span class='ident'>i16</span>, <span class='number'>2</span>, <span class='bool-val'>false</span>);
-<span class='macro'>asn1_cereal_int</span><span class='macro'>!</span>(<span class='ident'>i32</span>, <span class='number'>4</span>, <span class='bool-val'>false</span>);
-<span class='macro'>asn1_cereal_int</span><span class='macro'>!</span>(<span class='ident'>i64</span>, <span class='number'>8</span>, <span class='bool-val'>false</span>);
+<span class='macro'>ber_cereal_int</span><span class='macro'>!</span>(<span class='ident'>i8</span>, <span class='number'>1</span>, <span class='bool-val'>false</span>);
+<span class='macro'>ber_cereal_int</span><span class='macro'>!</span>(<span class='ident'>i16</span>, <span class='number'>2</span>, <span class='bool-val'>false</span>);
+<span class='macro'>ber_cereal_int</span><span class='macro'>!</span>(<span class='ident'>i32</span>, <span class='number'>4</span>, <span class='bool-val'>false</span>);
+<span class='macro'>ber_cereal_int</span><span class='macro'>!</span>(<span class='ident'>i64</span>, <span class='number'>8</span>, <span class='bool-val'>false</span>);
 
-<span class='macro'>asn1_cereal_int</span><span class='macro'>!</span>(<span class='ident'>u8</span>, <span class='number'>1</span>, <span class='bool-val'>true</span>);
-<span class='macro'>asn1_cereal_int</span><span class='macro'>!</span>(<span class='ident'>u16</span>, <span class='number'>2</span>, <span class='bool-val'>true</span>);
-<span class='macro'>asn1_cereal_int</span><span class='macro'>!</span>(<span class='ident'>u32</span>, <span class='number'>4</span>, <span class='bool-val'>true</span>);
-<span class='macro'>asn1_cereal_int</span><span class='macro'>!</span>(<span class='ident'>u64</span>, <span class='number'>8</span>, <span class='bool-val'>true</span>);
-
-<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_pointer_width</span> <span class='op'>=</span> <span class='string'>&quot;16&quot;</span>)]</span>
-<span class='macro'>asn1_cereal_int</span><span class='macro'>!</span> { <span class='ident'>isize</span>, <span class='number'>2</span>, <span class='bool-val'>false</span> }
-<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_pointer_width</span> <span class='op'>=</span> <span class='string'>&quot;32&quot;</span>)]</span>
-<span class='macro'>asn1_cereal_int</span><span class='macro'>!</span> { <span class='ident'>isize</span>, <span class='number'>4</span>, <span class='bool-val'>false</span> }
-<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_pointer_width</span> <span class='op'>=</span> <span class='string'>&quot;64&quot;</span>)]</span>
-<span class='macro'>asn1_cereal_int</span><span class='macro'>!</span> { <span class='ident'>isize</span>, <span class='number'>8</span>, <span class='bool-val'>false</span> }
+<span class='macro'>ber_cereal_int</span><span class='macro'>!</span>(<span class='ident'>u8</span>, <span class='number'>1</span>, <span class='bool-val'>true</span>);
+<span class='macro'>ber_cereal_int</span><span class='macro'>!</span>(<span class='ident'>u16</span>, <span class='number'>2</span>, <span class='bool-val'>true</span>);
+<span class='macro'>ber_cereal_int</span><span class='macro'>!</span>(<span class='ident'>u32</span>, <span class='number'>4</span>, <span class='bool-val'>true</span>);
+<span class='macro'>ber_cereal_int</span><span class='macro'>!</span>(<span class='ident'>u64</span>, <span class='number'>8</span>, <span class='bool-val'>true</span>);
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_pointer_width</span> <span class='op'>=</span> <span class='string'>&quot;16&quot;</span>)]</span>
-<span class='macro'>asn1_cereal_int</span><span class='macro'>!</span> { <span class='ident'>usize</span>, <span class='number'>2</span>, <span class='bool-val'>true</span> }
+<span class='macro'>ber_cereal_int</span><span class='macro'>!</span> { <span class='ident'>isize</span>, <span class='number'>2</span>, <span class='bool-val'>false</span> }
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_pointer_width</span> <span class='op'>=</span> <span class='string'>&quot;32&quot;</span>)]</span>
-<span class='macro'>asn1_cereal_int</span><span class='macro'>!</span> { <span class='ident'>usize</span>, <span class='number'>4</span>, <span class='bool-val'>true</span> }
+<span class='macro'>ber_cereal_int</span><span class='macro'>!</span> { <span class='ident'>isize</span>, <span class='number'>4</span>, <span class='bool-val'>false</span> }
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_pointer_width</span> <span class='op'>=</span> <span class='string'>&quot;64&quot;</span>)]</span>
-<span class='macro'>asn1_cereal_int</span><span class='macro'>!</span> { <span class='ident'>usize</span>, <span class='number'>8</span>, <span class='bool-val'>true</span> }
+<span class='macro'>ber_cereal_int</span><span class='macro'>!</span> { <span class='ident'>isize</span>, <span class='number'>8</span>, <span class='bool-val'>false</span> }
+
+<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_pointer_width</span> <span class='op'>=</span> <span class='string'>&quot;16&quot;</span>)]</span>
+<span class='macro'>ber_cereal_int</span><span class='macro'>!</span> { <span class='ident'>usize</span>, <span class='number'>2</span>, <span class='bool-val'>true</span> }
+<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_pointer_width</span> <span class='op'>=</span> <span class='string'>&quot;32&quot;</span>)]</span>
+<span class='macro'>ber_cereal_int</span><span class='macro'>!</span> { <span class='ident'>usize</span>, <span class='number'>4</span>, <span class='bool-val'>true</span> }
+<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>target_pointer_width</span> <span class='op'>=</span> <span class='string'>&quot;64&quot;</span>)]</span>
+<span class='macro'>ber_cereal_int</span><span class='macro'>!</span> { <span class='ident'>usize</span>, <span class='number'>8</span>, <span class='bool-val'>true</span> }
 </pre>
 </section>
     <section id='search' class="content hidden"></section>

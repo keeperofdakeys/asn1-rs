@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["enc","Encoding rules to use when encoding or decoding ASN.1."],["serial","Traits for serializing and deserializing rust types from/to ASN.1."],["stream","A `SAXParser` inspired stream parser and encoder for ber streams."]]});
+initSidebarItems({"mod":[["enc","Encoding rules to use for BER."],["serial","Traits for serializing and deserializing rust types from/to ASN.1."],["stream","A `SAXParser` inspired stream parser and encoder for ber streams."]]});

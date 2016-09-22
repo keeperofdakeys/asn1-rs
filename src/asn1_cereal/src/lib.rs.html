@@ -62,6 +62,30 @@
 <span id="18">18</span>
 <span id="19">19</span>
 <span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! # asn1-cereal</span>
 <span class='doccomment'>//! A collection of encoders and decoders for BER, DER and ASN.1.</span>
@@ -71,6 +95,28 @@
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! The `Asn1Info`, `BerSerialize` and `BerDeserialize` traits are what</span>
 <span class='doccomment'>//! most users will want to use.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! ```</span>
+<span class='doccomment'>//! #[macro_use] extern crate asn1_cereal; fn main() {</span>
+<span class='doccomment'>//!   struct ShortSequence {</span>
+<span class='doccomment'>//!     z: u64,</span>
+<span class='doccomment'>//!     y: u32,</span>
+<span class='doccomment'>//!   }</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//!   ber_sequence!(</span>
+<span class='doccomment'>//!     ShortSequence,</span>
+<span class='doccomment'>//!     &quot;SHORT_SEQUENCE&quot;,</span>
+<span class='doccomment'>//!     z,</span>
+<span class='doccomment'>//!     y</span>
+<span class='doccomment'>//!   );</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//!   use asn1_cereal::BerSerialize;</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//!   let data = ShortSequence{ z: 1, y: 2 };</span>
+<span class='doccomment'>//!   let mut bytes: Vec&lt;u8&gt; = Vec::new();</span>
+<span class='doccomment'>//!   BerSerialize::serialize(&amp;data, &amp;mut bytes).unwrap();</span>
+<span class='doccomment'>//! }</span>
+<span class='doccomment'>//! ```</span>
 
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>feature</span><span class='op'>=</span><span class='string'>&quot;clippy&quot;</span>, <span class='ident'>feature</span>(<span class='ident'>plugin</span>))]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>feature</span><span class='op'>=</span><span class='string'>&quot;clippy&quot;</span>, <span class='ident'>plugin</span>(<span class='ident'>clippy</span>))]</span>
@@ -78,11 +124,13 @@
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>tag</span>;
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>err</span>;
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>byte</span>;
+<span class='attribute'>#[<span class='ident'>macro_use</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>info</span>;
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>ber</span>;
 
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>info</span>::<span class='ident'>Asn1Info</span>;
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>ber</span>::<span class='ident'>serial</span>::<span class='ident'>traits</span>::{<span class='ident'>BerSerialize</span>, <span class='ident'>BerDeserialize</span>};
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>ber</span>::<span class='ident'>enc</span>::{<span class='ident'>BER</span>, <span class='ident'>DER</span>, <span class='ident'>BERAlt</span>, <span class='ident'>BerEncRules</span>};
 </pre>
 </section>
     <section id='search' class="content hidden"></section>

@@ -134,8 +134,8 @@
 <span class='doccomment'>//! Macros to generate the implementation of the serialization traits for Rust</span>
 <span class='doccomment'>//! enums, as ASN.1 choice.</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! You can either define both `asn1_info!` and `asn1_choice!`, or all three</span>
-<span class='doccomment'>//! of `asn1_info!`, `asn1_choice_serialize!` and `asn1_choice_deserialize!`.</span>
+<span class='doccomment'>//! You can either define both `asn1_info!` and `ber_choice!`, or all three</span>
+<span class='doccomment'>//! of `asn1_info!`, `ber_choice_serialize!` and `ber_choice_deserialize!`.</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! ```</span>
 <span class='doccomment'>//! #[macro_use] extern crate asn1_cereal; fn main() {</span>
@@ -150,29 +150,29 @@
 <span class='doccomment'>//!   };</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//!   asn1_info!(Enum1, 0x3, 0x1, true, &quot;CHOICE1&quot;);</span>
-<span class='doccomment'>//!   asn1_choice!(Enum1, A, B);</span>
+<span class='doccomment'>//!   ber_choice!(Enum1, A, B);</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//!   // OR</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//!   asn1_info!(Enum2, 0x3, 0x1, true, &quot;CHOICE2&quot;);</span>
-<span class='doccomment'>//!   asn1_choice_serialize!(Enum2);</span>
-<span class='doccomment'>//!   asn1_choice_deserialize!(Enum2, A, B);</span>
+<span class='doccomment'>//!   ber_choice_serialize!(Enum2);</span>
+<span class='doccomment'>//!   ber_choice_deserialize!(Enum2, A, B);</span>
 <span class='doccomment'>//! }</span>
 <span class='doccomment'>//! ```</span>
 
 <span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>asn1_choice</span> {
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>ber_choice</span> {
   (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ident</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>:<span class='ident'>ident</span>),<span class='op'>*</span>) <span class='op'>=&gt;</span> (
-    <span class='macro'>asn1_choice_serialize</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>);
-    <span class='macro'>asn1_choice_deserialize</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>),<span class='op'>*</span>);
+    <span class='macro'>ber_choice_serialize</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>);
+    <span class='macro'>ber_choice_deserialize</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>),<span class='op'>*</span>);
   )
 }
 
 <span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>asn1_choice_serialize</span> {
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>ber_choice_serialize</span> {
   (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ident</span>) <span class='op'>=&gt;</span> (
     <span class='kw'>impl</span> <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerSerialize</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span> {
-      <span class='kw'>fn</span> <span class='ident'>serialize_enc</span><span class='op'>&lt;</span><span class='ident'>E</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>ber</span>::<span class='ident'>BerEncRules</span>, <span class='ident'>W</span>: <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>Write</span><span class='op'>&gt;</span>
+      <span class='kw'>fn</span> <span class='ident'>serialize_enc</span><span class='op'>&lt;</span><span class='ident'>E</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerEncRules</span>, <span class='ident'>W</span>: <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>Write</span><span class='op'>&gt;</span>
           (<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>e</span>: <span class='ident'>E</span>, <span class='ident'>writer</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>err</span>::<span class='ident'>EncodeError</span><span class='op'>&gt;</span> {
         <span class='comment'>// FIXME: Can&#39;t call self.0 to call function on inner type.</span>
         <span class='comment'>//</span>
@@ -181,7 +181,7 @@
         <span class='macro'>unimplemented</span><span class='macro'>!</span>();
       }
 
-      <span class='kw'>fn</span> <span class='ident'>serialize_value</span><span class='op'>&lt;</span><span class='ident'>E</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>ber</span>::<span class='ident'>BerEncRules</span>, <span class='ident'>W</span>: <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>Write</span><span class='op'>&gt;</span>
+      <span class='kw'>fn</span> <span class='ident'>serialize_value</span><span class='op'>&lt;</span><span class='ident'>E</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerEncRules</span>, <span class='ident'>W</span>: <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>Write</span><span class='op'>&gt;</span>
           (<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>e</span>: <span class='ident'>E</span>, <span class='ident'>writer</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>err</span>::<span class='ident'>EncodeError</span><span class='op'>&gt;</span> {
         <span class='comment'>// FIXME: Can&#39;t call self.0 to call function on inner type.</span>
         <span class='comment'>//</span>
@@ -194,7 +194,7 @@
 }
 
 <span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>asn1_choice_deserialize</span> {
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>ber_choice_deserialize</span> {
   (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ident</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>:<span class='ident'>ident</span>),<span class='op'>*</span>) <span class='op'>=&gt;</span> (
     <span class='kw'>impl</span> <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerDeserialize</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span> {
       <span class='comment'>// FIXME: We can&#39;t call asn1_tag() on the inner type of the enum variant,</span>
@@ -211,7 +211,7 @@
       <span class='comment'>//   }</span>
       <span class='comment'>// }</span>
 
-      <span class='kw'>fn</span> <span class='ident'>deserialize_value</span><span class='op'>&lt;</span><span class='ident'>E</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>ber</span>::<span class='ident'>BerEncRules</span>, <span class='ident'>I</span>: <span class='ident'>Iterator</span><span class='op'>&lt;</span><span class='ident'>Item</span><span class='op'>=</span><span class='ident'>std</span>::<span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span>
+      <span class='kw'>fn</span> <span class='ident'>deserialize_value</span><span class='op'>&lt;</span><span class='ident'>E</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerEncRules</span>, <span class='ident'>I</span>: <span class='ident'>Iterator</span><span class='op'>&lt;</span><span class='ident'>Item</span><span class='op'>=</span><span class='ident'>std</span>::<span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span>
           (<span class='ident'>e</span>: <span class='ident'>E</span>, <span class='ident'>reader</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>I</span>, _: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>Len</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='self'>Self</span>, <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>err</span>::<span class='ident'>DecodeError</span><span class='op'>&gt;</span> {
         <span class='comment'>// This should never be called?</span>
         <span class='macro'>unimplemented</span><span class='macro'>!</span>();

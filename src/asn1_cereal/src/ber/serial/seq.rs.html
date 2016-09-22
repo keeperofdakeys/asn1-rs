@@ -211,8 +211,8 @@
 <span class='doccomment'>//! Macros to generate the implementation of the serialization traits for Rust</span>
 <span class='doccomment'>//! structs, as ASN.1 sequences.</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! You can either use the shortcut `asn1_sequence!` macro, or each of</span>
-<span class='doccomment'>//! `asn1_sequence_info!`, `asn1_sequence_serialize!` and `asn1_sequence_deserialize!`.</span>
+<span class='doccomment'>//! You can either use the shortcut `ber_sequence!` macro, or each of</span>
+<span class='doccomment'>//! `asn1_sequence_info!`, `ber_sequence_serialize!` and `ber_sequence_deserialize!`.</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! ```</span>
 <span class='doccomment'>//! #[macro_use] extern crate asn1_cereal; fn main() {</span>
@@ -221,7 +221,7 @@
 <span class='doccomment'>//!     y: u32,</span>
 <span class='doccomment'>//!   }</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//!   asn1_sequence!(</span>
+<span class='doccomment'>//!   ber_sequence!(</span>
 <span class='doccomment'>//!     ShortSequence,</span>
 <span class='doccomment'>//!     &quot;SHORT_SEQUENCE&quot;,</span>
 <span class='doccomment'>//!     z,</span>
@@ -237,8 +237,8 @@
 <span class='doccomment'>//!   }</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//!   asn1_sequence_info!(SomeSequence, &quot;SOME_SEQUENCE&quot;);</span>
-<span class='doccomment'>//!   asn1_sequence_serialize!(SomeSequence, a, b, c);</span>
-<span class='doccomment'>//!   asn1_sequence_deserialize!(SomeSequence, a, b, c);</span>
+<span class='doccomment'>//!   ber_sequence_serialize!(SomeSequence, a, b, c);</span>
+<span class='doccomment'>//!   ber_sequence_deserialize!(SomeSequence, a, b, c);</span>
 <span class='doccomment'>//! }</span>
 <span class='doccomment'>//! ```</span>
 <span class='doccomment'>//!</span>
@@ -253,11 +253,11 @@
 <span class='doccomment'>/// that they are encoded to, and decoded from ASN.1. If some form of</span>
 <span class='doccomment'>/// procedural macros are eventually stabilised, listing the fields</span>
 <span class='doccomment'>/// in the macro might no longer be required.</span>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>asn1_sequence</span> {
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>ber_sequence</span> {
   (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ident</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>asn1_ty</span>:<span class='ident'>expr</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>:<span class='ident'>ident</span>),<span class='op'>*</span>) <span class='op'>=&gt;</span> (
     <span class='macro'>asn1_sequence_info</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>asn1_ty</span>);
-    <span class='macro'>asn1_sequence_serialize</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>),<span class='op'>*</span>);
-    <span class='macro'>asn1_sequence_deserialize</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>),<span class='op'>*</span>);
+    <span class='macro'>ber_sequence_serialize</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>),<span class='op'>*</span>);
+    <span class='macro'>ber_sequence_deserialize</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>),<span class='op'>*</span>);
   )
 }
 
@@ -286,10 +286,10 @@
 <span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
 <span class='doccomment'>/// This macro defines the BerSerialize trait for a rust struct. The code generated</span>
 <span class='doccomment'>/// will serialize the specified fields in the order that they are given.</span>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>asn1_sequence_serialize</span> {
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>ber_sequence_serialize</span> {
   (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ty</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>:<span class='ident'>ident</span>),<span class='op'>*</span>) <span class='op'>=&gt;</span> (
     <span class='kw'>impl</span> <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerSerialize</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span> {
-      <span class='kw'>fn</span> <span class='ident'>serialize_value</span><span class='op'>&lt;</span><span class='ident'>E</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>ber</span>::<span class='ident'>BerEncRules</span>, <span class='ident'>W</span>: <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>Write</span><span class='op'>&gt;</span>
+      <span class='kw'>fn</span> <span class='ident'>serialize_value</span><span class='op'>&lt;</span><span class='ident'>E</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerEncRules</span>, <span class='ident'>W</span>: <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>Write</span><span class='op'>&gt;</span>
           (<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>e</span>: <span class='ident'>E</span>, <span class='ident'>writer</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>err</span>::<span class='ident'>EncodeError</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>bytes</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>count</span>: <span class='ident'>u64</span> <span class='op'>=</span> <span class='number'>0</span>;
@@ -323,10 +323,10 @@
 <span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
 <span class='doccomment'>/// This macro defines the BerDeserialize trait for a rust struct. The code generated</span>
 <span class='doccomment'>/// will deserialize the specified fields in the order that they are given.</span>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>asn1_sequence_deserialize</span> {
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>ber_sequence_deserialize</span> {
   (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ident</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>:<span class='ident'>ident</span>),<span class='op'>*</span>) <span class='op'>=&gt;</span> (
     <span class='kw'>impl</span> <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerDeserialize</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span> {
-      <span class='kw'>fn</span> <span class='ident'>deserialize_value</span><span class='op'>&lt;</span><span class='ident'>E</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>ber</span>::<span class='ident'>BerEncRules</span>, <span class='ident'>I</span>: <span class='ident'>Iterator</span><span class='op'>&lt;</span><span class='ident'>Item</span><span class='op'>=</span><span class='ident'>std</span>::<span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span>
+      <span class='kw'>fn</span> <span class='ident'>deserialize_value</span><span class='op'>&lt;</span><span class='ident'>E</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerEncRules</span>, <span class='ident'>I</span>: <span class='ident'>Iterator</span><span class='op'>&lt;</span><span class='ident'>Item</span><span class='op'>=</span><span class='ident'>std</span>::<span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span>
           (<span class='ident'>e</span>: <span class='ident'>E</span>, <span class='ident'>reader</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>I</span>, _: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>Len</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='self'>Self</span>, <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>err</span>::<span class='ident'>DecodeError</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>count</span>: <span class='ident'>u64</span> <span class='op'>=</span> <span class='number'>0</span>;
         $(

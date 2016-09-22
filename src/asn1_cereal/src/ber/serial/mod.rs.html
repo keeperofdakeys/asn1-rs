@@ -90,30 +90,6 @@
 <span id="46">46</span>
 <span id="47">47</span>
 <span id="48">48</span>
-<span id="49">49</span>
-<span id="50">50</span>
-<span id="51">51</span>
-<span id="52">52</span>
-<span id="53">53</span>
-<span id="54">54</span>
-<span id="55">55</span>
-<span id="56">56</span>
-<span id="57">57</span>
-<span id="58">58</span>
-<span id="59">59</span>
-<span id="60">60</span>
-<span id="61">61</span>
-<span id="62">62</span>
-<span id="63">63</span>
-<span id="64">64</span>
-<span id="65">65</span>
-<span id="66">66</span>
-<span id="67">67</span>
-<span id="68">68</span>
-<span id="69">69</span>
-<span id="70">70</span>
-<span id="71">71</span>
-<span id="72">72</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Traits for serializing and deserializing rust types from/to ASN.1.</span>
 <span class='doccomment'>//!</span>
@@ -139,7 +115,7 @@
 <span class='doccomment'>//!     y: u32,</span>
 <span class='doccomment'>//!   }</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//!   asn1_sequence!(</span>
+<span class='doccomment'>//!   ber_sequence!(</span>
 <span class='doccomment'>//!     ShortSequence,</span>
 <span class='doccomment'>//!     &quot;SHORT_SEQUENCE&quot;,</span>
 <span class='doccomment'>//!     z,</span>
@@ -153,30 +129,6 @@
 <span class='doccomment'>//!   BerSerialize::serialize(&amp;data, &amp;mut bytes).unwrap();</span>
 <span class='doccomment'>//! }</span>
 <span class='doccomment'>//! ```</span>
-
-<span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
-<span class='doccomment'>/// This macro defines the Asn1Info trait for a rust type.</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// This information is used to match tag information during deserialization,</span>
-<span class='doccomment'>/// so it should match the expected values in the ASN.1 stream.</span>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>asn1_info</span> {
-  (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ty</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>class</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tagnum</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>constructed</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>asn1_ty</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> (
-    <span class='kw'>impl</span> <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>Asn1Info</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span> {
-      <span class='kw'>fn</span> <span class='ident'>asn1_tag</span>() <span class='op'>-&gt;</span> <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>Tag</span> {
-        <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>Tag</span> {
-          <span class='ident'>class</span>: (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>class</span> <span class='kw'>as</span> <span class='ident'>u8</span>).<span class='ident'>into</span>(),
-          <span class='ident'>tagnum</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tagnum</span> <span class='kw'>as</span> <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>TagNum</span>,
-          <span class='ident'>constructed</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>constructed</span>,
-
-        }
-      }
-
-      <span class='kw'>fn</span> <span class='ident'>asn1_type</span>() <span class='op'>-&gt;</span> <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>Type</span> {
-        <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>Type</span>::<span class='ident'>from</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>asn1_ty</span>)
-      }
-    }
-  )
-}
 
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>traits</span>;
 <span class='kw'>mod</span> <span class='ident'>prim</span>;

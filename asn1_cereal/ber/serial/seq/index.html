@@ -47,12 +47,12 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-956' class='srclink' href='../../../../src/asn1_cereal/src/ber/serial/seq.rs.html#1-165' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-926' class='srclink' href='../../../../src/asn1_cereal/src/ber/serial/seq.rs.html#1-165' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>Macros to generate the implementation of the serialization traits for Rust
 structs, as ASN.1 sequences.</p>
 
-<p>You can either use the shortcut <code>asn1_sequence!</code> macro, or each of
-<code>asn1_sequence_info!</code>, <code>asn1_sequence_serialize!</code> and <code>asn1_sequence_deserialize!</code>.</p>
+<p>You can either use the shortcut <code>ber_sequence!</code> macro, or each of
+<code>asn1_sequence_info!</code>, <code>ber_sequence_serialize!</code> and <code>ber_sequence_deserialize!</code>.</p>
 
 <pre class='rust rust-example-rendered'>
 <span class='attribute'>#[<span class='ident'>macro_use</span>]</span> <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>asn1_cereal</span>; <span class='kw'>fn</span> <span class='ident'>main</span>() {
@@ -61,7 +61,7 @@ structs, as ASN.1 sequences.</p>
     <span class='ident'>y</span>: <span class='ident'>u32</span>,
   }
 
-  <span class='macro'>asn1_sequence</span><span class='macro'>!</span>(
+  <span class='macro'>ber_sequence</span><span class='macro'>!</span>(
     <span class='ident'>ShortSequence</span>,
     <span class='string'>&quot;SHORT_SEQUENCE&quot;</span>,
     <span class='ident'>z</span>,
@@ -77,8 +77,8 @@ structs, as ASN.1 sequences.</p>
   }
 
   <span class='macro'>asn1_sequence_info</span><span class='macro'>!</span>(<span class='ident'>SomeSequence</span>, <span class='string'>&quot;SOME_SEQUENCE&quot;</span>);
-  <span class='macro'>asn1_sequence_serialize</span><span class='macro'>!</span>(<span class='ident'>SomeSequence</span>, <span class='ident'>a</span>, <span class='ident'>b</span>, <span class='ident'>c</span>);
-  <span class='macro'>asn1_sequence_deserialize</span><span class='macro'>!</span>(<span class='ident'>SomeSequence</span>, <span class='ident'>a</span>, <span class='ident'>b</span>, <span class='ident'>c</span>);
+  <span class='macro'>ber_sequence_serialize</span><span class='macro'>!</span>(<span class='ident'>SomeSequence</span>, <span class='ident'>a</span>, <span class='ident'>b</span>, <span class='ident'>c</span>);
+  <span class='macro'>ber_sequence_deserialize</span><span class='macro'>!</span>(<span class='ident'>SomeSequence</span>, <span class='ident'>a</span>, <span class='ident'>b</span>, <span class='ident'>c</span>);
 }</pre>
 
 <p>Note that these macros won&#39;t handle SEQUENCE OF.</p>
