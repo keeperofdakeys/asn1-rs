@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate nom;
 
-use nom::{space, is_alphanumeric};
+use nom::{space,multispace,is_alphanumeric,eol};
 
 // LDAPString ::= OCTET STRING -- UTF-8 encoded,
 //                             -- [ISO10646] characters
@@ -29,11 +29,11 @@ named!(type_name <&[u8], String>, chain!(
 ));
 
 named!(type_assignment <&[u8], Asn1Def>, chain!(
-  next_token? ~
+  skip_other? ~
   name: type_name ~
-  next_token ~
+  skip_other ~
   tag!("::=") ~
-  next_token ~
+  skip_other ~
   assign: type_name,
   || Asn1Def {
     name: name,
@@ -48,39 +48,38 @@ named!(type_sequence <&[u8], Asn1Seq>, chain!(
   }
 ));
 
-named!(strip_comments <String>, chain!(
-  test: take_until!("--"),
-  || String::from_utf8(test.to_owned()).unwrap()
-));
-
-named!(strip_comments_2, take_until!("--"));
-
 pub fn is_eol(byte: &u8) -> bool {
   let chr = *byte as char;
   println!("{}", byte);
   chr == '\n' || chr == '\r'
 }
 
-named!(next_token <()>, chain!(
-  space? ~
+named!(comment <()>, chain!(
+  complete!(tag!("--")) ~
+  take_till!(is_eol) ~
+  eol,
+  || ()
+));
+
+named!(skip_other <()>, chain!(
+  multispace? ~
+  comment? ~
+  multispace? ~
   chain!(
-    tag!("--") ~
-    take_till!(is_eol) ~
-    tag!("\n") ~
-    space?,
-    || ()
-  )? ,
+     complete!(peek!(tag!("--"))) ~
+     complete!(skip_other),
+     || ()
+  )?,
   || ()
 ));
 
 named!(test_ten, chain!(
-  next_token ~
-  next_token ~
+  skip_other ~
   s: take_while!(nom::is_alphanumeric),
   || s
 ));
 
 fn main() {
-  println!("{:#?}", type_assignment("test -- ::=\n::= hi".as_bytes()));
-  println!("{:#?}", String::from_utf8(test_ten("  --fds\ndlsjfs\nfds ::= hi".as_bytes()).unwrap().0.to_owned()).unwrap());
+  println!("{:#?}", type_assignment("test -- ::=\n      	-- :\n::= hi".as_bytes()));
+  println!("{:#?}", String::from_utf8(test_ten(" --fds\n --\ndlsjfs\nfds ::= hi".as_bytes()).unwrap().0.to_owned()).unwrap());
 }
