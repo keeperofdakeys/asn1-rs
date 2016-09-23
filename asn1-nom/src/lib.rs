@@ -23,25 +23,36 @@ struct Asn1Seq {
   fields: Vec<Asn1Def>,
 }
 
-named!(type_name <&[u8], String>, chain!(
+named!(asn1_type_name <String>, chain!(
   s: take_while!(nom::is_alphanumeric),
   || String::from_utf8(Vec::from(s)).unwrap()
 ));
 
-named!(type_assignment <&[u8], Asn1Def>, chain!(
+named!(asn1_type_def <Asn1Def>, chain!(
   skip_other? ~
-  name: type_name ~
-  skip_other ~
+  multispace? ~
+  name: asn1_type_name ~
+  multispace? ~
   tag!("::=") ~
-  skip_other ~
-  assign: type_name,
+  multispace? ~
+  asn1_type: asn1_type,
   || Asn1Def {
     name: name,
-    assign: Asn1Type::Type(assign),
+    assign: asn1_type,
   }
 ));
 
-named!(type_sequence <&[u8], Asn1Seq>, chain!(
+named!(asn1_type <Asn1Type>, alt!(
+  chain!(s: asn1_sequence, || Asn1Type::Seq(s)) |
+  chain!(t: asn1_assignment, || Asn1Type::Type(t))
+));
+
+named!(asn1_assignment <String>, chain!(
+  t: asn1_type_name,
+  || t
+));
+
+named!(asn1_sequence <&[u8], Asn1Seq>, chain!(
   tag!("SEQUNECE"),
   || Asn1Seq {
     fields: Vec::new(),
@@ -80,6 +91,6 @@ named!(test_ten, chain!(
 ));
 
 fn main() {
-  println!("{:#?}", type_assignment("test -- ::=\n      	-- :\n::= hi".as_bytes()));
+  println!("{:#?}", asn1_type_def("--\ntest ::=  hi".as_bytes()));
   println!("{:#?}", String::from_utf8(test_ten(" --fds\n --\ndlsjfs\nfds ::= hi".as_bytes()).unwrap().0.to_owned()).unwrap());
 }
