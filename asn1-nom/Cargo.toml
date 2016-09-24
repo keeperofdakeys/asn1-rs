@@ -8,4 +8,6 @@ path = "src/lib.rs"
 name = "run"
 
 [dependencies]
-nom = "^1.2"
+# nom = "^1.2"
+# Use our nom for the eol patch
+nom = { path = "../../nom" }

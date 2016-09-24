@@ -12,6 +12,12 @@ pub struct Asn1Def {
 
 #[derive(Debug)]
 pub struct Asn1Seq {
-  pub fields: Vec<Asn1Def>,
+  pub fields: Vec<Asn1SeqField>,
+}
+
+#[derive(Debug)]
+pub struct Asn1SeqField {
+  pub name: String,
+  pub asn1_type: Asn1Type,
 }
 
