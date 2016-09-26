@@ -67,12 +67,6 @@ fn test_seq_fields() {
       }
     ],
   };
-  println!("{:#?}", asn1_seq("\
-      SEQUENCE {\
-        foo Bar,\
-        asdf INTEGER\
-      }\
-    ".as_bytes()));
   assert_eq!(
     seq,
     asn1_seq("\
@@ -82,4 +76,14 @@ fn test_seq_fields() {
       }\
     ".as_bytes()).unwrap().1
   );
+  assert_eq!(
+    seq,
+    asn1_seq("\
+      SEQUENCE {
+        foo Bar --,
+        , asdf INTEGER
+      }
+    ".as_bytes()).unwrap().1
+  );
+  assert!(asn1_seq("SEQUENC ".as_bytes()).is_err());
 }
