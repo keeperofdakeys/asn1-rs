@@ -43,6 +43,7 @@ mod prim;
 pub mod int;
 pub mod str;
 pub mod assign;
+pub mod alias;
 pub mod choice;
 pub mod seq;
 pub mod seq_of;
