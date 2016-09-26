@@ -3,7 +3,7 @@ name = "asn1-nom"
 version = "0.1.0"
 authors = ["Josh <keeperofdakeys@gmail.com>"]
 
-[[bin]]
+[lib]
 path = "src/lib.rs"
 name = "run"
 
