@@ -55,9 +55,9 @@ struct IntSequence {
 ber_sequence!(
   IntSequence,
   "INTSEQ",
-  a,
-  b,
-  c
+  a;
+  b;
+  c;
 );
 
 struct ProgOpts {

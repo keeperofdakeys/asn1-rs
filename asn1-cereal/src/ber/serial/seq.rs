@@ -44,10 +44,10 @@
 /// procedural macros are eventually stabilised, listing the fields
 /// in the macro might no longer be required.
 macro_rules! ber_sequence {
-  ($rs_type:ident, $asn1_ty:expr, $($item:ident),*) => (
+  ($rs_type:ident, $asn1_ty:expr, $($args:tt)*) => (
     asn1_sequence_info!($rs_type, $asn1_ty);
-    ber_sequence_serialize!($rs_type, $($item),*);
-    ber_sequence_deserialize!($rs_type, $($item),*);
+    ber_sequence_serialize!($rs_type, $($args)*);
+    // ber_sequence_deserialize!($rs_type, $($args)*);
   )
 }
 
@@ -77,53 +77,54 @@ macro_rules! asn1_sequence_info {
 /// This macro defines the BerSerialize trait for a rust struct. The code generated
 /// will serialize the specified fields in the order that they are given.
 macro_rules! ber_sequence_serialize {
-  ($rs_type:ty, $($item:ident),*) => (
+  ($rs_type:ty, $($args:tt)*) => (
     impl $crate::BerSerialize for $rs_type {
       fn serialize_value<E: $crate::BerEncRules, W: std::io::Write>
           (&self, e: E, writer: &mut W) -> Result<(), $crate::err::EncodeError> {
         let mut bytes = Vec::new();
         let mut count: u64 = 0;
         // For each declared sequence member, serialize it onto the stream.
-        $(
-          count += 1;
-          // If encoding uses implicit tag, skip context-specific tag.
-          if E::tag_rules() == $crate::ber::enc::TagEnc::Implicit {
-            try!($crate::BerSerialize::serialize_enc(&self.$item, e, writer));
-          // Otherwise encode the context-specific tag.
-          } else {
-            try!($crate::BerSerialize::serialize_enc(&self.$item, e, &mut bytes));
-            let tag = $crate::tag::Tag {
-              class: $crate::tag::Class::ContextSpecific,
-              tagnum: count.into(),
-              constructed: true,
-            };
-            let len: $crate::tag::Len = Some(bytes.len() as $crate::tag::LenNum).into();
-            try!($crate::tag::write_taglen(tag, len, writer));
-            try!(writer.write_all(&mut bytes));
-
-            bytes.clear();
-          }
-        )*
+        ber_sequence_serialize!(__field => {self e writer bytes count} $($args)*);
         Ok(())
       }
     }
-  )
+  );
+  (__field => {$this:ident $e:ident $writer:ident $bytes:ident $count:ident}
+      $item:ident; $($args:tt)*) => (
+    // If encoding uses implicit tag, skip context-specific tag.
+    if E::tag_rules() == $crate::ber::enc::TagEnc::Implicit {
+      try!($crate::BerSerialize::serialize_enc(&$this.$item, $e, $writer));
+    // Otherwise encode the context-specific tag.
+    } else {
+      try!($crate::BerSerialize::serialize_enc(&$this.$item, $e, &mut $bytes));
+      let tag = $crate::tag::Tag {
+        class: $crate::tag::Class::ContextSpecific,
+        tagnum: $count.into(),
+        constructed: true,
+      };
+      let len: $crate::tag::Len = Some($bytes.len() as $crate::tag::LenNum).into();
+      try!($crate::tag::write_taglen(tag, len, $writer));
+      try!($writer.write_all(&mut $bytes));
+
+      $count += 1;
+      $bytes.clear();
+    }
+
+    ber_sequence_serialize!(__field => {$this $e $writer $bytes $count} $($args)*);
+  );
+  (__field => { $($args:tt)* } ) => ();
 }
 
 #[macro_export]
 /// This macro defines the BerDeserialize trait for a rust struct. The code generated
 /// will deserialize the specified fields in the order that they are given.
 macro_rules! ber_sequence_deserialize {
-  ($rs_type:ident, $($item:ident),*) => (
+  ($rs_type:ident, $($item:ident);*) => (
     impl $crate::BerDeserialize for $rs_type {
       fn deserialize_value<E: $crate::BerEncRules, I: Iterator<Item=std::io::Result<u8>>>
           (e: E, reader: &mut I, _: $crate::tag::Len) -> Result<Self, $crate::err::DecodeError> {
         let mut count: u64 = 0;
         $(
-          // Iterate count.
-          // FIXME: Does this start from 0 or 1?
-          count += 1;
-
           // Use field name as variable name, due to hygiene this won't conflict with any
           // defined locally.
           let $item;
@@ -134,6 +135,10 @@ macro_rules! ber_sequence_deserialize {
               tagnum: count.into(),
               constructed: true,
             };
+
+            // Iterate count.
+            count += 1;
+
             let tag = try!($crate::tag::Tag::read_tag(reader));
 
             // If encoding uses implicit tagging, throw an error if this isn't an implicit tag.
