@@ -18,7 +18,11 @@ pub trait BerSerialize: Asn1Info {
   /// Serialize a value into ASN.1 data using a specific set of encoding rules.
   fn serialize_enc<E: enc::BerEncRules, W: io::Write>
       (&self, e: E, writer: &mut W) -> Result<(), err::EncodeError> {
-    let tag = Self::asn1_tag();
+    let tag = match Self::asn1_tag() {
+      Some(tag) => tag,
+      None => return self.serialize_value(e, writer),
+    };
+
     try!(tag.write_tag(writer));
 
     // If this is indefinite length and constructed, write the data directly.
@@ -72,7 +76,7 @@ pub trait BerDeserialize: Asn1Info + Sized {
       return r;
     }
 
-    if tag != Self::asn1_tag() {
+    if Some(tag) != Self::asn1_tag() {
       return Err(err::DecodeError::TagTypeMismatch);
     }
 

@@ -7,12 +7,12 @@ use tag;
 use err;
 
 impl Asn1Info for String {
-  fn asn1_tag() -> tag::Tag {
-    tag::Tag {
+  fn asn1_tag() -> Option<tag::Tag> {
+    Some(tag::Tag {
       class: tag::Class::Universal,
       tagnum: 19u8.into(),
       constructed: false,
-    }
+    })
   }
 
   fn asn1_type() -> tag::Type {

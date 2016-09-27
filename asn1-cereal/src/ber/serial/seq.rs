@@ -58,12 +58,12 @@ macro_rules! ber_sequence {
 macro_rules! asn1_sequence_info {
   ($rs_type:ident, $asn1_ty:expr) => (
     impl $crate::Asn1Info for $rs_type {
-      fn asn1_tag() -> $crate::tag::Tag {
-        $crate::tag::Tag {
+      fn asn1_tag() -> Option<$crate::tag::Tag> {
+        Some($crate::tag::Tag {
           class: $crate::tag::Class::Universal,
           tagnum: (0x10 as u8).into(),
           constructed: true,
-        }
+        })
       }
 
       fn asn1_type() -> $crate::tag::Type {

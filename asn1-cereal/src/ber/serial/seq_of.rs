@@ -85,7 +85,7 @@ macro_rules! ber_sequence_of_deserialize {
         }
       }
 
-      if tag != <Self as $crate::Asn1Info>::asn1_tag() {
+      if Some(tag) != <Self as $crate::Asn1Info>::asn1_tag() {
         return Err($crate::err::DecodeError::TagTypeMismatch);
       }
 

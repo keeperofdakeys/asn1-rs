@@ -13,12 +13,12 @@ use std::cmp;
 macro_rules! ber_cereal_int {
   ($rs_type:ty, 1, $unsigned:expr) => (
     impl Asn1Info for $rs_type {
-      fn asn1_tag() -> tag::Tag {
-        tag::Tag {
+      fn asn1_tag() -> Option<tag::Tag> {
+        Some(tag::Tag {
           class: tag::Class::Universal,
           tagnum: 2u8.into(),
           constructed: false,
-        }
+        })
       }
 
       fn asn1_type() -> tag::Type {
@@ -36,12 +36,12 @@ macro_rules! ber_cereal_int {
   );
   ($rs_type:ty, $size:expr, $unsigned:expr) => (
     impl Asn1Info for $rs_type {
-      fn asn1_tag() -> tag::Tag {
-        tag::Tag {
+      fn asn1_tag() -> Option<tag::Tag> {
+        Some(tag::Tag {
           class: tag::Class::Universal,
           tagnum: 2u8.into(),
           constructed: false,
-        }
+        })
       }
 
       fn asn1_type() -> tag::Type {

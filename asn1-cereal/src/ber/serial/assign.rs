@@ -60,7 +60,7 @@ macro_rules! ber_newtype_serialize {
           return self.0.serialize_enc(e, writer);
         }
 
-        let tag = <Self as $crate::Asn1Info>::asn1_tag();
+        let tag = <Self as $crate::Asn1Info>::asn1_tag().unwrap();
         try!(tag.write_tag(writer));
 
         // If this is indefinite length and constructed, write the data directly.
@@ -96,7 +96,7 @@ macro_rules! ber_newtype_deserialize {
       fn _deserialize_with_tag<E: $crate::BerEncRules, I: Iterator<Item=std::io::Result<u8>>>
           (e: E, reader: &mut I, tag: $crate::tag::Tag, len: $crate::tag::Len)
           -> Option<Result<Self, $crate::err::DecodeError>> {
-        let my_tag = <Self as $crate::Asn1Info>::asn1_tag();
+        let my_tag = <Self as $crate::Asn1Info>::asn1_tag().unwrap();
 
         // If we're decoding using Implicit tagging rules, throw an error if this isn't an implicit tag.
         if E::tag_rules() == $crate::ber::enc::TagEnc::Implicit && tag == my_tag {

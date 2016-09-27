@@ -12,6 +12,10 @@
 //! }
 //! ```
 
+// MERGE THIS WITH NEWTYPE
+//
+// We can do this now that asn1_tag returns an Option.
+
 #[macro_export]
 macro_rules! ber_alias {
   ($outer:ident, $inner:ident) => (
@@ -25,7 +29,7 @@ macro_rules! ber_alias {
 macro_rules! ber_alias_info {
   ($outer:ident, $inner:ident) => (
     impl $crate::Asn1Info for $outer {
-      fn asn1_tag() -> $crate::tag::Tag {
+      fn asn1_tag() -> Option<$crate::tag::Tag> {
         <$inner as $crate::Asn1Info>::asn1_tag()
       }
 
