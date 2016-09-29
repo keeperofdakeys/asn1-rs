@@ -1,3 +1,7 @@
+#![feature(trace_macros)]
+
+trace_macros!(true);
+
 #[macro_use]
 extern crate asn1_cereal;
 extern crate argparse;
@@ -32,7 +36,7 @@ fn main() {
   }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 struct SomeString(String);
 
 asn1_info!(
@@ -45,16 +49,27 @@ asn1_info!(
 
 ber_newtype!(SomeString);
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 struct IntSequence {
   a: u64,
   b: Vec<i32>,
   c: SomeString,
 }
 
-ber_sequence!(
+asn1_sequence_info!(
   IntSequence,
-  "INTSEQ",
+  "INTSEQ"
+);
+
+ber_sequence_serialize!(
+  IntSequence,
+  a ([APPLICATION 3] DEFAULT 4);
+  b;
+  c;
+);
+
+ber_sequence_deserialize!(
+  IntSequence,
   a;
   b;
   c;
