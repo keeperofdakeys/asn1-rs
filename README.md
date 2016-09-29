@@ -19,8 +19,8 @@ struct ShortSequence {
 ber1_sequence!(
   ShortSequence,
   "SHORT_SEQUENCE",
-  z,
-  y
+  z;
+  y;
 );
 
 use asn1_cereal::BerSerialize;
@@ -75,8 +75,8 @@ struct OtherSeq {
 ber\_sequence!(
   OtherSeq,
   "OtherSeq",
-  someInt,
-  thingySeq
+  someInt;
+  thingySeq;
 );
 
 let data = OtherSeq{ z: SomeInt(5), thingySeq: Vec< };

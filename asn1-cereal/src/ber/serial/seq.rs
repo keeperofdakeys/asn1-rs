@@ -14,8 +14,8 @@
 //!   ber_sequence!(
 //!     ShortSequence,
 //!     "SHORT_SEQUENCE",
-//!     z,
-//!     y
+//!     z;
+//!     y;
 //!   );
 //!
 //!   // OR
@@ -27,8 +27,8 @@
 //!   }
 //!
 //!   asn1_sequence_info!(SomeSequence, "SOME_SEQUENCE");
-//!   ber_sequence_serialize!(SomeSequence, a, b, c);
-//!   ber_sequence_deserialize!(SomeSequence, a, b, c);
+//!   ber_sequence_serialize!(SomeSequence, a; b; c;);
+//!   ber_sequence_deserialize!(SomeSequence, a; b; c;);
 //! }
 //! ```
 //!
@@ -47,7 +47,7 @@ macro_rules! ber_sequence {
   ($rs_type:ident, $asn1_ty:expr, $($args:tt)*) => (
     asn1_sequence_info!($rs_type, $asn1_ty);
     ber_sequence_serialize!($rs_type, $($args)*);
-    // ber_sequence_deserialize!($rs_type, $($args)*);
+    ber_sequence_deserialize!($rs_type, $($args)*);
   )
 }
 
@@ -119,7 +119,7 @@ macro_rules! ber_sequence_serialize {
 /// This macro defines the BerDeserialize trait for a rust struct. The code generated
 /// will deserialize the specified fields in the order that they are given.
 macro_rules! ber_sequence_deserialize {
-  ($rs_type:ident, $($item:ident);*) => (
+  ($rs_type:ident, $($item:ident);* ;) => (
     impl $crate::BerDeserialize for $rs_type {
       fn deserialize_value<E: $crate::BerEncRules, I: Iterator<Item=std::io::Result<u8>>>
           (e: E, reader: &mut I, _: $crate::tag::Len) -> Result<Self, $crate::err::DecodeError> {

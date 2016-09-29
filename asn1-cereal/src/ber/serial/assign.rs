@@ -21,8 +21,8 @@
 //!   }
 //!
 //!   asn1_sequence_info!(Type1, "TYPE1");
-//!   ber_sequence_serialize!(Type1, a);
-//!   ber_sequence_deserialize!(Type1, a);
+//!   ber_sequence_serialize!(Type1, a;);
+//!   ber_sequence_deserialize!(Type1, a;);
 //!
 //!   struct Type2 (Type1);
 //!   asn1_info!(Type2, 0x3, 0x1, true, "TYPE2");

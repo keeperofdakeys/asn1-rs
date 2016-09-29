@@ -25,8 +25,8 @@
 //!   ber_sequence!(
 //!     ShortSequence,
 //!     "SHORT_SEQUENCE",
-//!     z,
-//!     y
+//!     z;
+//!     y;
 //!   );
 //!
 //!   use asn1_cereal::BerSerialize;
