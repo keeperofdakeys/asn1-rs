@@ -47,3 +47,32 @@ macro_rules! asn1_info {
     }
   );
 }
+
+#[macro_export]
+/// This macro parses an ASN.1 tag specification, and returns the appropriate Tag.
+macro_rules! asn1_spec_tag {
+  ([$tagnum:expr]) => (
+    asn1_spec_tag!([CONTEXT $tagnum]);
+  );
+  ([CONTEXT $tagnum:expr]) => (
+    $crate::tag::Tag {
+      class: $crate::tag::Class::ContextSpecific,
+      tagnum: $tagnum,
+      constructed: true,
+    }
+  );
+  ([APPLICATION $tagnum:expr]) => (
+    $crate::tag::Tag {
+      class: $crate::tag::Class::Application,
+      tagnum: $tagnum,
+      constructed: true,
+    }
+  );
+  ([PRIVATE $tagnum:expr]) => (
+    $crate::tag::Tag {
+      class: $crate::tag::Class::Private,
+      tagnum: $tagnum,
+      constructed: true,
+    }
+  );
+}

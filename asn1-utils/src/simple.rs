@@ -21,18 +21,18 @@ fn main() {
 
   if opts.dump {
     let mut writer = io::BufWriter::new(&mut output);
-    seq.serialize_enc(BERAlt, &mut writer).unwrap();
+    seq.serialize_enc(BER, &mut writer).unwrap();
     return;
   }
   {
     let mut writer = io::BufWriter::new(&mut buffer);
-    seq.serialize_enc(BERAlt, &mut writer).unwrap();
+    seq.serialize_enc(BER, &mut writer).unwrap();
   }
   println!("{:?}", buffer);
   {
-    let mut reader = buffer.iter().map(|x| Ok(*x) as Result<u8, std::io::Error>);
-    let seq = IntSequence::deserialize_enc(BERAlt, &mut reader).unwrap();
-    println!("{:?}", seq);
+    // let mut reader = buffer.iter().map(|x| Ok(*x) as Result<u8, std::io::Error>);
+    // let seq = IntSequence::deserialize_enc(BER, &mut reader).unwrap();
+    // println!("{:?}", seq);
   }
 }
 
@@ -64,13 +64,6 @@ asn1_sequence_info!(
 ber_sequence_serialize!(
   IntSequence,
   a ([APPLICATION 3] DEFAULT 4);
-  b;
-  c;
-);
-
-ber_sequence_deserialize!(
-  IntSequence,
-  a;
   b;
   c;
 );
