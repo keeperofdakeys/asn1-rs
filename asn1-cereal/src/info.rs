@@ -51,6 +51,17 @@ macro_rules! asn1_info {
 #[macro_export]
 /// This macro parses an ASN.1 tag specification, and returns the appropriate Tag.
 macro_rules! asn1_spec_tag {
+  ({ $count:ident }) => (
+    asn1_spec_tag!([])
+  );
+  ({ $count:ident } []) => ({
+    let count = $count;
+    $count += 1;
+    asn1_spec_tag!([CONTEXT count])
+  });
+  ({ $count:ident } [$($args:tt)*]) => (
+    asn1_spec_tag!([$($args)*])
+  );
   ([$tagnum:expr]) => (
     asn1_spec_tag!([CONTEXT $tagnum]);
   );

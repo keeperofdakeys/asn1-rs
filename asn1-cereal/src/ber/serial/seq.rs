@@ -84,78 +84,56 @@ macro_rules! ber_sequence_serialize {
         let mut bytes = Vec::new();
         let mut count: u64 = 0;
         // For each declared sequence member, serialize it onto the stream.
-        ber_sequence_serialize!(__field => { self e writer bytes count } $($args)*);
+        ber_sequence_serialize!(_ { self e writer bytes count } $($args)*);
         Ok(())
       }
     }
   );
 
-  // Return a default tag.
-  (__tag => { $count:expr }) => (
-    ber_sequence_serialize!(__tag => { $count } [])
-  );
-  // Return a default tag.
-  (__tag => { $count:expr } []) => ({
-    let count = $count;
-    $count += 1;
-    asn1_spec_tag!([CONTEXT count])
-  });
-  // Return a specific tag.
-  (__tag => { $count:expr } [ $($args:tt)* ]) => (
-    asn1_spec_tag!([$($args)*]);
-  );
-
   // Handle field creation.
   // Expand a field with no options.
-  (__field =>
-      { $this:ident $e:ident $writer:ident $bytes:ident $count:ident }
+  (_ { $this:ident $e:ident $writer:ident $bytes:ident $count:ident }
       $item:ident; $($args:tt)*) => (
-    ber_sequence_serialize!(__field => { $this $e $writer $bytes $count } $item (); $($args)*);
+    ber_sequence_serialize!(_ { $this $e $writer $bytes $count } $item (); $($args)*);
   );
   // Expand an OPTIONAL field with no tag.
-  (__field =>
-      { $this:ident $e:ident $writer:ident $bytes:ident $count:ident }
+  (_ { $this:ident $e:ident $writer:ident $bytes:ident $count:ident }
       $item:ident (OPTIONAL); $($args:tt)*) => (
-    ber_sequence_serialize!(__field => { $this $e $writer $bytes $count } $item ([] OPTIONAL); $($args)*);
+    ber_sequence_serialize!(_ { $this $e $writer $bytes $count } $item ([] OPTIONAL); $($args)*);
   );
   // Expand an OPTIONAL field with a tag.
-  (__field =>
-      { $this:ident $e:ident $writer:ident $bytes:ident $count:ident }
+  (_ { $this:ident $e:ident $writer:ident $bytes:ident $count:ident }
       $item:ident ([$($opts:tt)*] OPTIONAL); $($args:tt)*) => (
-    let tag = ber_sequence_serialize!(__tag => { $count } [$($opts)*]);
+    let tag = asn1_spec_tag!({ $count } [$($opts)*]);
     if let Some(ref val) = $this.$item {
-      ber_sequence_serialize!(__field => { $this $e $writer $bytes $count tag, val } $($args)*);
+      ber_sequence_serialize!(_ { $this $e $writer $bytes $count tag, val } $($args)*);
     } else {
-      ber_sequence_serialize!(__field => { $this $e $writer $bytes $count } $($args)*);
+      ber_sequence_serialize!(_ { $this $e $writer $bytes $count } $($args)*);
     }
   );
   // Expand a field with a DEFAULT.
-  (__field =>
-      { $this:ident $e:ident $writer:ident $bytes:ident $count:ident }
+  (_ { $this:ident $e:ident $writer:ident $bytes:ident $count:ident }
       $item:ident (DEFAULT $default:expr); $($args:tt)*) => (
-    ber_sequence_serialize!(__field => { $this $e $writer $bytes $count } $item ([] DEFAULT $default); $($args)*);
+    ber_sequence_serialize!(_ { $this $e $writer $bytes $count } $item ([] DEFAULT $default); $($args)*);
   );
   // Expand a field with a DEFAULT and a tag.
-  (__field =>
-      { $this:ident $e:ident $writer:ident $bytes:ident $count:ident }
+  (_ { $this:ident $e:ident $writer:ident $bytes:ident $count:ident }
       $item:ident ([$($opts:tt)*] DEFAULT $default:expr); $($args:tt)*) => (
-    let tag = ber_sequence_serialize!(__tag => { $count } [$($opts)*]);
+    let tag = asn1_spec_tag!({ $count } [$($opts)*]);
     if &$this.$item != &$default {
-      ber_sequence_serialize!(__field => { $this $e $writer $bytes $count tag, &$this.$item } $($args)*);
+      ber_sequence_serialize!(_ { $this $e $writer $bytes $count tag, &$this.$item } $($args)*);
     } else {
-      ber_sequence_serialize!(__field => { $this $e $writer $bytes $count } $($args)*);
+      ber_sequence_serialize!(_ { $this $e $writer $bytes $count } $($args)*);
     }
   );
   // Expand a field that has options (assumes its a tag here).
-  (__field =>
-      { $this:ident $e:ident $writer:ident $bytes:ident $count:ident }
+  (_ { $this:ident $e:ident $writer:ident $bytes:ident $count:ident }
       $item:ident ($($opts:tt)*); $($args:tt)*) => (
-    let tag = ber_sequence_serialize!(__tag => { $count } [$($opts)*]);
-    ber_sequence_serialize!(__field => { $this $e $writer $bytes $count tag, &$this.$item } $($args)*);
+    let tag = asn1_spec_tag!({ $count } [$($opts)*]);
+    ber_sequence_serialize!(_ { $this $e $writer $bytes $count tag, &$this.$item } $($args)*);
   );
   // Create the implementation for a field with options.
-  (__field =>
-      { $this:ident $e:ident $writer:ident $bytes:ident $count:ident $tag:expr, $value:expr }
+  (_ { $this:ident $e:ident $writer:ident $bytes:ident $count:ident $tag:expr, $value:expr }
       $($args:tt)*) => (
     // If encoding uses implicit tag, skip context-specific tag.
     if E::tag_rules() == $crate::ber::enc::TagEnc::Implicit {
@@ -169,9 +147,9 @@ macro_rules! ber_sequence_serialize {
       $bytes.clear();
     }
 
-    ber_sequence_serialize!(__field => { $this $e $writer $bytes $count } $($args)*);
+    ber_sequence_serialize!(_ { $this $e $writer $bytes $count } $($args)*);
   );
-  (__field => { $($args:tt)* } ) => ();
+  (_ { $($args:tt)* } ) => ();
 }
 
 #[macro_export]
