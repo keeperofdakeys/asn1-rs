@@ -155,7 +155,7 @@ macro_rules! ber_sequence_serialize {
 #[macro_export]
 /// This macro defines the BerDeserialize trait for a rust struct. The code generated
 /// will deserialize the specified fields in the order that they are given.
-macro_rules! ber_sequence_deserialize {
+macro_rules! ber_sequence_deserializea {
   ($rs_type:ident, $($item:ident);* ;) => (
     impl $crate::BerDeserialize for $rs_type {
       fn deserialize_value<E: $crate::BerEncRules, I: Iterator<Item=std::io::Result<u8>>>
@@ -204,4 +204,109 @@ macro_rules! ber_sequence_deserialize {
       }
     }
   )
+}
+
+#[macro_export]
+/// This macro defines the BerDeserialize trait for a rust struct. The code generated
+/// will deserialize the specified fields in the order that they are given.
+macro_rules! ber_sequence_deserialize {
+  // Handle fields.
+  // Expand a field with no options.
+  (_ { $rs_type:ident $e:ident $reader:ident $count:ident $tag:ident [$($fields:ident)*] }
+      $item:ident; $($args:tt)*) => (
+    ber_sequence_deserialize!(
+      _ { $rs_type $e $reader $count $tag [$($fields)*] } $item (); $($args)*
+    );
+  );
+  // Expand a field with empty options.
+  (_ { $rs_type:ident $e:ident $reader:ident $count:ident $tag:ident [$($fields:ident)*] }
+      $item:ident (); $($args:tt)*) => (
+    ber_sequence_deserialize!(
+      _ { $rs_type $e $reader $count $tag [$($fields)*] } $item ([]); $($args)*
+    );
+  );
+  // Expand a field with empty options and a tag.
+  (_ { $rs_type:ident $e:ident $reader:ident $count:ident $tag:ident [$($fields:ident)*] }
+      $field:ident ([$($opts:tt)*]); $($args:tt)*) => (
+    let $field = {
+      let tag = match $tag {
+        Some(t) => t,
+        None => {
+          let t = try!($crate::tag::Tag::read_tag($reader));
+          $tag = Some(t); t
+        },
+      };
+      let our_tag = asn1_spec_tag!({ $count } [$($opts)*]);
+
+      ber_sequence_deserialize!(_ { $rs_type $e $reader $count } tag, our_tag )
+    };
+    ber_sequence_deserialize!(_ { $rs_type $e $reader $count $tag [$($fields)* $field] } $($args)*);
+  );
+  // Expand an OPTIONAL field with no tag.
+  (_ { $rs_type:ident $e:ident $reader:ident $count:ident $tag:ident [$($fields:ident)*] }
+      $item:ident (OPTIONAL); $($args:tt)*) => (
+    ber_sequence_deserialize!(
+      _ { $rs_type $e $reader $count $tag [$($fields)*] } $item ([] OPTIONAL); $($args)*
+    );
+  );
+  // Expand an OPTIONAL field with a tag.
+  (_ { $rs_type:ident $e:ident $reader:ident $count:ident $tag:ident [$($fields:ident)*] }
+      $field:ident ([$($opts:tt)*] OPTIONAL); $($args:tt)*) => (
+    let $field = {
+      let tag = match $tag {
+        Some(t) => t,
+        None => {
+          let t = try!($crate::tag::Tag::read_tag($reader));
+          $tag = Some(t); t
+        },
+      };
+      let our_tag = asn1_spec_tag!({ $count } [$($opts)*]);
+
+      if tag == our_tag {
+        let len = try!($crate::tag::Len::read_len($reader));
+        Some($crate::BerDeserialize::deserialize_with_tag($e, $reader, $tag, len));
+      } else {
+        None
+      }
+    };
+    ber_sequence_deserialize!({ $rs_type $e $reader $count $tag [$($fields)* $field] } $($args)*);
+  );
+  // Create the implementation for a field.
+  (_ { $rs_type:ident $e:ident $reader:ident $count:ident } $tag:expr, $our_tag:expr) => ({
+    // If encoding uses implicit tagging, throw an error if this isn't an implicit tag.
+    if E::tag_rules() == $crate::ber::enc::TagEnc::Implicit && $tag == $our_tag {
+      return Err($crate::err::DecodeError::ExplicitTag);
+    }
+
+    let len = try!($crate::tag::Len::read_len($reader));
+
+    // If the tag matches our tag, decode the len and call the normal deserialize function.
+    if $tag == $our_tag {
+      // We don't have anything to do with the len, technically we should use it to
+      // check the length decoded.
+      let _ = len;
+      try!($crate::BerDeserialize::deserialize_enc($e, $reader))
+    // Otherwise decode it as the inner type. (We give the tag that we
+    // decoded, and the function will decode the length itself).
+    } else {
+      try!($crate::BerDeserialize::deserialize_with_tag($e, $reader, $tag, len))
+    }
+  });
+  // When no fields are left, build the struct.
+  (_ { $rs_type:ident $e:ident $reader:ident $count:ident $tag:ident [ $($field:ident)* ] }) => (
+    return Ok($rs_type { $(
+      $field: $field
+    ),* })
+  );
+
+  ($rs_type:ident, $($args:tt)*) => (
+    impl $crate::BerDeserialize for $rs_type {
+      fn deserialize_value<E: $crate::BerEncRules, I: Iterator<Item=std::io::Result<u8>>>
+          (e: E, reader: &mut I, _: $crate::tag::Len) -> Result<Self, $crate::err::DecodeError> {
+        let mut count: u64 = 0;
+        let mut tag: Option<$crate::tag::Tag> = None;
+        ber_sequence_deserialize!(_ { $rs_type e reader count tag [ ] } $($args)*);
+      }
+    }
+  );
 }

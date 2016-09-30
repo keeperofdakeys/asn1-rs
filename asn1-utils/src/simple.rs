@@ -30,9 +30,9 @@ fn main() {
   }
   println!("{:?}", buffer);
   {
-    // let mut reader = buffer.iter().map(|x| Ok(*x) as Result<u8, std::io::Error>);
-    // let seq = IntSequence::deserialize_enc(BER, &mut reader).unwrap();
-    // println!("{:?}", seq);
+    let mut reader = buffer.iter().map(|x| Ok(*x) as Result<u8, std::io::Error>);
+    let seq = IntSequence::deserialize_enc(BER, &mut reader).unwrap();
+    println!("{:?}", seq);
   }
 }
 
@@ -56,14 +56,10 @@ struct IntSequence {
   c: SomeString,
 }
 
-asn1_sequence_info!(
+ber_sequence!(
   IntSequence,
-  "INTSEQ"
-);
-
-ber_sequence_serialize!(
-  IntSequence,
-  a ([APPLICATION 3] DEFAULT 4);
+  "INTSEQ",
+  a;
   b;
   c;
 );
