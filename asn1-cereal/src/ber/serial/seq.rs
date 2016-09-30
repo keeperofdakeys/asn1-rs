@@ -90,14 +90,6 @@ macro_rules! ber_sequence_serialize {
     }
   );
 
-  // Parse field defaults (skip encoding).
-  // No defaults
-  (__default => $value:expr, ) => ( false );
-  // OPTIONAl is an Option with default None.
-  (__default => $value:expr, OPTIONAL) => ( true );
-  // A custom default.
-  (__default => $value:expr, DEFAULT $default:expr) => ( $value == $default );
-
   // Return a default tag.
   (__tag => { $count:expr }) => (
     ber_sequence_serialize!(__tag => { $count } [])
