@@ -126,26 +126,28 @@ macro_rules! ber_sequence_serialize {
       ber_sequence_serialize!(_ { $this $e $writer $bytes $count } $($args)*);
     }
   );
-  // Expand a field that has options (assumes its a tag here).
+  // Expand a field that has options.
   (_ { $this:ident $e:ident $writer:ident $bytes:ident $count:ident }
       $item:ident ($($opts:tt)*); $($args:tt)*) => (
     let tag = asn1_spec_tag!({ $count } [$($opts)*]);
-    ber_sequence_serialize!(_ { $this $e $writer $bytes $count tag, &$this.$item } $($args)*);
-  );
-  // Create the implementation for a field with options.
-  (_ { $this:ident $e:ident $writer:ident $bytes:ident $count:ident $tag:expr, $value:expr }
-      $($args:tt)*) => (
+
     // If encoding uses implicit tag, skip context-specific tag.
     if E::tag_rules() == $crate::ber::enc::TagEnc::Implicit {
-      try!($crate::BerSerialize::serialize_enc($value, $e, $writer));
+      try!($crate::BerSerialize::serialize_enc(&$this.$item, $e, $writer));
+      ber_sequence_serialize!(_ { $this $e $writer $bytes $count } $($args)*);
     // Otherwise encode the context-specific tag.
     } else {
-      try!($crate::BerSerialize::serialize_enc($value, $e, &mut $bytes));
-      let len: $crate::tag::Len = Some($bytes.len() as $crate::tag::LenNum).into();
-      try!($crate::tag::write_taglen($tag, len, $writer));
-      try!($writer.write_all(&mut $bytes));
-      $bytes.clear();
+      ber_sequence_serialize!(_ { $this $e $writer $bytes $count tag, &$this.$item } $($args)*);
     }
+  );
+  // Write a field with a tag.
+  (_ { $this:ident $e:ident $writer:ident $bytes:ident $count:ident $tag:expr, $value:expr }
+      $($args:tt)*) => (
+    try!($crate::BerSerialize::serialize_enc($value, $e, &mut $bytes));
+    let len: $crate::tag::Len = Some($bytes.len() as $crate::tag::LenNum).into();
+    try!($crate::tag::write_taglen($tag, len, $writer));
+    try!($writer.write_all(&mut $bytes));
+    $bytes.clear();
 
     ber_sequence_serialize!(_ { $this $e $writer $bytes $count } $($args)*);
   );
@@ -175,13 +177,8 @@ macro_rules! ber_sequence_deserialize {
   (_ { $rs_type:ident $e:ident $reader:ident $count:ident $tag:ident [$($fields:ident)*] }
       $field:ident ([$($opts:tt)*]); $($args:tt)*) => (
     let $field = {
-      let tag = match $tag {
-        Some(t) => t,
-        None => {
-          let t = try!($crate::tag::Tag::read_tag($reader));
-          $tag = Some(t); t
-        },
-      };
+      let tag = $tag.unwrap_or(try!($crate::tag::Tag::read_tag($reader)));
+      $tag = None;
       let our_tag = asn1_spec_tag!({ $count } [$($opts)*]);
 
       ber_sequence_deserialize!(_ { $rs_type $e $reader $count } tag, our_tag )
@@ -206,16 +203,18 @@ macro_rules! ber_sequence_deserialize {
           $tag = Some(t); t
         },
       };
+
       let our_tag = asn1_spec_tag!({ $count } [$($opts)*]);
 
       if tag == our_tag {
-        let len = try!($crate::tag::Len::read_len($reader));
-        Some(try!($crate::BerDeserialize::deserialize_with_tag($e, $reader, tag, len)));
+        $tag = None;
+        let _ = try!($crate::tag::Len::read_len($reader));
+        Some(try!($crate::BerDeserialize::deserialize_enc($e, $reader)))
       } else {
         None
       }
     };
-    ber_sequence_deserialize!({ $rs_type $e $reader $count $tag [$($fields)* $field] } $($args)*);
+    ber_sequence_deserialize!(_ { $rs_type $e $reader $count $tag [$($fields)* $field] } $($args)*);
   );
   // Create the implementation for a field.
   (_ { $rs_type:ident $e:ident $reader:ident $count:ident } $tag:expr, $our_tag:expr) => ({
