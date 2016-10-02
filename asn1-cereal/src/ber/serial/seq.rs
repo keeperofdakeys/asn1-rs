@@ -177,8 +177,12 @@ macro_rules! ber_sequence_deserialize {
   (_ { $rs_type:ident $e:ident $reader:ident $count:ident $tag:ident [$($fields:ident)*] }
       $field:ident ([$($opts:tt)*]); $($args:tt)*) => (
     let $field = {
-      let tag = $tag.unwrap_or(try!($crate::tag::Tag::read_tag($reader)));
-      $tag = None;
+      let tag = if let Some(t) = $tag {
+        $tag = None;
+        t
+      } else {
+        try!($crate::tag::Tag::read_tag($reader))
+      };
       let our_tag = asn1_spec_tag!({ $count } [$($opts)*]);
 
       ber_sequence_deserialize!(_ { $rs_type $e $reader $count } tag, our_tag )
@@ -212,6 +216,37 @@ macro_rules! ber_sequence_deserialize {
         Some(try!($crate::BerDeserialize::deserialize_enc($e, $reader)))
       } else {
         None
+      }
+    };
+    ber_sequence_deserialize!(_ { $rs_type $e $reader $count $tag [$($fields)* $field] } $($args)*);
+  );
+  // Expand a DEFAULT field with no tag.
+  (_ { $rs_type:ident $e:ident $reader:ident $count:ident $tag:ident [$($fields:ident)*] }
+      $item:ident (DEFAULT $default:expr); $($args:tt)*) => (
+    ber_sequence_deserialize!(
+      _ { $rs_type $e $reader $count $tag [$($fields)*] } $item ([] DEFAULT $default); $($args)*
+    );
+  );
+  // Expand a DEFAULT field with a tag.
+  (_ { $rs_type:ident $e:ident $reader:ident $count:ident $tag:ident [$($fields:ident)*] }
+      $field:ident ([$($opts:tt)*] DEFAULT $default:expr); $($args:tt)*) => (
+    let $field = {
+      let tag = match $tag {
+        Some(t) => t,
+        None => {
+          let t = try!($crate::tag::Tag::read_tag($reader));
+          $tag = Some(t); t
+        },
+      };
+
+      let our_tag = asn1_spec_tag!({ $count } [$($opts)*]);
+
+      if tag == our_tag {
+        $tag = None;
+        let _ = try!($crate::tag::Len::read_len($reader));
+        try!($crate::BerDeserialize::deserialize_enc($e, $reader))
+      } else {
+        $default
       }
     };
     ber_sequence_deserialize!(_ { $rs_type $e $reader $count $tag [$($fields)* $field] } $($args)*);
