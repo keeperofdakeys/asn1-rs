@@ -82,9 +82,9 @@ macro_rules! ber_sequence_serialize {
       fn serialize_value<E: $crate::BerEncRules, W: std::io::Write>
           (&self, e: E, writer: &mut W) -> Result<(), $crate::err::EncodeError> {
         let mut bytes = Vec::new();
-        let mut count: u64 = 0;
+        let mut _count: u64 = 0;
         // For each declared sequence member, serialize it onto the stream.
-        ber_sequence_serialize!(_ { self e writer bytes count } $($args)*);
+        ber_sequence_serialize!(_ { self e writer bytes _count } $($args)*);
         Ok(())
       }
     }
@@ -155,67 +155,13 @@ macro_rules! ber_sequence_serialize {
 #[macro_export]
 /// This macro defines the BerDeserialize trait for a rust struct. The code generated
 /// will deserialize the specified fields in the order that they are given.
-macro_rules! ber_sequence_deserializea {
-  ($rs_type:ident, $($item:ident);* ;) => (
-    impl $crate::BerDeserialize for $rs_type {
-      fn deserialize_value<E: $crate::BerEncRules, I: Iterator<Item=std::io::Result<u8>>>
-          (e: E, reader: &mut I, _: $crate::tag::Len) -> Result<Self, $crate::err::DecodeError> {
-        let mut count: u64 = 0;
-        $(
-          // Use field name as variable name, due to hygiene this won't conflict with any
-          // defined locally.
-          let $item;
-          {
-            // Create a copy of what our tag context-specific tag would look like.
-            let our_tag = $crate::tag::Tag {
-              class: $crate::tag::Class::ContextSpecific,
-              tagnum: count.into(),
-              constructed: true,
-            };
-
-            // Iterate count.
-            count += 1;
-
-            let tag = try!($crate::tag::Tag::read_tag(reader));
-
-            // If encoding uses implicit tagging, throw an error if this isn't an implicit tag.
-            if E::tag_rules() == $crate::ber::enc::TagEnc::Implicit && tag == our_tag {
-              return Err($crate::err::DecodeError::ExplicitTag);
-            }
-
-            let len = try!($crate::tag::Len::read_len(reader));
-
-            // If the tag matches our tag, decode the len and call the normal deserialize function.
-            $item = if tag == our_tag {
-              // We don't have anything to do with the len, technically we should use it to
-              // check the length decoded.
-              let _ = len;
-              try!($crate::BerDeserialize::deserialize_enc(e, reader))
-            // Otherwise decode it as the inner type. (We give the tag that we
-            // decoded, and the function will decode the length itself).
-            } else {
-              try!($crate::BerDeserialize::deserialize_with_tag(e, reader, tag, len))
-            };
-          }
-        )*
-        Ok( $rs_type { $(
-          $item: $item,
-        )* })
-      }
-    }
-  )
-}
-
-#[macro_export]
-/// This macro defines the BerDeserialize trait for a rust struct. The code generated
-/// will deserialize the specified fields in the order that they are given.
 macro_rules! ber_sequence_deserialize {
   // Handle fields.
   // Expand a field with no options.
   (_ { $rs_type:ident $e:ident $reader:ident $count:ident $tag:ident [$($fields:ident)*] }
       $item:ident; $($args:tt)*) => (
     ber_sequence_deserialize!(
-      _ { $rs_type $e $reader $count $tag [$($fields)*] } $item (); $($args)*
+      _ { $rs_type $e $reader $count $tag [$($fields)*] } $item ([]); $($args)*
     );
   );
   // Expand a field with empty options.
@@ -264,7 +210,7 @@ macro_rules! ber_sequence_deserialize {
 
       if tag == our_tag {
         let len = try!($crate::tag::Len::read_len($reader));
-        Some($crate::BerDeserialize::deserialize_with_tag($e, $reader, $tag, len));
+        Some(try!($crate::BerDeserialize::deserialize_with_tag($e, $reader, tag, len)));
       } else {
         None
       }
@@ -303,9 +249,9 @@ macro_rules! ber_sequence_deserialize {
     impl $crate::BerDeserialize for $rs_type {
       fn deserialize_value<E: $crate::BerEncRules, I: Iterator<Item=std::io::Result<u8>>>
           (e: E, reader: &mut I, _: $crate::tag::Len) -> Result<Self, $crate::err::DecodeError> {
-        let mut count: u64 = 0;
-        let mut tag: Option<$crate::tag::Tag> = None;
-        ber_sequence_deserialize!(_ { $rs_type e reader count tag [ ] } $($args)*);
+        let mut _count: u64 = 0;
+        let mut _tag: Option<$crate::tag::Tag> = None;
+        ber_sequence_deserialize!(_ { $rs_type e reader _count _tag [ ] } $($args)*);
       }
     }
   );

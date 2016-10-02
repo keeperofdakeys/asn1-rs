@@ -55,9 +55,9 @@ macro_rules! asn1_spec_tag {
     asn1_spec_tag!([])
   );
   ({ $count:ident } []) => ({
-    let count = $count;
+    let _count = $count;
     $count += 1;
-    asn1_spec_tag!([CONTEXT count])
+    asn1_spec_tag!([CONTEXT _count])
   });
   ({ $count:ident } [$($args:tt)*]) => (
     asn1_spec_tag!([$($args)*])
