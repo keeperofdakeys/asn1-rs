@@ -48,7 +48,12 @@ macro_rules! ber_sequence {
     asn1_sequence_info!($rs_type, $asn1_ty);
     ber_sequence_serialize!($rs_type, $($args)*);
     ber_sequence_deserialize!($rs_type, $($args)*);
-  )
+  );
+  ($rs_type:ident, [$($args:tt)*], $asn1_ty:expr, $($args:tt)*) => (
+    asn1_sequence_info!($rs_type, [$($args:tt)*], $asn1_ty);
+    ber_sequence_serialize!($rs_type, $($args)*);
+    ber_sequence_deserialize!($rs_type, $($args)*);
+  );
 }
 
 #[macro_export]
@@ -56,21 +61,12 @@ macro_rules! ber_sequence {
 /// traits to get information about this type. If you need to provide a custom
 /// class or tag, consider using the asn1_info! macro.
 macro_rules! asn1_sequence_info {
+  ($rs_type:ident, [$($args:tt)*], $asn1_ty:expr) => (
+    asn1_info!($rs_type, [$($args:tt)*], $asn1_ty);
+  );
   ($rs_type:ident, $asn1_ty:expr) => (
-    impl $crate::Asn1Info for $rs_type {
-      fn asn1_tag() -> Option<$crate::tag::Tag> {
-        Some($crate::tag::Tag {
-          class: $crate::tag::Class::Universal,
-          tagnum: (0x10 as u8).into(),
-          constructed: true,
-        })
-      }
-
-      fn asn1_type() -> $crate::tag::Type {
-        $asn1_ty.into()
-      }
-    }
-  )
+    asn1_info!($rs_type, [UNIVERSAL 16], $asn1_ty);
+  );
 }
 
 #[macro_export]
