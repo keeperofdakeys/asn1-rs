@@ -1,6 +1,6 @@
-#![feature(trace_macros)]
-
-trace_macros!(true);
+// #![feature(trace_macros)]
+// 
+// trace_macros!(true);
 
 #[macro_use]
 extern crate asn1_cereal;
