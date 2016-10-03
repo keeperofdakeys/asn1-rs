@@ -42,6 +42,7 @@ mod prim;
 
 pub mod int;
 pub mod str;
+pub mod bool;
 pub mod alias;
 pub mod choice;
 pub mod seq;
