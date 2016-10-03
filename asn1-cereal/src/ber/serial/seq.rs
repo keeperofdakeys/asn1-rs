@@ -44,13 +44,13 @@
 /// procedural macros are eventually stabilised, listing the fields
 /// in the macro might no longer be required.
 macro_rules! ber_sequence {
-  ($rs_type:ident, $asn1_ty:expr, $($args:tt)*) => (
-    asn1_sequence_info!($rs_type, $asn1_ty);
+  ($rs_type:ident, [$($opts:tt)*], $asn1_ty:expr, $($args:tt)*) => (
+    asn1_sequence_info!($rs_type, [$($opts)*], $asn1_ty);
     ber_sequence_serialize!($rs_type, $($args)*);
     ber_sequence_deserialize!($rs_type, $($args)*);
   );
-  ($rs_type:ident, [$($args:tt)*], $asn1_ty:expr, $($args:tt)*) => (
-    asn1_sequence_info!($rs_type, [$($args:tt)*], $asn1_ty);
+  ($rs_type:ident, $asn1_ty:expr, $($args:tt)*) => (
+    asn1_sequence_info!($rs_type, $asn1_ty);
     ber_sequence_serialize!($rs_type, $($args)*);
     ber_sequence_deserialize!($rs_type, $($args)*);
   );
@@ -62,7 +62,7 @@ macro_rules! ber_sequence {
 /// class or tag, consider using the asn1_info! macro.
 macro_rules! asn1_sequence_info {
   ($rs_type:ident, [$($args:tt)*], $asn1_ty:expr) => (
-    asn1_info!($rs_type, [$($args:tt)*], $asn1_ty);
+    asn1_info!($rs_type, [$($args)*], $asn1_ty);
   );
   ($rs_type:ident, $asn1_ty:expr) => (
     asn1_info!($rs_type, [UNIVERSAL 16], $asn1_ty);

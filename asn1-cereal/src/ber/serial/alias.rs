@@ -15,12 +15,12 @@
 
 #[macro_export]
 macro_rules! ber_alias {
-  ($outer:ident ::= [$($args:tt)*] $inner:ident, $asn1_ty:expr) => (
+  ($outer:ident ::= [$($args:tt)*] $inner:ty, $asn1_ty:expr) => (
     ber_alias_info!($outer ::= [$($args)*] $inner, $asn1_ty);
     ber_alias_serialize!($outer ::= $inner);
     ber_alias_deserialize!($outer ::= $inner);
   );
-  ($outer:ident ::= $inner:ident, $asn1_ty:expr) => (
+  ($outer:ident ::= $inner:ty, $asn1_ty:expr) => (
     ber_alias_info!($outer ::= $inner, $asn1_ty);
     ber_alias_serialize!($outer ::= $inner);
     ber_alias_deserialize!($outer ::= $inner);
@@ -29,14 +29,14 @@ macro_rules! ber_alias {
 
 #[macro_export]
 macro_rules! ber_alias_info {
-  ($outer:ident ::= [$($args:tt)*] $inner:ident, $asn1_ty:expr) => (
+  ($outer:ident ::= [$($args:tt)*] $inner:ty, $asn1_ty:expr) => (
     asn1_info!(
       $outer,
       [$($args)*],
       $asn1_ty
     );
   );
-  ($outer:ident ::= $inner:ident, $asn1_ty:expr) => (
+  ($outer:ident ::= $inner:ty, $asn1_ty:expr) => (
     asn1_info!(
       $outer,
       $asn1_ty
@@ -47,7 +47,7 @@ macro_rules! ber_alias_info {
 #[macro_export]
 /// This macro defines the BerSerialize trait for an ASN.1 type alias.
 macro_rules! ber_alias_serialize {
-  ($outer:ident ::= $inner:ident) => (
+  ($outer:ident ::= $inner:ty) => (
     impl $crate::BerSerialize for $outer {
       fn _serialize_enc<E: $crate::BerEncRules, W: std::io::Write>
           (&self, e: E, writer: &mut W) -> Option<Result<(), $crate::err::EncodeError>> {
@@ -71,7 +71,7 @@ macro_rules! ber_alias_serialize {
 #[macro_export]
 /// This macro defines the BerSerialize trait for an ASN.1 type alias.
 macro_rules! ber_alias_deserialize {
-  ($outer:ident ::= $inner:ident) => (
+  ($outer:ident ::= $inner:ty) => (
     impl $crate::BerDeserialize for $outer {
       fn _deserialize_with_tag<E: $crate::BerEncRules, I: Iterator<Item=std::io::Result<u8>>>
           (e: E, reader: &mut I, tag: $crate::tag::Tag, len: $crate::tag::Len)
