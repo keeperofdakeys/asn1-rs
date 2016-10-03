@@ -15,15 +15,16 @@ pub trait Asn1Info {
 /// This information is used to match tag information during deserialization,
 /// so it should match the expected values in the ASN.1 stream.
 macro_rules! asn1_info {
-  ($rs_type:ty => $gen:ident, $($args:expr),*) => (
+  ($rs_type:ty => $gen:ident, $($args:tt)*) => (
     impl<$gen> $crate::Asn1Info for $rs_type {
-      asn1_info!{__impl $($args),*}
+      asn1_info!{__impl $($args)*}
     }
   );
-  ($rs_type:ty, $($args:expr),*) => (
-    impl $crate::Asn1Info for $rs_type {
-      asn1_info!{__impl $($args),*}
+  (__impl [$($args:tt)*], $asn1_ty:expr) => (
+    fn asn1_tag() -> Option<$crate::tag::Tag> {
+      Some(asn1_spec_tag!([$($args)*]))
     }
+    asn1_info!(__type $asn1_ty);
   );
   (__impl $class:expr, $tagnum:expr, $constructed:expr, $asn1_ty:expr) => (
     fn asn1_tag() -> Option<$crate::tag::Tag> {
@@ -44,6 +45,11 @@ macro_rules! asn1_info {
   (__type $asn1_ty:expr) => (
     fn asn1_type() -> $crate::tag::Type {
       $crate::tag::Type::from($asn1_ty)
+    }
+  );
+  ($rs_type:ty, $($args:tt)*) => (
+    impl $crate::Asn1Info for $rs_type {
+      asn1_info!{__impl $($args)*}
     }
   );
 }

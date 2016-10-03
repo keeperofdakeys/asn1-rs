@@ -18,6 +18,10 @@ pub trait BerSerialize: Asn1Info {
   /// Serialize a value into ASN.1 data using a specific set of encoding rules.
   fn serialize_enc<E: enc::BerEncRules, W: io::Write>
       (&self, e: E, writer: &mut W) -> Result<(), err::EncodeError> {
+    if let Some(r) = self._serialize_enc(e, writer) {
+      return r;
+    }
+
     let tag = match Self::asn1_tag() {
       Some(tag) => tag,
       None => return self.serialize_value(e, writer),
@@ -40,6 +44,12 @@ pub trait BerSerialize: Asn1Info {
     }
 
     Ok(())
+  }
+
+  fn _serialize_enc<E: enc::BerEncRules, W: io::Write>
+      (&self, e: E, writer: &mut W) -> Option<Result<(), err::EncodeError>> {
+    let _ = (e, writer);
+    None
   }
 
   /// Serialise a value into ASN.1 data, without a tag (implicit tagging).
@@ -76,6 +86,11 @@ pub trait BerDeserialize: Asn1Info + Sized {
       return r;
     }
 
+    let tag = match Self::asn1_tag() {
+      Some(tag) => tag,
+      None => panic!("Trying to decode item with no defined tag."),
+    };
+
     if Some(tag) != Self::asn1_tag() {
       return Err(err::DecodeError::TagTypeMismatch);
     }
@@ -104,7 +119,7 @@ pub trait BerDeserialize: Asn1Info + Sized {
 
   fn _deserialize_with_tag<E: enc::BerEncRules, I: Iterator<Item=io::Result<u8>>>
       (e: E, reader: &mut I, tag: tag::Tag, len: tag::Len) -> Option<Result<Self, err::DecodeError>> {
-    let (_, _, _, _) = (e, reader, tag, len);
+    let _ = (e, reader, tag, len);
     None
   }
 
