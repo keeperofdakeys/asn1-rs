@@ -50,6 +50,7 @@ macro_rules! ber_choice_serialize {
         //
         // // Skip choice tag, we don't need to encode this.
         // self.0.serialize_value(e, writer)
+        let _ = (self, e, writer);
         unimplemented!();
       }
 
@@ -59,6 +60,7 @@ macro_rules! ber_choice_serialize {
         //
         // // Return inner types encoding, we don't care which variant it is.
         // self.0.serialize_enc(e, writer)
+        let _ = (self, e, writer);
         unimplemented!();
       }
     }
@@ -86,6 +88,7 @@ macro_rules! ber_choice_deserialize {
       fn deserialize_value<E: $crate::BerEncRules, I: Iterator<Item=std::io::Result<u8>>>
           (e: E, reader: &mut I, _: $crate::tag::Len) -> Result<Self, $crate::err::DecodeError> {
         // This should never be called?
+        let _ = (e, reader);
         unimplemented!();
       }
     }

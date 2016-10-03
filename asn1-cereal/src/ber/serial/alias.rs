@@ -101,7 +101,7 @@ macro_rules! ber_alias_deserialize {
       }
 
       fn deserialize_value<E: $crate::BerEncRules, I: Iterator<Item=std::io::Result<u8>>>
-          (e: E, reader: &mut I, len: $crate::tag::Len) -> Result<Self, $crate::err::DecodeError> {
+          (e: E, reader: &mut I, _: $crate::tag::Len) -> Result<Self, $crate::err::DecodeError> {
         Ok($outer(try!($crate::BerDeserialize::deserialize_enc(e, reader))))
       }
     }
