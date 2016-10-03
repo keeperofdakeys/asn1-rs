@@ -16,8 +16,7 @@
 //!     B(u32),
 //!   };
 //!
-//!   asn1_info!(Enum1, 0x3, 0x1, true, "CHOICE1");
-//!   ber_choice!(Enum1, A, B);
+//!   ber_choice!(Enum1, [1], "CHOICE", A, B);
 //!
 //!   // OR
 //!
@@ -29,10 +28,16 @@
 
 #[macro_export]
 macro_rules! ber_choice {
-  ($rs_type:ident, $($item:ident),*) => (
+  ($rs_type:ident, [$($args:tt)*], $asn1_type:expr, $($item:ident),*) => (
+    asn1_info!($rs_type, [$($args)*], $asn1_type);
     ber_choice_serialize!($rs_type);
     ber_choice_deserialize!($rs_type, $($item),*);
-  )
+  );
+  ($rs_type:ident, $asn1_type:expr, $($item:ident),*) => (
+    asn1_info!($rs_type, $asn1_type);
+    ber_choice_serialize!($rs_type);
+    ber_choice_deserialize!($rs_type, $($item),*);
+  );
 }
 
 #[macro_export]
