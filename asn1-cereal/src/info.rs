@@ -14,6 +14,23 @@ pub trait Asn1Info {
 ///
 /// This information is used to match tag information during deserialization,
 /// so it should match the expected values in the ASN.1 stream.
+///
+/// ```
+/// #[macro_use] extern crate asn1_cereal; fn main() {
+/// // For A ::= [APPLICATION 3] u64
+/// struct A(u64);
+/// asn1_info!(A, [APPLICATION 3], "A");
+///
+/// // For B ::= [PRIVATE 3] u64
+/// struct B(u64);
+/// asn1_info!(B, [PRIVATE 3], "B");
+///
+/// // For a primitive type, with application tag 3.
+/// struct C(u64);
+/// // (The false here sets the constructed flag).
+/// asn1_info!(C, asn1_cereal::tag::Class::Application, 3, false, "C");
+/// }
+/// ```
 macro_rules! asn1_info {
   ($rs_type:ty => $gen:ident, $($args:tt)*) => (
     impl<$gen> $crate::Asn1Info for $rs_type {
@@ -70,6 +87,13 @@ macro_rules! asn1_spec_tag {
   );
   ([$tagnum:expr]) => (
     asn1_spec_tag!([CONTEXT $tagnum]);
+  );
+  ([UNIVERSAL $tagnum:expr]) => (
+    $crate::tag::Tag {
+      class: $crate::tag::Class::Universal,
+      tagnum: $tagnum,
+      constructed: true,
+    }
   );
   ([CONTEXT $tagnum:expr]) => (
     $crate::tag::Tag {
