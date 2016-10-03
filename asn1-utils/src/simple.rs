@@ -16,22 +16,27 @@ fn main() {
 
   let mut buffer: Vec<u8> = Vec::new();
   let mut output = io::BufWriter::new(io::stdout());
+  let enc = BER;
 
-  let seq = IntSequence { a: 3, b: vec![4], c: SomeString("Hello".into()) };
+  let seq = IntSequence {
+    a: 4,
+    b: vec![4],
+    c: Some(SomeString("Hello".into()))
+  };
 
   if opts.dump {
     let mut writer = io::BufWriter::new(&mut output);
-    seq.serialize_enc(BER, &mut writer).unwrap();
+    seq.serialize_enc(enc, &mut writer).unwrap();
     return;
   }
   {
     let mut writer = io::BufWriter::new(&mut buffer);
-    seq.serialize_enc(BER, &mut writer).unwrap();
+    seq.serialize_enc(enc, &mut writer).unwrap();
   }
-  println!("{:?}", buffer);
+  println!("Before: {:?}", buffer);
   {
     let mut reader = buffer.iter().map(|x| Ok(*x) as Result<u8, std::io::Error>);
-    let seq = IntSequence::deserialize_enc(BER, &mut reader).unwrap();
+    let seq = IntSequence::deserialize_enc(enc, &mut reader).unwrap();
     println!("{:?}", seq);
   }
 }
@@ -39,29 +44,24 @@ fn main() {
 #[derive(Debug, PartialEq)]
 struct SomeString(String);
 
-asn1_info!(
-  SomeString,
-  asn1_cereal::tag::Class::Private,
-  1,
-  true,
+ber_alias!(
+  SomeString ::= [PRIVATE 1] String,
   "SOMESTRING"
 );
-
-ber_newtype!(SomeString);
 
 #[derive(Debug, PartialEq)]
 struct IntSequence {
   a: u64,
   b: Vec<i32>,
-  c: SomeString,
+  c: Option<SomeString>,
 }
 
 ber_sequence!(
   IntSequence,
   "INTSEQ",
-  a;
+  a (DEFAULT 4);
   b;
-  c;
+  c (OPTIONAL);
 );
 
 struct ProgOpts {
