@@ -38,7 +38,7 @@
 //! ```
 
 pub mod traits;
-mod prim;
+pub mod prim;
 
 pub mod int;
 pub mod str;

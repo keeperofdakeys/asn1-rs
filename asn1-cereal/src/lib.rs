@@ -42,3 +42,4 @@ pub mod ber;
 pub use info::Asn1Info;
 pub use ber::serial::traits::{BerSerialize, BerDeserialize};
 pub use ber::enc::{BER, DER, BERAlt, BerEncRules};
+pub use ber::serial::prim::OctetString;
