@@ -21,6 +21,10 @@ name="ber-json-decode"
 path="src/simple.rs"
 name="simple"
 
+[[bin]]
+path="src/test1.rs"
+name="test1"
+
 # [[bin]]
 # path="src/snmp-decode.rs"
 # name="snmp-decode"
