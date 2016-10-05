@@ -86,9 +86,8 @@ pub trait BerDeserialize: Asn1Info + Sized {
       return r;
     }
 
-    let tag = match Self::asn1_tag() {
-      Some(tag) => tag,
-      None => panic!("Trying to decode item with no defined tag."),
+    if let None = Self::asn1_tag() {
+      panic!("Trying to decode item with no defined tag.");
     };
 
     if Some(tag) != Self::asn1_tag() {
