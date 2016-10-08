@@ -47,7 +47,7 @@ macro_rules! ber_sequence_of_deserialize {
         len: $crate::tag::Len,
         reader: $crate::byte::ByteReader<J>,
         e: F,
-        _p: Option<T>,
+        _p: ::std::marker::PhantomData<T>,
       }
 
       impl<T, F, J> Iterator for SeqOfDecoder<T, F, J> where
@@ -85,6 +85,7 @@ macro_rules! ber_sequence_of_deserialize {
         }
       }
 
+
       if Some(tag) != <Self as $crate::Asn1Info>::asn1_tag() {
         return Err($crate::err::DecodeError::TagTypeMismatch);
       }
@@ -98,7 +99,7 @@ macro_rules! ber_sequence_of_deserialize {
         e: e,
         len: len.into(),
         reader: $crate::byte::ByteReader::new(reader),
-        _p: None
+        _p: ::std::marker::PhantomData,
       };
       let v: Result<$rs_type, _> = ::std::iter::FromIterator::from_iter(decoder.by_ref());
       Ok(try!(v))
