@@ -93,15 +93,11 @@ pub trait BerDeserialize: Asn1Info + Sized {
       return r;
     }
 
-    if let None = Self::asn1_tag() {
-      panic!("Trying to decode item with no defined tag.");
-    };
-
     if Some(tag) != Self::asn1_tag() {
       if let Some(our_tag) = Self::asn1_tag() {
-        error!("Expected tag {}, but found tag {}", tag, our_tag);
+        warn!("Expected tag {}, but found tag {}", tag, our_tag);
       } else {
-        error!("Expected tag {}, but found no tag", tag);
+        warn!("Expected tag {}, but found no tag", tag);
       }
       return Err(err::DecodeError::TagTypeMismatch);
     }
@@ -111,11 +107,11 @@ pub trait BerDeserialize: Asn1Info + Sized {
       // Return an error if the encoding rules only allow definite length
       // encoding.
       if E::len_rules() == enc::LenEnc::Definite {
-        error!("Encountered indefinite length encoding, but encoding rules don't allow this");
+        warn!("Encountered indefinite length encoding, but encoding rules don't allow this");
         return Err(err::DecodeError::IndefiniteLen);
       // If this element is primitve, the length isn't allowed to be indefinite length.
       } else if !tag.constructed {
-        error!("Encountered indefinite length encoding, but this is a primitive element");
+        warn!("Encountered indefinite length encoding, but this is a primitive element");
         return Err(err::DecodeError::PrimIndef)
       }
     }
