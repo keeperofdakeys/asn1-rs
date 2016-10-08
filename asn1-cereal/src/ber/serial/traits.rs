@@ -18,13 +18,17 @@ pub trait BerSerialize: Asn1Info {
   /// Serialize a value into ASN.1 data using a specific set of encoding rules.
   fn serialize_enc<E: enc::BerEncRules, W: io::Write>
       (&self, e: E, writer: &mut W) -> Result<(), err::EncodeError> {
+    debug!("Encoding the type {}", Self::asn1_type());
     if let Some(r) = self._serialize_enc(e, writer) {
       return r;
     }
 
     let tag = match Self::asn1_tag() {
       Some(tag) => tag,
-      None => return self.serialize_value(e, writer),
+      None => {
+        debug!("Type does not have a tag");
+        return self.serialize_value(e, writer);
+      },
     };
 
     try!(tag.write_tag(writer));
@@ -32,11 +36,13 @@ pub trait BerSerialize: Asn1Info {
     // If this is indefinite length and constructed, write the data directly.
     if E::len_rules() == enc::LenEnc::Indefinite &&
        tag.constructed {
+      debug!("Using indefinite length");
       try!(tag::Len::Indef.write_len(writer));
       try!(self.serialize_value(e, writer));
       try!(tag::Len::write_indef_end(writer));
     // Otherwise write to a Vec first, so we can write the length.
     } else {
+      debug!("Using definite length encoding");
       let mut bytes: Vec<u8> = Vec::new();
       try!(self.serialize_value(e, &mut bytes));
       try!(tag::Len::write_len(Some(bytes.len() as tag::LenNum).into(), writer));
@@ -82,6 +88,7 @@ pub trait BerDeserialize: Asn1Info + Sized {
   /// the BER length of this element.
   fn deserialize_with_tag<E: enc::BerEncRules, I: Iterator<Item=io::Result<u8>>>
       (e: E, reader: &mut I, tag: tag::Tag, len: tag::Len) -> Result<Self, err::DecodeError> {
+    debug!("Decoding the type {}", Self::asn1_type());
     if let Some(r) = Self::_deserialize_with_tag(e, reader, tag, len) {
       return r;
     }
@@ -91,6 +98,11 @@ pub trait BerDeserialize: Asn1Info + Sized {
     };
 
     if Some(tag) != Self::asn1_tag() {
+      if let Some(our_tag) = Self::asn1_tag() {
+        error!("Expected tag {}, but found tag {}", tag, our_tag);
+      } else {
+        error!("Expected tag {}, but found no tag", tag);
+      }
       return Err(err::DecodeError::TagTypeMismatch);
     }
 
@@ -99,9 +111,11 @@ pub trait BerDeserialize: Asn1Info + Sized {
       // Return an error if the encoding rules only allow definite length
       // encoding.
       if E::len_rules() == enc::LenEnc::Definite {
+        error!("Encountered indefinite length encoding, but encoding rules don't allow this");
         return Err(err::DecodeError::IndefiniteLen);
       // If this element is primitve, the length isn't allowed to be indefinite length.
       } else if !tag.constructed {
+        error!("Encountered indefinite length encoding, but this is a primitive element");
         return Err(err::DecodeError::PrimIndef)
       }
     }
@@ -130,6 +144,6 @@ pub trait BerDeserialize: Asn1Info + Sized {
   fn deserialize_value<E: enc::BerEncRules, I: Iterator<Item=io::Result<u8>>>
     (e: E, reader: &mut I, len: tag::Len) -> Result<Self, err::DecodeError> {
     let (_, _, _) = (e, reader, len);
-    unimplemented!();
+    panic!("deserialize_value must be implemented for types that require it");
   }
 }

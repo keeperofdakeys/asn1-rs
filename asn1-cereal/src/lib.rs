@@ -32,6 +32,9 @@
 #![cfg_attr(feature="clippy", feature(plugin))]
 #![cfg_attr(feature="clippy", plugin(clippy))]
 
+#[macro_use]
+extern crate log;
+
 pub mod tag;
 pub mod err;
 pub mod byte;
