@@ -16,60 +16,62 @@
 //!     B(u32),
 //!   };
 //!
-//!   ber_choice!(Enum1, [1], "CHOICE", A, B);
+//!   ber_choice!(Enum1, [1], "CHOICE", A; B;);
 //!
 //!   // OR
 //!
 //!   asn1_info!(Enum2, 0x3, 0x1, true, "CHOICE2");
-//!   ber_choice_serialize!(Enum2);
-//!   ber_choice_deserialize!(Enum2, A, B);
+//!   ber_choice_serialize!(Enum2, A; B;);
+//!   ber_choice_deserialize!(Enum2, A; B;);
 //! }
 //! ```
 
 #[macro_export]
 macro_rules! ber_choice {
-  ($rs_type:ident, [$($args:tt)*], $asn1_type:expr, $($item:ident),*) => (
-    asn1_info!($rs_type, [$($args)*], $asn1_type);
-    ber_choice_serialize!($rs_type);
-    ber_choice_deserialize!($rs_type, $($item),*);
+  ($rs_type:ident, [$($opts:tt)*], $asn1_type:expr, $($args:tt)*) => (
+    asn1_info!($rs_type, [$($opts)*], $asn1_type);
+    // ber_choice_serialize!($rs_type, $($args)*);
+    ber_choice_deserialize!($rs_type, $($args)*);
   );
-  ($rs_type:ident, $asn1_type:expr, $($item:ident),*) => (
+  ($rs_type:ident, $asn1_type:expr, $($args:tt)*) => (
     asn1_info!($rs_type, $asn1_type);
-    ber_choice_serialize!($rs_type);
-    ber_choice_deserialize!($rs_type, $($item),*);
+    // ber_choice_serialize!($rs_type, $($args)*);
+    ber_choice_deserialize!($rs_type, $($args)*);
   );
 }
 
 #[macro_export]
 macro_rules! ber_choice_serialize {
-  ($rs_type:ident) => (
+  ($rs_type:ident, $($args:tt)*) => (
     impl $crate::BerSerialize for $rs_type {
-      fn serialize_enc<E: $crate::BerEncRules, W: std::io::Write>
-          (&self, e: E, writer: &mut W) -> Result<(), $crate::err::EncodeError> {
-        // FIXME: Can't call self.0 to call function on inner type.
-        //
-        // // Skip choice tag, we don't need to encode this.
-        // self.0.serialize_value(e, writer)
-        let _ = (self, e, writer);
-        unimplemented!();
-      }
-
       fn serialize_value<E: $crate::BerEncRules, W: std::io::Write>
           (&self, e: E, writer: &mut W) -> Result<(), $crate::err::EncodeError> {
-        // FIXME: Can't call self.0 to call function on inner type.
-        //
-        // // Return inner types encoding, we don't care which variant it is.
-        // self.0.serialize_enc(e, writer)
-        let _ = (self, e, writer);
-        unimplemented!();
+        self.0.serialize_enc(e, writer);
       }
     }
-  )
+  );
 }
 
 #[macro_export]
 macro_rules! ber_choice_deserialize {
-  ($rs_type:ident, $($item:ident),*) => (
+  (_ { $e:ident $reader:ident $tag:ident $len:ident [$($tags:expr, $funcs:expr,)*] }
+      $item:ident; $($args:tt)*) => (
+    let tag = $item.0.asn1_tag();
+    let func = || $item(try!($crate::BerDeserialize::deserialize_with_tag($e, $reader, $tag, $len)));
+    ber_choice_deserialize!(_ { $e $reader $tag $len [$($tags, $funcs,)* tag, func,] } $($args)*)
+  );
+  (_ { $e:ident $writer:ident $tag:ident $len:ident [$($tags:expr, $funcs:expr,)*] }
+      [$($opts:tt)*] $item:ident; $($args:tt)*) => (
+    let tag = asn1_spec_tag!([$($opts:tt)*]);
+    let func = || $item(try!($crate::BerDeserialize::deserialize_enc($e, $reader)));
+    ber_choice_deserialize!(_ { $e $reader $tag $len [$($tags, $funcs,)* tag, func,] } $($args)*)
+  );
+  (_ { $e:ident $writer:ident $tag:ident $len:ident [$($tags:expr, $funcs:expr,)*] }) => (
+    Ok(match $tag {
+      $( tag @ $crate::tag::Tag { .. } if tag == $tags => { $funcs() } ),*
+    })
+  );
+  ($rs_type:ident, $($args:tt)*) => (
     impl $crate::BerDeserialize for $rs_type {
       // FIXME: We can't call asn1_tag() on the inner type of the enum variant,
       // so we can't compare the tag with the one we get.
@@ -85,12 +87,13 @@ macro_rules! ber_choice_deserialize {
       //   }
       // }
 
-      fn deserialize_value<E: $crate::BerEncRules, I: Iterator<Item=std::io::Result<u8>>>
-          (e: E, reader: &mut I, _: $crate::tag::Len) -> Result<Self, $crate::err::DecodeError> {
-        // This should never be called?
-        let _ = (e, reader);
-        unimplemented!();
+      fn deserialize_with_tag<E: $crate::BerEncRules, I: Iterator<Item=std::io::Result<u8>>>
+          (e: E, reader: &mut I, tag: $crate::tag::Tag, len: $crate::tag::Len)
+          -> Result<Self, $crate::err::DecodeError> {
+        let (tag, len) = try!($crate::tag::read_taglen(reader));
+
+        ber_choice_deserialize!(_ { e reader tag len [] } $($args)*);
       }
     }
-  )
+  );
 }
