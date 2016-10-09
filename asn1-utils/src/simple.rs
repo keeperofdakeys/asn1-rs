@@ -1,15 +1,27 @@
 // #![feature(trace_macros)]
-// 
+
 // trace_macros!(true);
+
+// #![feature(plugin)]
+// #![plugin(afl_plugin)]
 
 #[macro_use]
 extern crate asn1_cereal;
 extern crate argparse;
+// extern crate afl;
 
 use std::io;
+use std::io::Read;
 
 use asn1_cereal::{BerSerialize, BerDeserialize, DER, BER, BERAlt};
 use argparse::{ArgumentParser, StoreTrue};
+
+// fn main() {
+//   afl::handle_bytes(|b| {
+//     let a = IntSequence::deserialize_enc(enc, b.iter().map(|b| Ok(b) as std::io::Result<_>));
+//     println!("{:?}", a);
+//   })
+// }
 
 fn main() {
   let opts = parse_args();
@@ -19,9 +31,10 @@ fn main() {
   let enc = BER;
 
   let seq = IntSequence {
-    a: 4,
+    a: 3,
     b: vec![4],
-    c: Some(SomeString("Hello".into()))
+    c: Some(SomeString("Hello".into())),
+    d: Choice::A(4),
   };
 
   if opts.dump {
@@ -29,6 +42,10 @@ fn main() {
     seq.serialize_enc(enc, &mut writer).unwrap();
     return;
   }
+
+  if opts.input {
+  }
+
   {
     let mut writer = io::BufWriter::new(&mut buffer);
     seq.serialize_enc(enc, &mut writer).unwrap();
@@ -40,6 +57,19 @@ fn main() {
     println!("{:?}", seq);
   }
 }
+
+#[derive(Debug, PartialEq)]
+enum Choice {
+  A(i32),
+  Str(String),
+}
+
+ber_choice!(
+  Choice,
+  "Choice",
+  A, i32;
+  Str, String;
+);
 
 #[derive(Debug, PartialEq)]
 struct SomeString(String);
@@ -54,6 +84,7 @@ struct IntSequence {
   a: u64,
   b: Vec<i32>,
   c: Option<SomeString>,
+  d: Choice,
 }
 
 ber_sequence!(
@@ -62,20 +93,25 @@ ber_sequence!(
   a (DEFAULT 4);
   b;
   c (OPTIONAL);
+  d;
 );
 
 struct ProgOpts {
   dump: bool,
+  input: bool,
 }
 
 fn parse_args() -> ProgOpts {
   let mut opts = ProgOpts {
     dump: false,
+    input: false,
   };
   {
     let mut ap = ArgumentParser::new();
     ap.refer(&mut opts.dump)
       .add_option(&["-d", "--dump"], StoreTrue, "Dump asn.1 packet");
+    ap.refer(&mut opts.input)
+      .add_option(&["-i", "--input"], StoreTrue, "Decode asn.1 data from stdin");
     ap.parse_args_or_exit();
   }
   opts
