@@ -47,13 +47,31 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-990' class='srclink' href='../src/asn1_cereal/src/ber/serial/seq_of.rs.html#5-14' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-1167' class='srclink' href='../src/asn1_cereal/src/ber/serial/seq_of.rs.html#28-33' title='goto source code'>[src]</a></span></h1>
 <pre class='rust macro'>
 <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>ber_sequence_of</span> {
-    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ty</span>) <span class='op'>=&gt;</span> { ... };
-    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ty</span> <span class='op'>=&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>gen</span>:<span class='ident'>ident</span>) <span class='op'>=&gt;</span> { ... };
+    ($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>token</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
 }</pre>
-</section>
+<div class='docblock'><p>Generate a SEQUENCE OF implementation for an iterator type. <code>asn1_info!</code> must
+be called manually.</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='comment'>// Assuming A implements IntoIterator and FromIterator.</span>
+
+<span class='macro'>asn1_info</span><span class='macro'>!</span>(<span class='ident'>A</span>, [<span class='ident'>PRIVATE</span> <span class='number'>5</span>], <span class='string'>&quot;A&quot;</span>);
+
+
+<span class='macro'>ber_sequence_of</span><span class='macro'>!</span>(<span class='ident'>A</span>);
+
+ <span class='comment'>// OR</span>
+
+<span class='macro'>ber_sequence_of_serialize</span><span class='macro'>!</span>(<span class='ident'>A</span>);
+<span class='macro'>ber_sequence_of_deserialize</span><span class='macro'>!</span>(<span class='ident'>A</span>);
+
+
+<span class='comment'>// If A has a generic, you can instead do.</span>
+<span class='macro'>ber_sequence_of</span><span class='macro'>!</span>(<span class='ident'>A</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='op'>=&gt;</span> <span class='ident'>T</span>);</pre>
+</div></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>

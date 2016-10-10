@@ -90,6 +90,7 @@
 <span id="46">46</span>
 <span id="47">47</span>
 <span id="48">48</span>
+<span id="49">49</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Traits for serializing and deserializing rust types from/to ASN.1.</span>
 <span class='doccomment'>//!</span>
@@ -118,8 +119,8 @@
 <span class='doccomment'>//!   ber_sequence!(</span>
 <span class='doccomment'>//!     ShortSequence,</span>
 <span class='doccomment'>//!     &quot;SHORT_SEQUENCE&quot;,</span>
-<span class='doccomment'>//!     z,</span>
-<span class='doccomment'>//!     y</span>
+<span class='doccomment'>//!     z;</span>
+<span class='doccomment'>//!     y;</span>
 <span class='doccomment'>//!   );</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//!   use asn1_cereal::BerSerialize;</span>
@@ -131,11 +132,12 @@
 <span class='doccomment'>//! ```</span>
 
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>traits</span>;
-<span class='kw'>mod</span> <span class='ident'>prim</span>;
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>prim</span>;
 
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>int</span>;
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>str</span>;
-<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>assign</span>;
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>bool</span>;
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>alias</span>;
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>choice</span>;
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>seq</span>;
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>seq_of</span>;

@@ -162,23 +162,92 @@
 <span id="118">118</span>
 <span id="119">119</span>
 <span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Macros to generate the implementation of the serialization traits for Rust</span>
 <span class='doccomment'>//! iterators, as ASN.1 sequence of.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! This macro has already been implemented for Vec and HashSet, using the tags</span>
+<span class='doccomment'>//! SEQUENCE OF and SET OF respectively.</span>
 
 <span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
+<span class='doccomment'>/// Generate a SEQUENCE OF implementation for an iterator type. `asn1_info!` must</span>
+<span class='doccomment'>/// be called manually.</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// ```rust,ignore</span>
+<span class='doccomment'>/// // Assuming A implements IntoIterator and FromIterator.</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// asn1_info!(A, [PRIVATE 5], &quot;A&quot;);</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// ber_sequence_of!(A);</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>///  // OR</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// ber_sequence_of_serialize!(A);</span>
+<span class='doccomment'>/// ber_sequence_of_deserialize!(A);</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// // If A has a generic, you can instead do.</span>
+<span class='doccomment'>/// ber_sequence_of!(A&lt;T&gt; =&gt; T);</span>
+<span class='doccomment'>/// ```</span>
 <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>ber_sequence_of</span> {
-  (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ty</span>) <span class='op'>=&gt;</span> (
-    <span class='macro'>ber_sequence_of_serialize</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>);
-    <span class='macro'>ber_sequence_of_deserialize</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>);
-  );
-  (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ty</span> <span class='op'>=&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>gen</span>:<span class='ident'>ident</span>) <span class='op'>=&gt;</span> (
-    <span class='macro'>ber_sequence_of_serialize</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span> <span class='op'>=&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>gen</span>);
-    <span class='macro'>ber_sequence_of_deserialize</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span> <span class='op'>=&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>gen</span>);
+  ($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>token</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> (
+    <span class='macro'>ber_sequence_of_serialize</span><span class='macro'>!</span>($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>token</span>)<span class='op'>*</span>);
+    <span class='macro'>ber_sequence_of_deserialize</span><span class='macro'>!</span>($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>token</span>)<span class='op'>*</span>);
   );
 }
 
 <span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
+<span class='doccomment'>/// Implement BerSerialize for a type, by iterating over each element, and</span>
+<span class='doccomment'>/// calling serialize_enc on each element.</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// Requires that the type implement IntoIterator, and can be used to implement</span>
+<span class='doccomment'>/// SEQUENCE/SET OF.</span>
 <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>ber_sequence_of_serialize</span> {
   (<span class='kw'>impl</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ty</span>) <span class='op'>=&gt;</span> (
     <span class='kw'>fn</span> <span class='ident'>serialize_value</span><span class='op'>&lt;</span><span class='ident'>E</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerEncRules</span>, <span class='ident'>W</span>: ::<span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>Write</span><span class='op'>&gt;</span>
@@ -200,9 +269,19 @@
       <span class='macro'>ber_sequence_of_serialize</span><span class='macro'>!</span>{<span class='kw'>impl</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>}
     }
   );
+  (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ty</span> <span class='op'>=&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>gen</span>:<span class='ident'>ident</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>where_attr</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> (
+    <span class='kw'>impl</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>gen</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerSerialize</span><span class='op'>&gt;</span> <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerSerialize</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span> <span class='kw'>where</span> $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>where_attr</span>)<span class='op'>*</span> {
+      <span class='macro'>ber_sequence_of_serialize</span><span class='macro'>!</span>{<span class='kw'>impl</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>}
+    }
+  );
 }
 
 <span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
+<span class='doccomment'>/// Implement BerDeserialize for a type, by collecting the elements from an iterator</span>
+<span class='doccomment'>/// built by calling deserialize_enc on the stream continually.</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// Requires that the type implement FromIterator, and can be used to implement</span>
+<span class='doccomment'>/// SEQUENCE/SET OF.</span>
 <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>ber_sequence_of_deserialize</span> {
   (<span class='kw'>impl</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ty</span>) <span class='op'>=&gt;</span> (
     <span class='kw'>fn</span> <span class='ident'>deserialize_with_tag</span><span class='op'>&lt;</span><span class='ident'>E</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerEncRules</span>, <span class='ident'>I</span>: <span class='ident'>Iterator</span><span class='op'>&lt;</span><span class='ident'>Item</span><span class='op'>=</span>::<span class='ident'>std</span>::<span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span>
@@ -212,7 +291,7 @@
         <span class='ident'>len</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>Len</span>,
         <span class='ident'>reader</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>byte</span>::<span class='ident'>ByteReader</span><span class='op'>&lt;</span><span class='ident'>J</span><span class='op'>&gt;</span>,
         <span class='ident'>e</span>: <span class='ident'>F</span>,
-        <span class='ident'>_p</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>,
+        <span class='ident'>_p</span>: ::<span class='ident'>std</span>::<span class='ident'>marker</span>::<span class='ident'>PhantomData</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>,
       }
 
       <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>, <span class='ident'>F</span>, <span class='ident'>J</span><span class='op'>&gt;</span> <span class='ident'>Iterator</span> <span class='kw'>for</span> <span class='ident'>SeqOfDecoder</span><span class='op'>&lt;</span><span class='ident'>T</span>, <span class='ident'>F</span>, <span class='ident'>J</span><span class='op'>&gt;</span> <span class='kw'>where</span>
@@ -250,7 +329,8 @@
         }
       }
 
-      <span class='kw'>if</span> <span class='ident'>tag</span> <span class='op'>!=</span> <span class='op'>&lt;</span><span class='self'>Self</span> <span class='kw'>as</span> <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>Asn1Info</span><span class='op'>&gt;</span>::<span class='ident'>asn1_tag</span>() {
+
+      <span class='kw'>if</span> <span class='prelude-val'>Some</span>(<span class='ident'>tag</span>) <span class='op'>!=</span> <span class='op'>&lt;</span><span class='self'>Self</span> <span class='kw'>as</span> <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>Asn1Info</span><span class='op'>&gt;</span>::<span class='ident'>asn1_tag</span>() {
         <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>err</span>::<span class='ident'>DecodeError</span>::<span class='ident'>TagTypeMismatch</span>);
       }
 
@@ -263,7 +343,7 @@
         <span class='ident'>e</span>: <span class='ident'>e</span>,
         <span class='ident'>len</span>: <span class='ident'>len</span>.<span class='ident'>into</span>(),
         <span class='ident'>reader</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>byte</span>::<span class='ident'>ByteReader</span>::<span class='ident'>new</span>(<span class='ident'>reader</span>),
-        <span class='ident'>_p</span>: <span class='prelude-val'>None</span>
+        <span class='ident'>_p</span>: ::<span class='ident'>std</span>::<span class='ident'>marker</span>::<span class='ident'>PhantomData</span>,
       };
       <span class='kw'>let</span> <span class='ident'>v</span>: <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>, _<span class='op'>&gt;</span> <span class='op'>=</span> ::<span class='ident'>std</span>::<span class='ident'>iter</span>::<span class='ident'>FromIterator</span>::<span class='ident'>from_iter</span>(<span class='ident'>decoder</span>.<span class='ident'>by_ref</span>());
       <span class='prelude-val'>Ok</span>(<span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>v</span>))
@@ -279,10 +359,20 @@
       <span class='macro'>ber_sequence_of_deserialize</span><span class='macro'>!</span>{<span class='kw'>impl</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>}
     }
   );
+  (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ty</span> <span class='op'>=&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>gen</span>:<span class='ident'>ident</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>where_attr</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> (
+    <span class='kw'>impl</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>gen</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerDeserialize</span><span class='op'>&gt;</span> <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerDeserialize</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span> <span class='kw'>where</span> $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>where_attr</span>)<span class='op'>*</span> {
+      <span class='macro'>ber_sequence_of_deserialize</span><span class='macro'>!</span>{<span class='kw'>impl</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>}
+    }
+  );
 }
+
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashSet</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>hash</span>::<span class='ident'>Hash</span>;
 
 <span class='macro'>asn1_info</span><span class='macro'>!</span>(<span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='op'>=&gt;</span> <span class='ident'>T</span>, ::<span class='ident'>tag</span>::<span class='ident'>Class</span>::<span class='ident'>Universal</span>, <span class='number'>16</span>, <span class='bool-val'>true</span>, <span class='string'>&quot;SEQUENCE OF&quot;</span>);
 <span class='macro'>ber_sequence_of</span><span class='macro'>!</span>(<span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='op'>=&gt;</span> <span class='ident'>T</span>);
+<span class='macro'>asn1_info</span><span class='macro'>!</span>(<span class='ident'>HashSet</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='op'>=&gt;</span> <span class='ident'>T</span>, ::<span class='ident'>tag</span>::<span class='ident'>Class</span>::<span class='ident'>Universal</span>, <span class='number'>17</span>, <span class='bool-val'>true</span>, <span class='string'>&quot;SET OF&quot;</span>);
+<span class='macro'>ber_sequence_of</span><span class='macro'>!</span>(<span class='ident'>HashSet</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='op'>=&gt;</span> <span class='ident'>T</span>, <span class='ident'>T</span>: <span class='ident'>Eq</span> <span class='op'>+</span> <span class='ident'>Hash</span>);
 </pre>
 </section>
     <section id='search' class="content hidden"></section>

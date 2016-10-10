@@ -47,17 +47,45 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-979' class='srclink' href='../src/asn1_cereal/src/info.rs.html#17-42' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-1154' class='srclink' href='../src/asn1_cereal/src/info.rs.html#43-81' title='goto source code'>[src]</a></span></h1>
 <pre class='rust macro'>
 <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>asn1_info</span> {
-    (<span class='kw'>impl</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ty</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>class</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tagnum</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>constructed</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>asn1_ty</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> { ... };
-    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ty</span> <span class='op'>=&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>gen</span>:<span class='ident'>ident</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>class</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tagnum</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>constructed</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>asn1_ty</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> { ... };
-    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ty</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>class</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tagnum</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>constructed</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>asn1_ty</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ty</span> <span class='op'>=&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>gen</span>:<span class='ident'>ident</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='ident'>__impl</span> [$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>:<span class='ident'>tt</span>)<span class='op'>*</span>], <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>asn1_ty</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='ident'>__impl</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>class</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tagnum</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>constructed</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>asn1_ty</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='ident'>__impl</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>asn1_ty</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='ident'>__type</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>asn1_ty</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ty</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
 }</pre>
 <div class='docblock'><p>This macro defines the Asn1Info trait for a rust type.</p>
 
 <p>This information is used to match tag information during deserialization,
 so it should match the expected values in the ASN.1 stream.</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='attribute'>#[<span class='ident'>macro_use</span>]</span> <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>asn1_cereal</span>; <span class='kw'>fn</span> <span class='ident'>main</span>() {
+<span class='comment'>// For A ::= [APPLICATION 3] u64</span>
+<span class='kw'>struct</span> <span class='ident'>A</span>(<span class='ident'>u64</span>);
+<span class='macro'>asn1_info</span><span class='macro'>!</span>(<span class='ident'>A</span>, [<span class='ident'>APPLICATION</span> <span class='number'>3</span>], <span class='string'>&quot;A&quot;</span>);
+
+<span class='comment'>// For B ::= [PRIVATE 3] u64</span>
+<span class='kw'>struct</span> <span class='ident'>B</span>(<span class='ident'>u64</span>);
+<span class='macro'>asn1_info</span><span class='macro'>!</span>(<span class='ident'>B</span>, [<span class='ident'>PRIVATE</span> <span class='number'>3</span>], <span class='string'>&quot;B&quot;</span>);
+
+<span class='comment'>// For a primitive type, with application tag 3.</span>
+<span class='kw'>struct</span> <span class='ident'>C</span>(<span class='ident'>u64</span>);
+<span class='comment'>// (The false here sets the constructed flag).</span>
+<span class='macro'>asn1_info</span><span class='macro'>!</span>(<span class='ident'>C</span>, <span class='ident'>asn1_cereal</span>::<span class='ident'>tag</span>::<span class='ident'>Class</span>::<span class='ident'>Application</span>, <span class='number'>3</span>, <span class='bool-val'>false</span>, <span class='string'>&quot;C&quot;</span>);
+}
+
+<span class='comment'>// For a type that won&#39;t have a tag.</span>
+<span class='kw'>struct</span> <span class='ident'>D</span>(<span class='ident'>i32</span>);
+<span class='macro'>asn1_info</span><span class='macro'>!</span>(<span class='ident'>D</span>, <span class='string'>&quot;D&quot;</span>);
+
+<span class='comment'>// For a type with a generic.</span>
+<span class='kw'>struct</span> <span class='ident'>E</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='ident'>T</span>);
+<span class='macro'>asn1_info</span><span class='macro'>!</span>(<span class='ident'>E</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='op'>=&gt;</span> <span class='ident'>T</span>, [<span class='ident'>PRIVATE</span> <span class='number'>4</span>], <span class='string'>&quot;E&quot;</span>);
+</pre>
 </div></section>
     <section id='search' class="content hidden"></section>
 

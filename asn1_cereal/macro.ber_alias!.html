@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="API documentation for the Rust `asn1_sequence_of!` macro in crate `asn1_cereal`.">
-    <meta name="keywords" content="rust, rustlang, rust-lang, asn1_sequence_of!">
+    <meta name="description" content="API documentation for the Rust `ber_alias!` macro in crate `asn1_cereal`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, ber_alias!">
 
-    <title>asn1_cereal::asn1_sequence_of! - Rust</title>
+    <title>asn1_cereal::ber_alias! - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
@@ -28,7 +28,7 @@
 
     <nav class="sidebar">
         
-        <p class='location'><a href='index.html'>asn1_cereal</a></p><script>window.sidebarCurrent = {name: 'asn1_sequence_of!', ty: 'macro', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <p class='location'><a href='index.html'>asn1_cereal</a></p><script>window.sidebarCurrent = {name: 'ber_alias!', ty: 'macro', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </nav>
 
     <nav class="sub">
@@ -43,16 +43,18 @@
     </nav>
 
     <section id='main' class="content macro">
-<h1 class='fqn'><span class='in-band'><a href='index.html'>asn1_cereal</a>::<wbr><a class='macro' href=''>asn1_sequence_of!</a></span><span class='out-of-band'><span id='render-detail'>
+<h1 class='fqn'><span class='in-band'><a href='index.html'>asn1_cereal</a>::<wbr><a class='macro' href=''>ber_alias!</a></span><span class='out-of-band'><span id='render-detail'>
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-1018' class='srclink' href='../src/asn1_cereal/src/ber/serial/seq_of.rs.html#5-10' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-1156' class='srclink' href='../src/asn1_cereal/src/ber/serial/alias.rs.html#21-32' title='goto source code'>[src]</a></span></h1>
 <pre class='rust macro'>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>asn1_sequence_of</span> {
-    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ty</span>) <span class='op'>=&gt;</span> { ... };
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>ber_alias</span> {
+    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>outer</span>:<span class='ident'>ident</span> ::<span class='op'>=</span> [$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>:<span class='ident'>tt</span>)<span class='op'>*</span>] <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>inner</span>:<span class='ident'>ty</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>asn1_ty</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>outer</span>:<span class='ident'>ident</span> ::<span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>inner</span>:<span class='ident'>ty</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>asn1_ty</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> { ... };
 }</pre>
-</section>
+<div class='docblock'><p>Generate the implemention of an ASN.1 alias for a Rust type.</p>
+</div></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>

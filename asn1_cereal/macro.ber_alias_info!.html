@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="API documentation for the Rust `asn1_sequence!` macro in crate `asn1_cereal`.">
-    <meta name="keywords" content="rust, rustlang, rust-lang, asn1_sequence!">
+    <meta name="description" content="API documentation for the Rust `ber_alias_info!` macro in crate `asn1_cereal`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, ber_alias_info!">
 
-    <title>asn1_cereal::asn1_sequence! - Rust</title>
+    <title>asn1_cereal::ber_alias_info! - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
@@ -28,7 +28,7 @@
 
     <nav class="sidebar">
         
-        <p class='location'><a href='index.html'>asn1_cereal</a></p><script>window.sidebarCurrent = {name: 'asn1_sequence!', ty: 'macro', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <p class='location'><a href='index.html'>asn1_cereal</a></p><script>window.sidebarCurrent = {name: 'ber_alias_info!', ty: 'macro', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </nav>
 
     <nav class="sub">
@@ -43,23 +43,17 @@
     </nav>
 
     <section id='main' class="content macro">
-<h1 class='fqn'><span class='in-band'><a href='index.html'>asn1_cereal</a>::<wbr><a class='macro' href=''>asn1_sequence!</a></span><span class='out-of-band'><span id='render-detail'>
+<h1 class='fqn'><span class='in-band'><a href='index.html'>asn1_cereal</a>::<wbr><a class='macro' href=''>ber_alias_info!</a></span><span class='out-of-band'><span id='render-detail'>
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-1014' class='srclink' href='../src/asn1_cereal/src/ber/serial/seq.rs.html#46-52' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-1157' class='srclink' href='../src/asn1_cereal/src/ber/serial/alias.rs.html#36-50' title='goto source code'>[src]</a></span></h1>
 <pre class='rust macro'>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>asn1_sequence</span> {
-    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ident</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>asn1_ty</span>:<span class='ident'>expr</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>:<span class='ident'>ident</span>),<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>ber_alias_info</span> {
+    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>outer</span>:<span class='ident'>ident</span> ::<span class='op'>=</span> [$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>:<span class='ident'>tt</span>)<span class='op'>*</span>] <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>inner</span>:<span class='ident'>ty</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>asn1_ty</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>outer</span>:<span class='ident'>ident</span> ::<span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>inner</span>:<span class='ident'>ty</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>asn1_ty</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> { ... };
 }</pre>
-<div class='docblock'><p>This macro is a compact way of defining all three of the
-Asn1 traits - Asn1Info, BerSerialize and BerDeserialize -
-for a rust struct, that represents an ASN.1 sequence.</p>
-
-<p>Note that the order the fields are placed in will affect the order
-that they are encoded to, and decoded from ASN.1. If some form of
-procedural macros are eventually stabilised, listing the fields
-in the macro might no longer be required.</p>
+<div class='docblock'><p>Generate the Asn1Info implemention of an ASN.1 alias for a Rust type.</p>
 </div></section>
     <section id='search' class="content hidden"></section>
 

@@ -47,12 +47,15 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-983' class='srclink' href='../src/asn1_cereal/src/ber/serial/choice.rs.html#31-36' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-1160' class='srclink' href='../src/asn1_cereal/src/ber/serial/choice.rs.html#36-47' title='goto source code'>[src]</a></span></h1>
 <pre class='rust macro'>
 <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>ber_choice</span> {
-    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ident</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>:<span class='ident'>ident</span>),<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ident</span>, [$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>opts</span>:<span class='ident'>tt</span>)<span class='op'>*</span>], <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>asn1_type</span>:<span class='ident'>expr</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ident</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>asn1_type</span>:<span class='ident'>expr</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
 }</pre>
-</section>
+<div class='docblock'><p>Generate the Asn1Info implemention for an ASN.1 Choice type, represented
+by a Rust enum.</p>
+</div></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>

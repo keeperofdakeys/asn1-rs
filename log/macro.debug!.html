@@ -4,16 +4,16 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="API documentation for the Rust `asn1_newtype!` macro in crate `asn1_cereal`.">
-    <meta name="keywords" content="rust, rustlang, rust-lang, asn1_newtype!">
+    <meta name="description" content="API documentation for the Rust `debug!` macro in crate `log`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, debug!">
 
-    <title>asn1_cereal::asn1_newtype! - Rust</title>
+    <title>log::debug! - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
     
 
-    
+    <link rel="shortcut icon" href="https://www.rust-lang.org/favicon.ico">
     
 </head>
 <body class="rustdoc">
@@ -27,8 +27,8 @@
     
 
     <nav class="sidebar">
-        
-        <p class='location'><a href='index.html'>asn1_cereal</a></p><script>window.sidebarCurrent = {name: 'asn1_newtype!', ty: 'macro', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <a href='../log/index.html'><img src='https://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='logo' width='100'></a>
+        <p class='location'><a href='index.html'>log</a></p><script>window.sidebarCurrent = {name: 'debug!', ty: 'macro', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </nav>
 
     <nav class="sub">
@@ -43,18 +43,26 @@
     </nav>
 
     <section id='main' class="content macro">
-<h1 class='fqn'><span class='in-band'><a href='index.html'>asn1_cereal</a>::<wbr><a class='macro' href=''>asn1_newtype!</a></span><span class='out-of-band'><span id='render-detail'>
+<h1 class='fqn'><span class='in-band'><a href='index.html'>log</a>::<wbr><a class='macro' href=''>debug!</a></span><span class='out-of-band'><span id='render-detail'>
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-1008' class='srclink' href='../src/asn1_cereal/src/ber/serial/assign.rs.html#44-49' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-321' class='srclink' href='../src/log/macros.rs.html#94-101' title='goto source code'>[src]</a></span></h1>
 <pre class='rust macro'>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>asn1_newtype</span> {
-    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ident</span>) <span class='op'>=&gt;</span> { ... };
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>debug</span> {
+    (<span class='ident'>target</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>target</span>:<span class='ident'>expr</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>arg</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
+    ($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>arg</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
 }</pre>
-<div class='docblock'><p>This macro is a compact way of defining both of the
-Asn1 serialization traits - BerSerialize and BerDeserialize
-- for a rust newtype, that represents an ASN.1 type definition.</p>
+<div class='docblock'><p>Logs a message at the debug level.</p>
+
+<p>Logging at this level is disabled if any of the following features are
+present: <code>max_level_off</code>, <code>max_level_error</code>, <code>max_level_warn</code>, or
+<code>max_level_info</code>.</p>
+
+<p>When building in release mode (i.e., without the <code>debug_assertions</code> option),
+logging at this level is also disabled if any of the following features are
+present: <code>release_max_level_off</code>, <code>release_max_level_error</code>,
+<code>release_max_level_warn</code>, or <code>release_max_level_info</code>.</p>
 </div></section>
     <section id='search' class="content hidden"></section>
 
@@ -110,7 +118,7 @@ Asn1 serialization traits - BerSerialize and BerDeserialize
 
     <script>
         window.rootPath = "../";
-        window.currentCrate = "asn1_cereal";
+        window.currentCrate = "log";
         window.playgroundUrl = "";
     </script>
     <script src="../jquery.js"></script>

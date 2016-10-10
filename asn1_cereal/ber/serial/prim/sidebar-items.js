@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["OctetString","A Rust wrapper for OCTET STRING."]]});

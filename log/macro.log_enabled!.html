@@ -4,16 +4,16 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="API documentation for the Rust `asn1_choice!` macro in crate `asn1_cereal`.">
-    <meta name="keywords" content="rust, rustlang, rust-lang, asn1_choice!">
+    <meta name="description" content="API documentation for the Rust `log_enabled!` macro in crate `log`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, log_enabled!">
 
-    <title>asn1_cereal::asn1_choice! - Rust</title>
+    <title>log::log_enabled! - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
     
 
-    
+    <link rel="shortcut icon" href="https://www.rust-lang.org/favicon.ico">
     
 </head>
 <body class="rustdoc">
@@ -27,8 +27,8 @@
     
 
     <nav class="sidebar">
-        
-        <p class='location'><a href='index.html'>asn1_cereal</a></p><script>window.sidebarCurrent = {name: 'asn1_choice!', ty: 'macro', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <a href='../log/index.html'><img src='https://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='logo' width='100'></a>
+        <p class='location'><a href='index.html'>log</a></p><script>window.sidebarCurrent = {name: 'log_enabled!', ty: 'macro', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </nav>
 
     <nav class="sub">
@@ -43,16 +43,31 @@
     </nav>
 
     <section id='main' class="content macro">
-<h1 class='fqn'><span class='in-band'><a href='index.html'>asn1_cereal</a>::<wbr><a class='macro' href=''>asn1_choice!</a></span><span class='out-of-band'><span id='render-detail'>
+<h1 class='fqn'><span class='in-band'><a href='index.html'>log</a>::<wbr><a class='macro' href=''>log_enabled!</a></span><span class='out-of-band'><span id='render-detail'>
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-1011' class='srclink' href='../src/asn1_cereal/src/ber/serial/choice.rs.html#31-36' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-323' class='srclink' href='../src/log/macros.rs.html#148-155' title='goto source code'>[src]</a></span></h1>
 <pre class='rust macro'>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>asn1_choice</span> {
-    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ident</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>:<span class='ident'>ident</span>),<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>log_enabled</span> {
+    (<span class='ident'>target</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>target</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>lvl</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>lvl</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> { ... };
 }</pre>
-</section>
+<div class='docblock'><p>Determines if a message logged at the specified level in that module will
+be logged.</p>
+
+<p>This can be used to avoid expensive computation of log message arguments if
+the message would be ignored anyway.</p>
+
+<h1 id='examples' class='section-header'><a href='#examples'>Examples</a></h1>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>log</span>::<span class='ident'>LogLevel</span>::<span class='ident'>Debug</span>;
+
+<span class='kw'>if</span> <span class='macro'>log_enabled</span><span class='macro'>!</span>(<span class='ident'>Debug</span>) {
+    <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='ident'>expensive_call</span>();
+    <span class='macro'>debug</span><span class='macro'>!</span>(<span class='string'>&quot;expensive debug data: {} {}&quot;</span>, <span class='ident'>data</span>.<span class='ident'>x</span>, <span class='ident'>data</span>.<span class='ident'>y</span>);
+}</pre>
+</div></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>
@@ -107,7 +122,7 @@
 
     <script>
         window.rootPath = "../";
-        window.currentCrate = "asn1_cereal";
+        window.currentCrate = "log";
         window.playgroundUrl = "";
     </script>
     <script src="../jquery.js"></script>

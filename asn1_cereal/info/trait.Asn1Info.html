@@ -47,20 +47,21 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-351' class='srclink' href='../../src/asn1_cereal/src/info.rs.html#4-10' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-374' class='srclink' href='../../src/asn1_cereal/src/info.rs.html#4-10' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait Asn1Info {
-    fn <a href='#tymethod.asn1_tag' class='fnname'>asn1_tag</a>() -&gt; <a class='struct' href='../../asn1_cereal/tag/struct.Tag.html' title='asn1_cereal::tag::Tag'>Tag</a>;
+    fn <a href='#tymethod.asn1_tag' class='fnname'>asn1_tag</a>() -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../../asn1_cereal/tag/struct.Tag.html' title='asn1_cereal::tag::Tag'>Tag</a>&gt;;
     fn <a href='#tymethod.asn1_type' class='fnname'>asn1_type</a>() -&gt; <a class='type' href='../../asn1_cereal/tag/type.Type.html' title='asn1_cereal::tag::Type'>Type</a>;
 }</pre><div class='docblock'><p>Provides ASN.1 information about a Rust type, including the BER tag and ASN.1 type.</p>
 </div>
             <h2 id='required-methods'>Required Methods</h2>
             <div class='methods'>
-        <h3 id='tymethod.asn1_tag' class='method stab '><code>fn <a href='#tymethod.asn1_tag' class='fnname'>asn1_tag</a>() -&gt; <a class='struct' href='../../asn1_cereal/tag/struct.Tag.html' title='asn1_cereal::tag::Tag'>Tag</a></code></h3><div class='docblock'><p>Get the ASN.1 tag for this Rust type.</p>
+        <h3 id='tymethod.asn1_tag' class='method stab '><code>fn <a href='#tymethod.asn1_tag' class='fnname'>asn1_tag</a>() -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../../asn1_cereal/tag/struct.Tag.html' title='asn1_cereal::tag::Tag'>Tag</a>&gt;</code></h3><div class='docblock'><p>Get the ASN.1 tag (if defined) for this Rust type. Some types don&#39;t have a tag, eg. CHOICE.</p>
 </div><h3 id='tymethod.asn1_type' class='method stab '><code>fn <a href='#tymethod.asn1_type' class='fnname'>asn1_type</a>() -&gt; <a class='type' href='../../asn1_cereal/tag/type.Type.html' title='asn1_cereal::tag::Type'>Type</a></code></h3><div class='docblock'><p>Get the ASN.1 type for this Rust type.</p>
 </div></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
-    <li><code>impl Asn1Info for <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.i8.html'>i8</a></code></li>
+    <li><code>impl Asn1Info for <a class='struct' href='../../asn1_cereal/ber/serial/prim/struct.OctetString.html' title='asn1_cereal::ber::serial::prim::OctetString'>OctetString</a></code></li>
+<li><code>impl Asn1Info for <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.i8.html'>i8</a></code></li>
 <li><code>impl Asn1Info for <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.i16.html'>i16</a></code></li>
 <li><code>impl Asn1Info for <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a></code></li>
 <li><code>impl Asn1Info for <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.i64.html'>i64</a></code></li>
@@ -71,7 +72,9 @@
 <li><code>impl Asn1Info for <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.isize.html'>isize</a></code></li>
 <li><code>impl Asn1Info for <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a></code></li>
 <li><code>impl Asn1Info for <a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a></code></li>
+<li><code>impl Asn1Info for <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></li>
 <li><code>impl&lt;T&gt; Asn1Info for <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;T&gt;</code></li>
+<li><code>impl&lt;T&gt; Asn1Info for <a class='struct' href='https://doc.rust-lang.org/nightly/std/collections/hash/set/struct.HashSet.html' title='std::collections::hash::set::HashSet'>HashSet</a>&lt;T&gt;</code></li>
 </ul><script type="text/javascript" async
                          src="../../implementors/asn1_cereal/info/trait.Asn1Info.js">
                  </script></section>

@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-505' class='srclink' href='../../../src/asn1_cereal/src/ber/serial/mod.rs.html#1-48' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-528' class='srclink' href='../../../src/asn1_cereal/src/ber/serial/mod.rs.html#1-49' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>Traits for serializing and deserializing rust types from/to ASN.1.</p>
 
 <p>The traits in this module can be used to implement serialization and
@@ -74,8 +74,8 @@ the struct to a DER-encoded byte stream.</p>
   <span class='macro'>ber_sequence</span><span class='macro'>!</span>(
     <span class='ident'>ShortSequence</span>,
     <span class='string'>&quot;SHORT_SEQUENCE&quot;</span>,
-    <span class='ident'>z</span>,
-    <span class='ident'>y</span>
+    <span class='ident'>z</span>;
+    <span class='ident'>y</span>;
   );
 
   <span class='kw'>use</span> <span class='ident'>asn1_cereal</span>::<span class='ident'>BerSerialize</span>;
@@ -87,11 +87,20 @@ the struct to a DER-encoded byte stream.</p>
 </div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
 <table>
                        <tr class=' module-item'>
-                           <td><a class='mod' href='assign/index.html'
-                                  title='asn1_cereal::ber::serial::assign'>assign</a></td>
+                           <td><a class='mod' href='alias/index.html'
+                                  title='asn1_cereal::ber::serial::alias'>alias</a></td>
                            <td class='docblock short'>
                                 <p>Macros to generate the implementation of the serialization traits for Rust
-newtypes, as ASN.1 type assignments.</p>
+newtypes (tuple structs). This can be used to represent ASN.1 type
+assignments, or wrap Rust types, to provide distinct types.
+```</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='bool/index.html'
+                                  title='asn1_cereal::ber::serial::bool'>bool</a></td>
+                           <td class='docblock short'>
+                                <p>Implementation of the serialization traits for Rust booleans.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -110,11 +119,19 @@ enums, as ASN.1 choice.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
+                           <td><a class='mod' href='prim/index.html'
+                                  title='asn1_cereal::ber::serial::prim'>prim</a></td>
+                           <td class='docblock short'>
+                                <p>A collection of primitive wrappers for ASN.1, where a direct Rust equivalent may not exist.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
                            <td><a class='mod' href='seq/index.html'
                                   title='asn1_cereal::ber::serial::seq'>seq</a></td>
                            <td class='docblock short'>
                                 <p>Macros to generate the implementation of the serialization traits for Rust
-structs, as ASN.1 sequences.</p>
+structs, as an ASN.1 SEQUENCE. You can technically use this for a SET, but it
+still assumes the elements are in order.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -129,14 +146,14 @@ iterators, as ASN.1 sequence of.</p>
                            <td><a class='mod' href='str/index.html'
                                   title='asn1_cereal::ber::serial::str'>str</a></td>
                            <td class='docblock short'>
-                                <p>Implementation of the serialization traits for Rust strings.</p>
+                                <p>Implementation of the serialization traits for String.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class='mod' href='traits/index.html'
                                   title='asn1_cereal::ber::serial::traits'>traits</a></td>
                            <td class='docblock short'>
-                                
+                                <p>The base traits that are used for serializing and deserializing rust types.</p>
                            </td>
                        </tr></table></section>
     <section id='search' class="content hidden"></section>

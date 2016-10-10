@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["DecodeError","Errors that can occur while decoding an ASN.1 element."],["EncodeError","Errors that can occur while encoding an ASN.1 element."]]});
+initSidebarItems({"enum":[["DecodeError","Errors that can occur while decoding an ASN.1 element."],["EncodeError","Errors that can occur while encoding an ASN.1 element."]],"struct":[["DecodeError2","An error that occurs while decoding an ASN.1 element."]]});

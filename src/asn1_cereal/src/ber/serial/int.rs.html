@@ -172,8 +172,12 @@
 <span id="128">128</span>
 <span id="129">129</span>
 <span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Implementation of the serialization traits for Rust integers.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! This defines for all rust integers.</span>
 
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>;
 
@@ -188,12 +192,12 @@
 <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>ber_cereal_int</span> {
   (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ty</span>, <span class='number'>1</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>unsigned</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> (
     <span class='kw'>impl</span> <span class='ident'>Asn1Info</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span> {
-      <span class='kw'>fn</span> <span class='ident'>asn1_tag</span>() <span class='op'>-&gt;</span> <span class='ident'>tag</span>::<span class='ident'>Tag</span> {
-        <span class='ident'>tag</span>::<span class='ident'>Tag</span> {
+      <span class='kw'>fn</span> <span class='ident'>asn1_tag</span>() <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>tag</span>::<span class='ident'>Tag</span><span class='op'>&gt;</span> {
+        <span class='prelude-val'>Some</span>(<span class='ident'>tag</span>::<span class='ident'>Tag</span> {
           <span class='ident'>class</span>: <span class='ident'>tag</span>::<span class='ident'>Class</span>::<span class='ident'>Universal</span>,
           <span class='ident'>tagnum</span>: <span class='number'>2u8</span>.<span class='ident'>into</span>(),
           <span class='ident'>constructed</span>: <span class='bool-val'>false</span>,
-        }
+        })
       }
 
       <span class='kw'>fn</span> <span class='ident'>asn1_type</span>() <span class='op'>-&gt;</span> <span class='ident'>tag</span>::<span class='ident'>Type</span> {
@@ -211,12 +215,12 @@
   );
   (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ty</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>size</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>unsigned</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> (
     <span class='kw'>impl</span> <span class='ident'>Asn1Info</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span> {
-      <span class='kw'>fn</span> <span class='ident'>asn1_tag</span>() <span class='op'>-&gt;</span> <span class='ident'>tag</span>::<span class='ident'>Tag</span> {
-        <span class='ident'>tag</span>::<span class='ident'>Tag</span> {
+      <span class='kw'>fn</span> <span class='ident'>asn1_tag</span>() <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>tag</span>::<span class='ident'>Tag</span><span class='op'>&gt;</span> {
+        <span class='prelude-val'>Some</span>(<span class='ident'>tag</span>::<span class='ident'>Tag</span> {
           <span class='ident'>class</span>: <span class='ident'>tag</span>::<span class='ident'>Class</span>::<span class='ident'>Universal</span>,
           <span class='ident'>tagnum</span>: <span class='number'>2u8</span>.<span class='ident'>into</span>(),
           <span class='ident'>constructed</span>: <span class='bool-val'>false</span>,
-        }
+        })
       }
 
       <span class='kw'>fn</span> <span class='ident'>asn1_type</span>() <span class='op'>-&gt;</span> <span class='ident'>tag</span>::<span class='ident'>Type</span> {

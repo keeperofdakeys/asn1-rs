@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="API documentation for the Rust `ber_newtype!` macro in crate `asn1_cereal`.">
-    <meta name="keywords" content="rust, rustlang, rust-lang, ber_newtype!">
+    <meta name="description" content="API documentation for the Rust `ber_alias_serialize!` macro in crate `asn1_cereal`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, ber_alias_serialize!">
 
-    <title>asn1_cereal::ber_newtype! - Rust</title>
+    <title>asn1_cereal::ber_alias_serialize! - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
@@ -28,7 +28,7 @@
 
     <nav class="sidebar">
         
-        <p class='location'><a href='index.html'>asn1_cereal</a></p><script>window.sidebarCurrent = {name: 'ber_newtype!', ty: 'macro', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <p class='location'><a href='index.html'>asn1_cereal</a></p><script>window.sidebarCurrent = {name: 'ber_alias_serialize!', ty: 'macro', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </nav>
 
     <nav class="sub">
@@ -43,18 +43,16 @@
     </nav>
 
     <section id='main' class="content macro">
-<h1 class='fqn'><span class='in-band'><a href='index.html'>asn1_cereal</a>::<wbr><a class='macro' href=''>ber_newtype!</a></span><span class='out-of-band'><span id='render-detail'>
+<h1 class='fqn'><span class='in-band'><a href='index.html'>asn1_cereal</a>::<wbr><a class='macro' href=''>ber_alias_serialize!</a></span><span class='out-of-band'><span id='render-detail'>
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-980' class='srclink' href='../src/asn1_cereal/src/ber/serial/assign.rs.html#44-49' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-1158' class='srclink' href='../src/asn1_cereal/src/ber/serial/alias.rs.html#54-74' title='goto source code'>[src]</a></span></h1>
 <pre class='rust macro'>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>ber_newtype</span> {
-    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ident</span>) <span class='op'>=&gt;</span> { ... };
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>ber_alias_serialize</span> {
+    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>outer</span>:<span class='ident'>ident</span> ::<span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>inner</span>:<span class='ident'>ty</span>) <span class='op'>=&gt;</span> { ... };
 }</pre>
-<div class='docblock'><p>This macro is a compact way of defining both of the
-Asn1 serialization traits - BerSerialize and BerDeserialize
-- for a rust newtype, that represents an ASN.1 type definition.</p>
+<div class='docblock'><p>This macro defines the BerSerialize trait for an ASN.1 type alias.</p>
 </div></section>
     <section id='search' class="content hidden"></section>
 

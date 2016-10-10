@@ -47,8 +47,17 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-506' class='srclink' href='../../../../src/asn1_cereal/src/ber/serial/traits.rs.html#1-117' title='goto source code'>[src]</a></span></h1>
-<h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
+               </span><a id='src-529' class='srclink' href='../../../../src/asn1_cereal/src/ber/serial/traits.rs.html#1-164' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>The base traits that are used for serializing and deserializing rust types.</p>
+
+<p>BerSerialize implements serialization, and BerDeserialize implements deserialization.
+Both traits depend upon the Asn1Info trait being implemented, to provide
+metadata about the type (like ASN.1 tag and ASN.1 type).</p>
+
+<p>For both traits, only the (de)serialize_value functions should need overridden
+to get custom behaviour. If you need to change how tags are handled, you may need
+to override _serialize_enc or _deserialize_with_tag.</p>
+</div><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
 <table>
                        <tr class=' module-item'>
                            <td><a class='trait' href='trait.BerDeserialize.html'

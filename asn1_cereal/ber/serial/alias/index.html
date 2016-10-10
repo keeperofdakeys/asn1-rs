@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="API documentation for the Rust `assign` mod in crate `asn1_cereal`.">
-    <meta name="keywords" content="rust, rustlang, rust-lang, assign">
+    <meta name="description" content="API documentation for the Rust `alias` mod in crate `asn1_cereal`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, alias">
 
-    <title>asn1_cereal::ber::serial::assign - Rust</title>
+    <title>asn1_cereal::ber::serial::alias - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../../main.css">
@@ -28,7 +28,7 @@
 
     <nav class="sidebar">
         
-        <p class='location'><a href='../../../index.html'>asn1_cereal</a>::<wbr><a href='../../index.html'>ber</a>::<wbr><a href='../index.html'>serial</a></p><script>window.sidebarCurrent = {name: 'assign', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
+        <p class='location'><a href='../../../index.html'>asn1_cereal</a>::<wbr><a href='../../index.html'>ber</a>::<wbr><a href='../index.html'>serial</a></p><script>window.sidebarCurrent = {name: 'alias', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
     </nav>
 
     <nav class="sub">
@@ -43,47 +43,29 @@
     </nav>
 
     <section id='main' class="content mod">
-<h1 class='fqn'><span class='in-band'>Module <a href='../../../index.html'>asn1_cereal</a>::<wbr><a href='../../index.html'>ber</a>::<wbr><a href='../index.html'>serial</a>::<wbr><a class='mod' href=''>assign</a></span><span class='out-of-band'><span id='render-detail'>
+<h1 class='fqn'><span class='in-band'>Module <a href='../../../index.html'>asn1_cereal</a>::<wbr><a href='../../index.html'>ber</a>::<wbr><a href='../index.html'>serial</a>::<wbr><a class='mod' href=''>alias</a></span><span class='out-of-band'><span id='render-detail'>
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-924' class='srclink' href='../../../../src/asn1_cereal/src/ber/serial/assign.rs.html#1-123' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-1048' class='srclink' href='../../../../src/asn1_cereal/src/ber/serial/alias.rs.html#1-114' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>Macros to generate the implementation of the serialization traits for Rust
-newtypes, as ASN.1 type assignments.</p>
+newtypes (tuple structs). This can be used to represent ASN.1 type
+assignments, or wrap Rust types, to provide distinct types.
+```</p>
 
-<p>You can either define both <code>asn1_info!</code> and <code>ber_newtype!</code>, or all three
-of <code>asn1_info!</code>, <code>ber_newtype_serialize!</code> and <code>ber_newtype_deserialize!</code>.</p>
+<h1 id='macro_use-extern-crate-asn1_cereal-fn-main-' class='section-header'><a href='#macro_use-extern-crate-asn1_cereal-fn-main-'>[macro_use] extern crate asn1_cereal; fn main() {</a></h1>
+<p>struct A(u64);</p>
 
-<p>IE:</p>
+<p>// Alias with no tag
+  ber_alias!(A ::= u64, &quot;A&quot;);</p>
 
-<pre><code class="language-text">TYPE1 ::= SEQUENCE {
-  a PrintableString
+<p>// OR
+  struct B(u64);</p>
+
+<p>// Alias with a custom tag.
+  ber_alias!(B ::= [APPLICATION 3] u64, &quot;B&quot;);
 }
-
-TYPE1 ::= TYPE2
-</code></pre>
-
-<pre class='rust rust-example-rendered'>
-<span class='attribute'>#[<span class='ident'>macro_use</span>]</span> <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>asn1_cereal</span>; <span class='kw'>fn</span> <span class='ident'>main</span>() {
-  <span class='kw'>struct</span> <span class='ident'>Type1</span> {
-    <span class='ident'>a</span>: <span class='ident'>String</span>
-  }
-
-  <span class='macro'>asn1_sequence_info</span><span class='macro'>!</span>(<span class='ident'>Type1</span>, <span class='string'>&quot;TYPE1&quot;</span>);
-  <span class='macro'>ber_sequence_serialize</span><span class='macro'>!</span>(<span class='ident'>Type1</span>, <span class='ident'>a</span>);
-  <span class='macro'>ber_sequence_deserialize</span><span class='macro'>!</span>(<span class='ident'>Type1</span>, <span class='ident'>a</span>);
-
-  <span class='kw'>struct</span> <span class='ident'>Type2</span> (<span class='ident'>Type1</span>);
-  <span class='macro'>asn1_info</span><span class='macro'>!</span>(<span class='ident'>Type2</span>, <span class='number'>0x3</span>, <span class='number'>0x1</span>, <span class='bool-val'>true</span>, <span class='string'>&quot;TYPE2&quot;</span>);
-  <span class='macro'>ber_newtype</span><span class='macro'>!</span>(<span class='ident'>Type2</span>);
-
-  <span class='comment'>// OR</span>
-
-  <span class='kw'>struct</span> <span class='ident'>Type3</span> (<span class='ident'>Type1</span>);
-  <span class='macro'>asn1_info</span><span class='macro'>!</span>(<span class='ident'>Type3</span>, <span class='number'>0x3</span>, <span class='number'>0x1</span>, <span class='bool-val'>true</span>, <span class='string'>&quot;TYPE3&quot;</span>);
-  <span class='macro'>ber_newtype_serialize</span><span class='macro'>!</span>(<span class='ident'>Type3</span>);
-  <span class='macro'>ber_newtype_deserialize</span><span class='macro'>!</span>(<span class='ident'>Type3</span>);
-}</pre>
+```</p>
 </div></section>
     <section id='search' class="content hidden"></section>
 

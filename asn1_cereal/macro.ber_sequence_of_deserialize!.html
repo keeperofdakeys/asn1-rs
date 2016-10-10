@@ -47,14 +47,20 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-992' class='srclink' href='../src/asn1_cereal/src/ber/serial/seq_of.rs.html#41-117' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-1169' class='srclink' href='../src/asn1_cereal/src/ber/serial/seq_of.rs.html#75-157' title='goto source code'>[src]</a></span></h1>
 <pre class='rust macro'>
 <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>ber_sequence_of_deserialize</span> {
     (<span class='kw'>impl</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ty</span>) <span class='op'>=&gt;</span> { ... };
     (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ty</span>) <span class='op'>=&gt;</span> { ... };
     (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ty</span> <span class='op'>=&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>gen</span>:<span class='ident'>ident</span>) <span class='op'>=&gt;</span> { ... };
+    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ty</span> <span class='op'>=&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>gen</span>:<span class='ident'>ident</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>where_attr</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> { ... };
 }</pre>
-</section>
+<div class='docblock'><p>Implement BerDeserialize for a type, by collecting the elements from an iterator
+built by calling deserialize_enc on the stream continually.</p>
+
+<p>Requires that the type implement FromIterator, and can be used to implement
+SEQUENCE/SET OF.</p>
+</div></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>

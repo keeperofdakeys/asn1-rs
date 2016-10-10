@@ -89,10 +89,54 @@
 <span id="45">45</span>
 <span id="46">46</span>
 <span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Encoding and Decoding errors that this crate can produce.</span>
 
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>;
+<span class='kw'>use</span> <span class='ident'>tag</span>::{<span class='ident'>Tag</span>, <span class='ident'>Type</span>};
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>error</span>::<span class='ident'>Error</span>;
+
+<span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>dead_code</span>)]</span>
+<span class='doccomment'>/// An error that occurs while decoding an ASN.1 element.</span>
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>DecodeError2</span> {
+  <span class='doccomment'>/// If relevant, the tag for the element being decoded when the error occured.</span>
+  <span class='ident'>tag</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Tag</span><span class='op'>&gt;</span>,
+  <span class='doccomment'>/// If relevant, the ASN.1 type for the element being decoced when the error occured.</span>
+  <span class='ident'>asn1_type</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Type</span><span class='op'>&gt;</span>,
+  <span class='doccomment'>/// Optionally, an error that caused this error.</span>
+  <span class='ident'>inner</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Error</span><span class='op'>&gt;&gt;</span>,
+  <span class='doccomment'>/// Optionally, a string containing more information about this error.</span>
+  <span class='ident'>more</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span><span class='op'>&gt;</span>,
+}
+
+<span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>dead_code</span>)]</span>
+<span class='kw'>struct</span> <span class='ident'>TypeInfo</span> {
+  <span class='ident'>tag</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Tag</span><span class='op'>&gt;</span>,
+  <span class='ident'>asn1_type</span>: <span class='ident'>Type</span>,
+}
 
 <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>)]</span>
 <span class='doccomment'>/// Errors that can occur while decoding an ASN.1 element.</span>
@@ -130,6 +174,8 @@
 <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>EncodeError</span> {
   <span class='doccomment'>/// Generic IO Error.</span>
   <span class='ident'>IO</span>(<span class='ident'>io</span>::<span class='ident'>Error</span>),
+  <span class='doccomment'>/// Custom encoding error.</span>
+  <span class='ident'>Custom</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span>),
 }
 
 <span class='kw'>impl</span> <span class='ident'>From</span><span class='op'>&lt;</span><span class='ident'>io</span>::<span class='ident'>Error</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>EncodeError</span> {

@@ -207,9 +207,133 @@
 <span id="163">163</span>
 <span id="164">164</span>
 <span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Macros to generate the implementation of the serialization traits for Rust</span>
-<span class='doccomment'>//! structs, as ASN.1 sequences.</span>
+<span class='doccomment'>//! structs, as an ASN.1 SEQUENCE. You can technically use this for a SET, but it</span>
+<span class='doccomment'>//! still assumes the elements are in order.</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! You can either use the shortcut `ber_sequence!` macro, or each of</span>
 <span class='doccomment'>//! `asn1_sequence_info!`, `ber_sequence_serialize!` and `ber_sequence_deserialize!`.</span>
@@ -224,8 +348,8 @@
 <span class='doccomment'>//!   ber_sequence!(</span>
 <span class='doccomment'>//!     ShortSequence,</span>
 <span class='doccomment'>//!     &quot;SHORT_SEQUENCE&quot;,</span>
-<span class='doccomment'>//!     z,</span>
-<span class='doccomment'>//!     y</span>
+<span class='doccomment'>//!     z;</span>
+<span class='doccomment'>//!     y;</span>
 <span class='doccomment'>//!   );</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//!   // OR</span>
@@ -237,8 +361,8 @@
 <span class='doccomment'>//!   }</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//!   asn1_sequence_info!(SomeSequence, &quot;SOME_SEQUENCE&quot;);</span>
-<span class='doccomment'>//!   ber_sequence_serialize!(SomeSequence, a, b, c);</span>
-<span class='doccomment'>//!   ber_sequence_deserialize!(SomeSequence, a, b, c);</span>
+<span class='doccomment'>//!   ber_sequence_serialize!(SomeSequence, a; b; c;);</span>
+<span class='doccomment'>//!   ber_sequence_deserialize!(SomeSequence, a; b; c;);</span>
 <span class='doccomment'>//! }</span>
 <span class='doccomment'>//! ```</span>
 <span class='doccomment'>//!</span>
@@ -254,11 +378,16 @@
 <span class='doccomment'>/// procedural macros are eventually stabilised, listing the fields</span>
 <span class='doccomment'>/// in the macro might no longer be required.</span>
 <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>ber_sequence</span> {
-  (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ident</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>asn1_ty</span>:<span class='ident'>expr</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>:<span class='ident'>ident</span>),<span class='op'>*</span>) <span class='op'>=&gt;</span> (
+  (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ident</span>, [$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>opts</span>:<span class='ident'>tt</span>)<span class='op'>*</span>], <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>asn1_ty</span>:<span class='ident'>expr</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> (
+    <span class='macro'>asn1_sequence_info</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>, [$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>opts</span>)<span class='op'>*</span>], <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>asn1_ty</span>);
+    <span class='macro'>ber_sequence_serialize</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>)<span class='op'>*</span>);
+    <span class='macro'>ber_sequence_deserialize</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>)<span class='op'>*</span>);
+  );
+  (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ident</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>asn1_ty</span>:<span class='ident'>expr</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> (
     <span class='macro'>asn1_sequence_info</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>asn1_ty</span>);
-    <span class='macro'>ber_sequence_serialize</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>),<span class='op'>*</span>);
-    <span class='macro'>ber_sequence_deserialize</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>),<span class='op'>*</span>);
-  )
+    <span class='macro'>ber_sequence_serialize</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>)<span class='op'>*</span>);
+    <span class='macro'>ber_sequence_deserialize</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>)<span class='op'>*</span>);
+  );
 }
 
 <span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
@@ -266,112 +395,229 @@
 <span class='doccomment'>/// traits to get information about this type. If you need to provide a custom</span>
 <span class='doccomment'>/// class or tag, consider using the asn1_info! macro.</span>
 <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>asn1_sequence_info</span> {
+  (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ident</span>, [$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>:<span class='ident'>tt</span>)<span class='op'>*</span>], <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>asn1_ty</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> (
+    <span class='macro'>asn1_info</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>, [$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>)<span class='op'>*</span>], <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>asn1_ty</span>);
+  );
   (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ident</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>asn1_ty</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> (
-    <span class='kw'>impl</span> <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>Asn1Info</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span> {
-      <span class='kw'>fn</span> <span class='ident'>asn1_tag</span>() <span class='op'>-&gt;</span> <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>Tag</span> {
-        <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>Tag</span> {
-          <span class='ident'>class</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>Class</span>::<span class='ident'>Universal</span>,
-          <span class='ident'>tagnum</span>: (<span class='number'>0x10</span> <span class='kw'>as</span> <span class='ident'>u8</span>).<span class='ident'>into</span>(),
-          <span class='ident'>constructed</span>: <span class='bool-val'>true</span>,
-        }
-      }
-
-      <span class='kw'>fn</span> <span class='ident'>asn1_type</span>() <span class='op'>-&gt;</span> <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>Type</span> {
-        <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>asn1_ty</span>.<span class='ident'>into</span>()
-      }
-    }
-  )
+    <span class='macro'>asn1_info</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>, [<span class='ident'>UNIVERSAL</span> <span class='number'>16</span>], <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>asn1_ty</span>);
+  );
 }
 
 <span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
 <span class='doccomment'>/// This macro defines the BerSerialize trait for a rust struct. The code generated</span>
 <span class='doccomment'>/// will serialize the specified fields in the order that they are given.</span>
 <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>ber_sequence_serialize</span> {
-  (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ty</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>:<span class='ident'>ident</span>),<span class='op'>*</span>) <span class='op'>=&gt;</span> (
+  (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ty</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> (
     <span class='kw'>impl</span> <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerSerialize</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span> {
       <span class='kw'>fn</span> <span class='ident'>serialize_value</span><span class='op'>&lt;</span><span class='ident'>E</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerEncRules</span>, <span class='ident'>W</span>: <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>Write</span><span class='op'>&gt;</span>
           (<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>e</span>: <span class='ident'>E</span>, <span class='ident'>writer</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>err</span>::<span class='ident'>EncodeError</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>bytes</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>count</span>: <span class='ident'>u64</span> <span class='op'>=</span> <span class='number'>0</span>;
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>_count</span>: <span class='ident'>u64</span> <span class='op'>=</span> <span class='number'>0</span>;
         <span class='comment'>// For each declared sequence member, serialize it onto the stream.</span>
-        $(
-          <span class='ident'>count</span> <span class='op'>+=</span> <span class='number'>1</span>;
-          <span class='comment'>// If encoding uses implicit tag, skip context-specific tag.</span>
-          <span class='kw'>if</span> <span class='ident'>E</span>::<span class='ident'>tag_rules</span>() <span class='op'>==</span> <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>ber</span>::<span class='ident'>enc</span>::<span class='ident'>TagEnc</span>::<span class='ident'>Implicit</span> {
-            <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerSerialize</span>::<span class='ident'>serialize_enc</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>, <span class='ident'>e</span>, <span class='ident'>writer</span>));
-          <span class='comment'>// Otherwise encode the context-specific tag.</span>
-          } <span class='kw'>else</span> {
-            <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerSerialize</span>::<span class='ident'>serialize_enc</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>, <span class='ident'>e</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>bytes</span>));
-            <span class='kw'>let</span> <span class='ident'>tag</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>Tag</span> {
-              <span class='ident'>class</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>Class</span>::<span class='ident'>ContextSpecific</span>,
-              <span class='ident'>tagnum</span>: <span class='ident'>count</span>.<span class='ident'>into</span>(),
-              <span class='ident'>constructed</span>: <span class='bool-val'>true</span>,
-            };
-            <span class='kw'>let</span> <span class='ident'>len</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>Len</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>bytes</span>.<span class='ident'>len</span>() <span class='kw'>as</span> <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>LenNum</span>).<span class='ident'>into</span>();
-            <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>write_taglen</span>(<span class='ident'>tag</span>, <span class='ident'>len</span>, <span class='ident'>writer</span>));
-            <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>writer</span>.<span class='ident'>write_all</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>bytes</span>));
-
-            <span class='ident'>bytes</span>.<span class='ident'>clear</span>();
-          }
-        )<span class='op'>*</span>
-        <span class='prelude-val'>Ok</span>(())
+        <span class='macro'>ber_sequence_serialize</span><span class='macro'>!</span>(_ { <span class='self'>self</span> <span class='ident'>e</span> <span class='ident'>writer</span> <span class='ident'>bytes</span> <span class='ident'>_count</span> } $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>)<span class='op'>*</span>); <span class='prelude-val'>Ok</span>(())
       }
     }
-  )
+  );
+
+  <span class='comment'>// Handle field creation.</span>
+  <span class='comment'>// Expand a field with no options.</span>
+  (_ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>this</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>writer</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bytes</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span>:<span class='ident'>ident</span> }
+      <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>:<span class='ident'>ident</span>; $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> (
+    <span class='macro'>ber_sequence_serialize</span><span class='macro'>!</span>(_ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>this</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>writer</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bytes</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span> } <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span> (); $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>)<span class='op'>*</span>);
+  );
+  <span class='comment'>// Expand an OPTIONAL field with no tag.</span>
+  (_ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>this</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>writer</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bytes</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span>:<span class='ident'>ident</span> }
+      <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>:<span class='ident'>ident</span> (<span class='ident'>OPTIONAL</span>); $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> (
+    <span class='macro'>ber_sequence_serialize</span><span class='macro'>!</span>(_ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>this</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>writer</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bytes</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span> } <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span> ([] <span class='ident'>OPTIONAL</span>); $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>)<span class='op'>*</span>);
+  );
+  <span class='comment'>// Expand an OPTIONAL field with a tag.</span>
+  (_ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>this</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>writer</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bytes</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span>:<span class='ident'>ident</span> }
+      <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>:<span class='ident'>ident</span> ([$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>opts</span>:<span class='ident'>tt</span>)<span class='op'>*</span>] <span class='ident'>OPTIONAL</span>); $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> (
+    <span class='kw'>let</span> <span class='ident'>tag</span> <span class='op'>=</span> <span class='macro'>asn1_spec_tag</span><span class='macro'>!</span>({ <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span> } [$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>opts</span>)<span class='op'>*</span>]);
+    <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>val</span>) <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>this</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span> {
+      <span class='macro'>ber_sequence_serialize</span><span class='macro'>!</span>(_ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>this</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>writer</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bytes</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span> <span class='ident'>tag</span>, <span class='ident'>val</span> } $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>)<span class='op'>*</span>);
+    } <span class='kw'>else</span> {
+      <span class='macro'>ber_sequence_serialize</span><span class='macro'>!</span>(_ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>this</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>writer</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bytes</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span> } $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>)<span class='op'>*</span>);
+    }
+  );
+  <span class='comment'>// Expand a field with a DEFAULT.</span>
+  (_ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>this</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>writer</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bytes</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span>:<span class='ident'>ident</span> }
+      <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>:<span class='ident'>ident</span> (<span class='ident'>DEFAULT</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>default</span>:<span class='ident'>expr</span>); $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> (
+    <span class='macro'>ber_sequence_serialize</span><span class='macro'>!</span>(_ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>this</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>writer</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bytes</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span> } <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span> ([] <span class='ident'>DEFAULT</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>default</span>); $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>)<span class='op'>*</span>);
+  );
+  <span class='comment'>// Expand a field with a DEFAULT and a tag.</span>
+  (_ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>this</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>writer</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bytes</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span>:<span class='ident'>ident</span> }
+      <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>:<span class='ident'>ident</span> ([$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>opts</span>:<span class='ident'>tt</span>)<span class='op'>*</span>] <span class='ident'>DEFAULT</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>default</span>:<span class='ident'>expr</span>); $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> (
+    <span class='kw'>let</span> <span class='ident'>tag</span> <span class='op'>=</span> <span class='macro'>asn1_spec_tag</span><span class='macro'>!</span>({ <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span> } [$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>opts</span>)<span class='op'>*</span>]);
+    <span class='kw'>if</span> <span class='kw-2'>&amp;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>this</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span> <span class='op'>!=</span> <span class='kw-2'>&amp;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>default</span> {
+      <span class='macro'>ber_sequence_serialize</span><span class='macro'>!</span>(_ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>this</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>writer</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bytes</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span> <span class='ident'>tag</span>, <span class='kw-2'>&amp;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>this</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span> } $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>)<span class='op'>*</span>);
+    } <span class='kw'>else</span> {
+      <span class='macro'>ber_sequence_serialize</span><span class='macro'>!</span>(_ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>this</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>writer</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bytes</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span> } $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>)<span class='op'>*</span>);
+    }
+  );
+  <span class='comment'>// Expand a field that has options.</span>
+  (_ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>this</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>writer</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bytes</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span>:<span class='ident'>ident</span> }
+      <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>:<span class='ident'>ident</span> ($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>opts</span>:<span class='ident'>tt</span>)<span class='op'>*</span>); $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> (
+    <span class='kw'>let</span> <span class='ident'>tag</span> <span class='op'>=</span> <span class='macro'>asn1_spec_tag</span><span class='macro'>!</span>({ <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span> } [$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>opts</span>)<span class='op'>*</span>]);
+
+    <span class='comment'>// If encoding uses implicit tag, skip context-specific tag.</span>
+    <span class='kw'>if</span> <span class='ident'>E</span>::<span class='ident'>tag_rules</span>() <span class='op'>==</span> <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>ber</span>::<span class='ident'>enc</span>::<span class='ident'>TagEnc</span>::<span class='ident'>Implicit</span> {
+      <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerSerialize</span>::<span class='ident'>serialize_enc</span>(<span class='kw-2'>&amp;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>this</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>writer</span>));
+      <span class='macro'>ber_sequence_serialize</span><span class='macro'>!</span>(_ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>this</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>writer</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bytes</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span> } $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>)<span class='op'>*</span>);
+    <span class='comment'>// Otherwise encode the context-specific tag.</span>
+    } <span class='kw'>else</span> {
+      <span class='macro'>ber_sequence_serialize</span><span class='macro'>!</span>(_ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>this</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>writer</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bytes</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span> <span class='ident'>tag</span>, <span class='kw-2'>&amp;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>this</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span> } $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>)<span class='op'>*</span>);
+    }
+  );
+  <span class='comment'>// Write a field with a tag.</span>
+  (_ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>this</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>writer</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bytes</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tag</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>value</span>:<span class='ident'>expr</span> }
+      $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> (
+    <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerSerialize</span>::<span class='ident'>serialize_enc</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>value</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bytes</span>));
+    <span class='kw'>let</span> <span class='ident'>len</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>Len</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bytes</span>.<span class='ident'>len</span>() <span class='kw'>as</span> <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>LenNum</span>).<span class='ident'>into</span>();
+    <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>write_taglen</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tag</span>, <span class='ident'>len</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>writer</span>));
+    <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>writer</span>.<span class='ident'>write_all</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bytes</span>));
+    <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bytes</span>.<span class='ident'>clear</span>();
+
+    <span class='macro'>ber_sequence_serialize</span><span class='macro'>!</span>(_ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>this</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>writer</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>bytes</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span> } $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>)<span class='op'>*</span>);
+  );
+  (_ { $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>:<span class='ident'>tt</span>)<span class='op'>*</span> } ) <span class='op'>=&gt;</span> ();
 }
 
 <span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
 <span class='doccomment'>/// This macro defines the BerDeserialize trait for a rust struct. The code generated</span>
 <span class='doccomment'>/// will deserialize the specified fields in the order that they are given.</span>
 <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>ber_sequence_deserialize</span> {
-  (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ident</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>:<span class='ident'>ident</span>),<span class='op'>*</span>) <span class='op'>=&gt;</span> (
+  <span class='comment'>// Handle fields.</span>
+  <span class='comment'>// Expand a field with no options.</span>
+  (_ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>reader</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tag</span>:<span class='ident'>ident</span> [$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>fields</span>:<span class='ident'>ident</span>)<span class='op'>*</span>] }
+      <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>:<span class='ident'>ident</span>; $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> (
+    <span class='macro'>ber_sequence_deserialize</span><span class='macro'>!</span>(
+      _ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>reader</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tag</span> [$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>fields</span>)<span class='op'>*</span>] } <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span> ([]); $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>)<span class='op'>*</span>
+    );
+  );
+  <span class='comment'>// Expand a field with empty options.</span>
+  (_ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>reader</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tag</span>:<span class='ident'>ident</span> [$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>fields</span>:<span class='ident'>ident</span>)<span class='op'>*</span>] }
+      <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>:<span class='ident'>ident</span> (); $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> (
+    <span class='macro'>ber_sequence_deserialize</span><span class='macro'>!</span>(
+      _ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>reader</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tag</span> [$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>fields</span>)<span class='op'>*</span>] } <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span> ([]); $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>)<span class='op'>*</span>
+    );
+  );
+  <span class='comment'>// Expand a field with empty options and a tag.</span>
+  (_ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>reader</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tag</span>:<span class='ident'>ident</span> [$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>fields</span>:<span class='ident'>ident</span>)<span class='op'>*</span>] }
+      <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>field</span>:<span class='ident'>ident</span> ([$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>opts</span>:<span class='ident'>tt</span>)<span class='op'>*</span>]); $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> (
+    <span class='kw'>let</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>field</span> <span class='op'>=</span> {
+      <span class='kw'>let</span> <span class='ident'>tag</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>t</span>) <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tag</span> {
+        <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tag</span> <span class='op'>=</span> <span class='prelude-val'>None</span>;
+        <span class='ident'>t</span>
+      } <span class='kw'>else</span> {
+        <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>Tag</span>::<span class='ident'>read_tag</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>reader</span>))
+      };
+      <span class='kw'>let</span> <span class='ident'>our_tag</span> <span class='op'>=</span> <span class='macro'>asn1_spec_tag</span><span class='macro'>!</span>({ <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span> } [$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>opts</span>)<span class='op'>*</span>]);
+
+      <span class='macro'>ber_sequence_deserialize</span><span class='macro'>!</span>(_ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>reader</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span> } <span class='ident'>tag</span>, <span class='ident'>our_tag</span> )
+    };
+    <span class='macro'>ber_sequence_deserialize</span><span class='macro'>!</span>(_ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>reader</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tag</span> [$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>fields</span>)<span class='op'>*</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>field</span>] } $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>)<span class='op'>*</span>);
+  );
+  <span class='comment'>// Expand an OPTIONAL field with no tag.</span>
+  (_ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>reader</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tag</span>:<span class='ident'>ident</span> [$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>fields</span>:<span class='ident'>ident</span>)<span class='op'>*</span>] }
+      <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>:<span class='ident'>ident</span> (<span class='ident'>OPTIONAL</span>); $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> (
+    <span class='macro'>ber_sequence_deserialize</span><span class='macro'>!</span>(
+      _ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>reader</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tag</span> [$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>fields</span>)<span class='op'>*</span>] } <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span> ([] <span class='ident'>OPTIONAL</span>); $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>)<span class='op'>*</span>
+    );
+  );
+  <span class='comment'>// Expand an OPTIONAL field with a tag.</span>
+  (_ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>reader</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tag</span>:<span class='ident'>ident</span> [$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>fields</span>:<span class='ident'>ident</span>)<span class='op'>*</span>] }
+      <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>field</span>:<span class='ident'>ident</span> ([$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>opts</span>:<span class='ident'>tt</span>)<span class='op'>*</span>] <span class='ident'>OPTIONAL</span>); $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> (
+    <span class='kw'>let</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>field</span> <span class='op'>=</span> {
+      <span class='kw'>let</span> <span class='ident'>tag</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tag</span> {
+        <span class='prelude-val'>Some</span>(<span class='ident'>t</span>) <span class='op'>=&gt;</span> <span class='ident'>t</span>,
+        <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {
+          <span class='kw'>let</span> <span class='ident'>t</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>Tag</span>::<span class='ident'>read_tag</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>reader</span>));
+          <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tag</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>t</span>); <span class='ident'>t</span>
+        },
+      };
+
+      <span class='kw'>let</span> <span class='ident'>our_tag</span> <span class='op'>=</span> <span class='macro'>asn1_spec_tag</span><span class='macro'>!</span>({ <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span> } [$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>opts</span>)<span class='op'>*</span>]);
+
+      <span class='kw'>if</span> <span class='ident'>tag</span> <span class='op'>==</span> <span class='ident'>our_tag</span> {
+        <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tag</span> <span class='op'>=</span> <span class='prelude-val'>None</span>;
+        <span class='kw'>let</span> _ <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>Len</span>::<span class='ident'>read_len</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>reader</span>));
+        <span class='prelude-val'>Some</span>(<span class='macro'>try</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerDeserialize</span>::<span class='ident'>deserialize_enc</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>reader</span>)))
+      } <span class='kw'>else</span> {
+        <span class='prelude-val'>None</span>
+      }
+    };
+    <span class='macro'>ber_sequence_deserialize</span><span class='macro'>!</span>(_ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>reader</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tag</span> [$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>fields</span>)<span class='op'>*</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>field</span>] } $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>)<span class='op'>*</span>);
+  );
+  <span class='comment'>// Expand a DEFAULT field with no tag.</span>
+  (_ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>reader</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tag</span>:<span class='ident'>ident</span> [$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>fields</span>:<span class='ident'>ident</span>)<span class='op'>*</span>] }
+      <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>:<span class='ident'>ident</span> (<span class='ident'>DEFAULT</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>default</span>:<span class='ident'>expr</span>); $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> (
+    <span class='macro'>ber_sequence_deserialize</span><span class='macro'>!</span>(
+      _ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>reader</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tag</span> [$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>fields</span>)<span class='op'>*</span>] } <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span> ([] <span class='ident'>DEFAULT</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>default</span>); $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>)<span class='op'>*</span>
+    );
+  );
+  <span class='comment'>// Expand a DEFAULT field with a tag.</span>
+  (_ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>reader</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tag</span>:<span class='ident'>ident</span> [$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>fields</span>:<span class='ident'>ident</span>)<span class='op'>*</span>] }
+      <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>field</span>:<span class='ident'>ident</span> ([$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>opts</span>:<span class='ident'>tt</span>)<span class='op'>*</span>] <span class='ident'>DEFAULT</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>default</span>:<span class='ident'>expr</span>); $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> (
+    <span class='kw'>let</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>field</span> <span class='op'>=</span> {
+      <span class='kw'>let</span> <span class='ident'>tag</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tag</span> {
+        <span class='prelude-val'>Some</span>(<span class='ident'>t</span>) <span class='op'>=&gt;</span> <span class='ident'>t</span>,
+        <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {
+          <span class='kw'>let</span> <span class='ident'>t</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>Tag</span>::<span class='ident'>read_tag</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>reader</span>));
+          <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tag</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>t</span>); <span class='ident'>t</span>
+        },
+      };
+
+      <span class='kw'>let</span> <span class='ident'>our_tag</span> <span class='op'>=</span> <span class='macro'>asn1_spec_tag</span><span class='macro'>!</span>({ <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span> } [$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>opts</span>)<span class='op'>*</span>]);
+
+      <span class='kw'>if</span> <span class='ident'>tag</span> <span class='op'>==</span> <span class='ident'>our_tag</span> {
+        <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tag</span> <span class='op'>=</span> <span class='prelude-val'>None</span>;
+        <span class='kw'>let</span> _ <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>Len</span>::<span class='ident'>read_len</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>reader</span>));
+        <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerDeserialize</span>::<span class='ident'>deserialize_enc</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>reader</span>))
+      } <span class='kw'>else</span> {
+        <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>default</span>
+      }
+    };
+    <span class='macro'>ber_sequence_deserialize</span><span class='macro'>!</span>(_ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>reader</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tag</span> [$(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>fields</span>)<span class='op'>*</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>field</span>] } $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>)<span class='op'>*</span>);
+  );
+  <span class='comment'>// Create the implementation for a field.</span>
+  (_ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>reader</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span>:<span class='ident'>ident</span> } <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tag</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>our_tag</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> ({
+    <span class='comment'>// If encoding uses implicit tagging, throw an error if this isn&#39;t an implicit tag.</span>
+    <span class='kw'>if</span> <span class='ident'>E</span>::<span class='ident'>tag_rules</span>() <span class='op'>==</span> <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>ber</span>::<span class='ident'>enc</span>::<span class='ident'>TagEnc</span>::<span class='ident'>Implicit</span> <span class='op'>&amp;&amp;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tag</span> <span class='op'>==</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>our_tag</span> {
+      <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>err</span>::<span class='ident'>DecodeError</span>::<span class='ident'>ExplicitTag</span>);
+    }
+
+    <span class='kw'>let</span> <span class='ident'>len</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>Len</span>::<span class='ident'>read_len</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>reader</span>));
+
+    <span class='comment'>// If the tag matches our tag, decode the len and call the normal deserialize function.</span>
+    <span class='kw'>if</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tag</span> <span class='op'>==</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>our_tag</span> {
+      <span class='comment'>// We don&#39;t have anything to do with the len, technically we should use it to</span>
+      <span class='comment'>// check the length decoded.</span>
+      <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>len</span>;
+      <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerDeserialize</span>::<span class='ident'>deserialize_enc</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>reader</span>))
+    <span class='comment'>// Otherwise decode it as the inner type. (We give the tag that we</span>
+    <span class='comment'>// decoded, and the function will decode the length itself).</span>
+    } <span class='kw'>else</span> {
+      <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerDeserialize</span>::<span class='ident'>deserialize_with_tag</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>reader</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tag</span>, <span class='ident'>len</span>))
+    }
+  });
+  <span class='comment'>// When no fields are left, build the struct.</span>
+  (_ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>reader</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>count</span>:<span class='ident'>ident</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tag</span>:<span class='ident'>ident</span> [ $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>field</span>:<span class='ident'>ident</span>)<span class='op'>*</span> ] }) <span class='op'>=&gt;</span> (
+    <span class='kw'>return</span> <span class='prelude-val'>Ok</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span> { $(
+      <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>field</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>field</span>
+    ),<span class='op'>*</span> })
+  );
+
+  (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span>:<span class='ident'>ident</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> (
     <span class='kw'>impl</span> <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerDeserialize</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span> {
       <span class='kw'>fn</span> <span class='ident'>deserialize_value</span><span class='op'>&lt;</span><span class='ident'>E</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerEncRules</span>, <span class='ident'>I</span>: <span class='ident'>Iterator</span><span class='op'>&lt;</span><span class='ident'>Item</span><span class='op'>=</span><span class='ident'>std</span>::<span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span>
           (<span class='ident'>e</span>: <span class='ident'>E</span>, <span class='ident'>reader</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>I</span>, _: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>Len</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='self'>Self</span>, <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>err</span>::<span class='ident'>DecodeError</span><span class='op'>&gt;</span> {
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>count</span>: <span class='ident'>u64</span> <span class='op'>=</span> <span class='number'>0</span>;
-        $(
-          <span class='comment'>// Iterate count.</span>
-          <span class='comment'>// FIXME: Does this start from 0 or 1?</span>
-          <span class='ident'>count</span> <span class='op'>+=</span> <span class='number'>1</span>;
-
-          <span class='comment'>// Use field name as variable name, due to hygiene this won&#39;t conflict with any</span>
-          <span class='comment'>// defined locally.</span>
-          <span class='kw'>let</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>;
-          {
-            <span class='comment'>// Create a copy of what our tag context-specific tag would look like.</span>
-            <span class='kw'>let</span> <span class='ident'>our_tag</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>Tag</span> {
-              <span class='ident'>class</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>Class</span>::<span class='ident'>ContextSpecific</span>,
-              <span class='ident'>tagnum</span>: <span class='ident'>count</span>.<span class='ident'>into</span>(),
-              <span class='ident'>constructed</span>: <span class='bool-val'>true</span>,
-            };
-            <span class='kw'>let</span> <span class='ident'>tag</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>Tag</span>::<span class='ident'>read_tag</span>(<span class='ident'>reader</span>));
-
-            <span class='comment'>// If encoding uses implicit tagging, throw an error if this isn&#39;t an implicit tag.</span>
-            <span class='kw'>if</span> <span class='ident'>E</span>::<span class='ident'>tag_rules</span>() <span class='op'>==</span> <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>ber</span>::<span class='ident'>enc</span>::<span class='ident'>TagEnc</span>::<span class='ident'>Implicit</span> <span class='op'>&amp;&amp;</span> <span class='ident'>tag</span> <span class='op'>==</span> <span class='ident'>our_tag</span> {
-              <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>err</span>::<span class='ident'>DecodeError</span>::<span class='ident'>ExplicitTag</span>);
-            }
-
-            <span class='kw'>let</span> <span class='ident'>len</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>Len</span>::<span class='ident'>read_len</span>(<span class='ident'>reader</span>));
-
-            <span class='comment'>// If the tag matches our tag, decode the len and call the normal deserialize function.</span>
-            <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>tag</span> <span class='op'>==</span> <span class='ident'>our_tag</span> {
-              <span class='comment'>// We don&#39;t have anything to do with the len, technically we should use it to</span>
-              <span class='comment'>// check the length decoded.</span>
-              <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>len</span>;
-              <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerDeserialize</span>::<span class='ident'>deserialize_enc</span>(<span class='ident'>e</span>, <span class='ident'>reader</span>))
-            <span class='comment'>// Otherwise decode it as the inner type. (We give the tag that we</span>
-            <span class='comment'>// decoded, and the function will decode the length itself).</span>
-            } <span class='kw'>else</span> {
-              <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>BerDeserialize</span>::<span class='ident'>deserialize_with_tag</span>(<span class='ident'>e</span>, <span class='ident'>reader</span>, <span class='ident'>tag</span>, <span class='ident'>len</span>))
-            };
-          }
-        )<span class='op'>*</span>
-        <span class='prelude-val'>Ok</span>( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span> { $(
-          <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>,
-        )<span class='op'>*</span> })
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>_count</span>: <span class='ident'>u64</span> <span class='op'>=</span> <span class='number'>0</span>;
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>_tag</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>tag</span>::<span class='ident'>Tag</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='prelude-val'>None</span>;
+        <span class='macro'>ber_sequence_deserialize</span><span class='macro'>!</span>(_ { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rs_type</span> <span class='ident'>e</span> <span class='ident'>reader</span> <span class='ident'>_count</span> <span class='ident'>_tag</span> [ ] } $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>args</span>)<span class='op'>*</span>);
       }
     }
-  )
+  );
 }
 </pre>
 </section>
