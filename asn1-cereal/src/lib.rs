@@ -7,6 +7,18 @@
 //! The `Asn1Info`, `BerSerialize` and `BerDeserialize` traits are what
 //! most users will want to use.
 //!
+//! # ASN.1 Elements
+//!
+//! These pages will provide more details on specific ASN.1 constructs.
+//!
+//! - SEQUENCE/SET [`ber::serial::seq`](ber/serial/seq/index.html)
+//! - SEQUENCE/SET OF [`ber::serial::seq_of`](ber/serial/seq_of/index.html)
+//! - CHOICE/ANY [`ber::serial::choice`](ber/serial/choice/index.html)
+//! - A ::= B [`ber::serial::alias`](ber/serial/alias/index.html)
+//! - OCTET STRING [`ber::serial::prim`](ber/serial/prim/index.html)
+//!
+//! # Example
+//!
 //! ```
 //! #[macro_use] extern crate asn1_cereal; fn main() {
 //!   struct ShortSequence {

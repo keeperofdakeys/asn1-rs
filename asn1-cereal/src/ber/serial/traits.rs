@@ -1,3 +1,12 @@
+//! The base traits that are used for serializing and deserializing rust types.
+//!
+//! BerSerialize implements serialization, and BerDeserialize implements deserialization.
+//! Both traits depend upon the Asn1Info trait being implemented, to provide
+//! metadata about the type (like ASN.1 tag and ASN.1 type).
+//!
+//! For both traits, only the (de)serialize_value functions should need overridden
+//! to get custom behaviour. If you need to change how tags are handled, you may need
+//! to override _serialize_enc or _deserialize_with_tag.
 use std::io;
 
 use ::Asn1Info;
@@ -8,7 +17,8 @@ use ber::enc;
 /// Provides the methods required to serialize this Rust type into an ASN.1 stream.
 ///
 /// When implementing this for a simple primitive type, implementing `serialize_value`
-/// should be all that's required.
+/// should be all that's required. For more complex, structured types you may need to
+/// implement `_serialize_enc` (this is called first by `serialize_enc`).
 pub trait BerSerialize: Asn1Info {
   /// Serialize a value into ASN.1 data as DER.
   fn serialize<W: io::Write>(&self, writer: &mut W) -> Result<(), err::EncodeError> {
@@ -52,6 +62,10 @@ pub trait BerSerialize: Asn1Info {
     Ok(())
   }
 
+  /// An empty method that is called first by `serialize_enc` to allow custom
+  /// handling, without losing normal serialization behaviour.
+  ///
+  /// Return `Some(())` to indicate stop normal behaviour, or `None` to continue.
   fn _serialize_enc<E: enc::BerEncRules, W: io::Write>
       (&self, e: E, writer: &mut W) -> Option<Result<(), err::EncodeError>> {
     let _ = (e, writer);
@@ -66,7 +80,8 @@ pub trait BerSerialize: Asn1Info {
 /// Provides the methods required to deserialize this Rust type from an ASN.1 stream.
 ///
 /// When implementing this for a simple primitive type, implementing `deserialize_value`
-/// should be all that's required.
+/// should be all that's required. For more complex, structued types you may need to
+/// implement `_deserialize_with_tag` (this is called first by `deserialize_with_tag).
 pub trait BerDeserialize: Asn1Info + Sized {
   /// Deserialize ASN.1 data into a Rust value, accepting any valid BER.
   fn deserialize<I: Iterator<Item=io::Result<u8>>>(reader: &mut I) -> Result<Self, err::DecodeError> {
@@ -126,6 +141,10 @@ pub trait BerDeserialize: Asn1Info + Sized {
     Ok(item)
   }
 
+  /// An empty method that is called first by `deserialize_with_tag` to allow
+  /// custom handling, without losing normal deserialization behaviour.
+  ///
+  /// Return `Some(..)` to return that value, or `None` to use normal behaviour.
   fn _deserialize_with_tag<E: enc::BerEncRules, I: Iterator<Item=io::Result<u8>>>
       (e: E, reader: &mut I, tag: tag::Tag, len: tag::Len) -> Option<Result<Self, err::DecodeError>> {
     let _ = (e, reader, tag, len);

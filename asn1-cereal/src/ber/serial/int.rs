@@ -1,4 +1,6 @@
 //! Implementation of the serialization traits for Rust integers.
+//!
+//! This defines for all rust integers.
 
 use std::io;
 

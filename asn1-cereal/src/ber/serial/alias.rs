@@ -1,3 +1,6 @@
+//! Macros to generate the implementation of the serialization traits for Rust
+//! newtypes (tuple structs). This can be used to represent ASN.1 type
+//! assignments, or wrap Rust types, to provide distinct types.
 //! ```
 //! #[macro_use] extern crate asn1_cereal; fn main() {
 //!   struct A(u64);
@@ -14,6 +17,7 @@
 //! ```
 
 #[macro_export]
+/// Generate the implemention of an ASN.1 alias for a Rust type.
 macro_rules! ber_alias {
   ($outer:ident ::= [$($args:tt)*] $inner:ty, $asn1_ty:expr) => (
     ber_alias_info!($outer ::= [$($args)*] $inner, $asn1_ty);
@@ -28,6 +32,7 @@ macro_rules! ber_alias {
 }
 
 #[macro_export]
+/// Generate the Asn1Info implemention of an ASN.1 alias for a Rust type.
 macro_rules! ber_alias_info {
   ($outer:ident ::= [$($args:tt)*] $inner:ty, $asn1_ty:expr) => (
     asn1_info!(

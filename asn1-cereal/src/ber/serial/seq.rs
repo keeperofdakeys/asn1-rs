@@ -1,5 +1,6 @@
 //! Macros to generate the implementation of the serialization traits for Rust
-//! structs, as ASN.1 sequences.
+//! structs, as an ASN.1 SEQUENCE. You can technically use this for a SET, but it
+//! still assumes the elements are in order.
 //!
 //! You can either use the shortcut `ber_sequence!` macro, or each of
 //! `asn1_sequence_info!`, `ber_sequence_serialize!` and `ber_sequence_deserialize!`.
@@ -80,8 +81,7 @@ macro_rules! ber_sequence_serialize {
         let mut bytes = Vec::new();
         let mut _count: u64 = 0;
         // For each declared sequence member, serialize it onto the stream.
-        ber_sequence_serialize!(_ { self e writer bytes _count } $($args)*);
-        Ok(())
+        ber_sequence_serialize!(_ { self e writer bytes _count } $($args)*); Ok(())
       }
     }
   );

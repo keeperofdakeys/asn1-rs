@@ -1,4 +1,10 @@
-//! Implementation of the serialization traits for Rust strings.
+//! Implementation of the serialization traits for String.
+//!
+//! This currently uses OCTET STRING, as ASN.1 was invented before UTF8,
+//! and OCTET STRING is the only thing that can actually hold this.
+//!
+//! If you require specific types of strings, please use the assoicated
+//! rust type in the prim module.
 
 use std::io;
 
@@ -16,7 +22,7 @@ impl Asn1Info for String {
   }
 
   fn asn1_type() -> tag::Type {
-    tag::Type::from("PRINTABLESTRING")
+    tag::Type::from("OCTET STRING")
   }
 }
 

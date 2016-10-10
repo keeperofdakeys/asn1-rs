@@ -86,4 +86,5 @@ BerSerialize::serialize(&data, &mut bytes).unwrap();
 ```
 
 For custom primitive ASN.1 elements, you may need to provide
-your own implementations.
+your own implementations. Read the full documentation for
+more [Stable](https://docs.rs/asn1-cereal) [Nightly](https://keeperofdakeys.github.io/asn1-rs/asn1_cereal/index.html).

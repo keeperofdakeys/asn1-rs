@@ -1,8 +1,4 @@
 //! A collection of primitive wrappers for ASN.1, where a direct Rust equivalent may not exist.
-//!
-//! Note that a Rust type can represent only a single ASN.1 type. So since Vec
-//! represents a generic SEQUENCE OF container, OctetString must use a separate
-//! type.
 
 use std::io;
 
@@ -10,7 +6,11 @@ use ::{BerSerialize, BerDeserialize};
 use tag;
 use err;
 
-/// A Rust equivalent to an ASN.1 OCTET STRING.
+/// A Rust wrapper for OCTET STRING.
+///
+/// To access the internal element, call `a.0`.
+///
+/// (Use this instead of Vec<u8>, since Vec is used for SEQUENCE OF).
 pub struct OctetString(Vec<u8>);
 
 asn1_info!(OctetString, [UNIVERSAL 4], "OCTET STRING");

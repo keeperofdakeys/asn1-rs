@@ -30,6 +30,15 @@ pub trait Asn1Info {
 /// // (The false here sets the constructed flag).
 /// asn1_info!(C, asn1_cereal::tag::Class::Application, 3, false, "C");
 /// }
+///
+/// // For a type that won't have a tag.
+/// struct D(i32);
+/// asn1_info!(D, "D");
+///
+/// // For a type with a generic.
+/// struct E<T>(T);
+/// asn1_info!(E<T> => T, [PRIVATE 4], "E");
+///
 /// ```
 macro_rules! asn1_info {
   ($rs_type:ty => $gen:ident, $($args:tt)*) => (
