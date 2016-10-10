@@ -1,5 +1,6 @@
 #!/bin/bash
 
+cd asn1-cereal
 if ! hash ghp-import 2>/dev/null; then
     echo "This script requires ghp-import from pip"
     exit 1
