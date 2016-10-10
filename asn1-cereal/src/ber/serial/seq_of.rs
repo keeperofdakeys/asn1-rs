@@ -1,7 +1,7 @@
 //! Macros to generate the implementation of the serialization traits for Rust
 //! iterators, as ASN.1 sequence of.
 //!
-//! This macro has already been implemented for Vec and HashSet, using the tags
+//! This macro has already been implemented for `Vec` and `HashSet`, using the tags
 //! SEQUENCE OF and SET OF respectively.
 
 #[macro_export]
@@ -43,7 +43,7 @@ macro_rules! ber_sequence_of_serialize {
     fn serialize_value<E: $crate::BerEncRules, W: ::std::io::Write>
         (&self, e: E, writer: &mut W) -> Result<(), $crate::err::EncodeError> {
       // Call serialize_enc on each item.
-      for item in (self).into_iter() {
+      for item in self {
         try!($crate::BerSerialize::serialize_enc(item, e, writer));
       }
       Ok(())

@@ -1,12 +1,12 @@
 //! The base traits that are used for serializing and deserializing rust types.
 //!
-//! BerSerialize implements serialization, and BerDeserialize implements deserialization.
-//! Both traits depend upon the Asn1Info trait being implemented, to provide
+//! `BerSerialize` implements serialization, and `BerDeserialize` implements deserialization.
+//! Both traits depend upon the `Asn1Info` trait being implemented, to provide
 //! metadata about the type (like ASN.1 tag and ASN.1 type).
 //!
-//! For both traits, only the (de)serialize_value functions should need overridden
+//! For both traits, only the `(de)serialize_value` functions should need overridden
 //! to get custom behaviour. If you need to change how tags are handled, you may need
-//! to override _serialize_enc or _deserialize_with_tag.
+//! to override `_serialize_enc` or `_deserialize_with_tag`.
 use std::io;
 
 use ::Asn1Info;
