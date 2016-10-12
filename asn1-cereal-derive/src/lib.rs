@@ -14,6 +14,7 @@ use proc_macro::TokenStream;
 use syn::{MetaItem, Lit};
 use nom::{space, digit};
 use std::str::from_utf8;
+use asn1_cereal::tag;
 
 /// Parse a string as an ASN.1 tag definition.
 ///
@@ -43,14 +44,16 @@ named!(parse_tag<quote::Tokens>, chain!(
           "PRIVATE" =>     "::asn1_cereal::tag::Class::Private",
           class => panic!("Unknown class variant {}", class),
         };
-        let tagnum = from_utf8(tagnum).unwrap();
+        let mut class_tokens = quote::Tokens::new();
+        class_tokens.append(class);
+        let tagnum: tag::TagNum = from_utf8(tagnum).unwrap().parse().unwrap();
         let constructed = constructed.is_none();
         quote!(
-          ::asn1_cereal::tag::Tag {
-            class: #class,
+          Some(::asn1_cereal::tag::Tag {
+            class: #class_tokens,
             tagnum: #tagnum,
             constructed: #constructed,
-          }
+          })
         )
       }
     ),

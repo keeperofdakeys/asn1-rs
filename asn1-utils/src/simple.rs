@@ -5,6 +5,7 @@
 // #![feature(plugin)]
 // #![plugin(afl_plugin)]
 #![feature(proc_macro)]
+#![feature(custom_attribute)]
 
 #[macro_use]
 extern crate asn1_cereal;
@@ -38,6 +39,7 @@ fn main() {
     b: vec![4],
     c: Some(SomeString("Hello".into())),
     d: Choice::A(4),
+    e: C(54),
   };
 
   if opts.dump {
@@ -61,8 +63,9 @@ fn main() {
   }
 }
 
-#[derive(Asn1Info)]
-struct A(u64);
+#[derive(Asn1Info, Debug, PartialEq)]
+#[asn1(tag="[PRIVATE 69]", asn1_type="SEQUENCE")]
+struct C(u64);
 
 ber_alias_serialize!(A ::= u64);
 ber_alias_deserialize!(A ::= u64);
@@ -94,6 +97,7 @@ struct IntSequence {
   b: Vec<i32>,
   c: Option<SomeString>,
   d: Choice,
+  e: C,
 }
 
 ber_sequence!(
@@ -103,6 +107,7 @@ ber_sequence!(
   b;
   c (OPTIONAL);
   d;
+  e;
 );
 
 struct ProgOpts {
