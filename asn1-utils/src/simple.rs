@@ -4,9 +4,12 @@
 
 // #![feature(plugin)]
 // #![plugin(afl_plugin)]
+#![feature(proc_macro)]
 
 #[macro_use]
 extern crate asn1_cereal;
+#[macro_use]
+extern crate asn1_cereal_derive;
 extern crate argparse;
 // extern crate afl;
 
@@ -57,6 +60,12 @@ fn main() {
     println!("{:?}", seq);
   }
 }
+
+#[derive(Asn1Info)]
+struct A(u64);
+
+ber_alias_serialize!(A ::= u64);
+ber_alias_deserialize!(A ::= u64);
 
 #[derive(Debug, PartialEq)]
 enum Choice {

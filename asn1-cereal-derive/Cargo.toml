@@ -1,0 +1,15 @@
+[package]
+name = "asn1-cereal-derive"
+version = "0.1.0"
+authors = ["Josh Driver <keeperofdakeys@gmail.com>"]
+keywords = ["asn1", "ber", "der", "derive"]
+license = "MIT/Apache-2.0"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+asn1-cereal = "0.2"
+syn = "0.9"
+quote = "0.3"
+nom = "1.2"
