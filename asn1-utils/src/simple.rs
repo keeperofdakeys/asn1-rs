@@ -63,10 +63,13 @@ fn main() {
   }
 }
 
+#[derive(Asn1Info, BerSerialize, BerDeserialize, Debug, PartialEq)]
 #[derive(Asn1Info, Debug, PartialEq)]
 #[asn1(tag="[PRIVATE 69]", asn1_type="SEQUENCE")]
 struct C(u64);
 
+// ber_alias_serialize!(C ::= u64);
+// ber_alias_deserialize!(C ::= u64);
 ber_alias_serialize!(A ::= u64);
 ber_alias_deserialize!(A ::= u64);
 

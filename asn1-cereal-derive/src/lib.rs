@@ -1,4 +1,5 @@
 #![feature(proc_macro, proc_macro_lib)]
+#![recursion_limit = "256"]
 
 extern crate proc_macro;
 extern crate syn;
@@ -8,19 +9,19 @@ extern crate asn1_cereal;
 #[macro_use]
 extern crate nom;
 
+use proc_macro::TokenStream;
+
+use ::tag::parse_tag;
+use ::alias::{ber_alias_serialize, ber_alias_deserialize};
+
 mod seq;
 mod tag;
-
-use proc_macro::TokenStream;
-use syn::{MetaItem, Lit};
-use std::str::from_utf8;
-
-use tag::parse_tag;
+mod alias;
 
 #[proc_macro_derive(Asn1Info)]
 pub fn asn1_info(input: TokenStream) -> TokenStream {
   let source = input.to_string();
-  let ast = syn::parse_macro_input(&source).unwrap();
+  let ast = syn::parse_macro_input(&source).expect("Couldn't parse input TokenSteam into AST");
 
   // Tag and asn1 type for this rust type.
   let mut tag = quote!(None);
@@ -29,10 +30,10 @@ pub fn asn1_info(input: TokenStream) -> TokenStream {
   // Parse attributes.
   for attr in &ast.attrs {
     if attr.name() != "asn1" { continue; }
-    if let MetaItem::List(_, ref items) = attr.value {
+    if let syn::MetaItem::List(_, ref items) = attr.value {
       for item in items {
         match *item {
-          MetaItem::NameValue(ref _name, Lit::Str(ref value, _)) => {
+          syn::MetaItem::NameValue(ref _name, syn::Lit::Str(ref value, _)) => {
             let name: &str = _name.as_ref();
             match name {
               "tag" => tag = parse_tag(value.as_bytes()).unwrap().1,
@@ -67,5 +68,45 @@ pub fn asn1_info(input: TokenStream) -> TokenStream {
       }
     }
   };
-  expanded.to_string().parse().unwrap()
+  expanded.to_string().parse().expect("Failure parsing derived impl")
+}
+
+#[proc_macro_derive(BerSerialize)]
+pub fn ber_serialize(input: TokenStream) -> TokenStream {
+  let source = input.to_string();
+  let ast = syn::parse_macro_input(&source).unwrap();
+
+  let body = &ast.body;
+
+  match body {
+    &syn::Body::Enum(_) => unimplemented!(),
+    &syn::Body::Struct(syn::VariantData::Tuple(ref fields)) => {
+      if fields.len() == 1 {
+        ber_alias_serialize(ast.clone())
+      } else {
+        unimplemented!()
+      }
+    },
+    _ => unimplemented!(),
+  }
+}
+
+#[proc_macro_derive(BerDeserialize)]
+pub fn ber_deserialize(input: TokenStream) -> TokenStream {
+  let source = input.to_string();
+  let ast = syn::parse_macro_input(&source).expect("Couldn't parse input TokenSteam into AST");
+
+  let body = &ast.body;
+
+  match body {
+    &syn::Body::Enum(_) => unimplemented!(),
+    &syn::Body::Struct(syn::VariantData::Tuple(ref fields)) => {
+      if fields.len() == 1 {
+        ber_alias_deserialize(ast.clone())
+      } else {
+        unimplemented!()
+      }
+    },
+    _ => unimplemented!(),
+  }
 }
