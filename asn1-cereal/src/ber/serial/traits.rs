@@ -36,7 +36,7 @@ pub trait BerSerialize: Asn1Info {
     let tag = match Self::asn1_tag() {
       Some(tag) => tag,
       None => {
-        debug!("Type does not have a tag");
+        debug!("Skipping encoding of empty tag");
         return self.serialize_value(e, writer);
       },
     };
