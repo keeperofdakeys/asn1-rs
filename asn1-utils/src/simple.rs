@@ -1,5 +1,6 @@
 // #![feature(trace_macros)]
 
+#![recursion_limit = "10240"]
 // trace_macros!(true);
 
 // #![feature(plugin)]
@@ -12,6 +13,8 @@ extern crate asn1_cereal;
 #[macro_use]
 extern crate asn1_cereal_derive;
 extern crate argparse;
+#[macro_use] extern crate log;
+extern crate env_logger;
 // extern crate afl;
 
 use std::io;
@@ -29,6 +32,7 @@ use argparse::{ArgumentParser, StoreTrue};
 
 fn main() {
   let opts = parse_args();
+  env_logger::init().unwrap();
 
   let mut buffer: Vec<u8> = Vec::new();
   let mut output = io::BufWriter::new(io::stdout());
@@ -65,13 +69,11 @@ fn main() {
 
 #[derive(Asn1Info, BerSerialize, BerDeserialize, Debug, PartialEq)]
 #[derive(Asn1Info, Debug, PartialEq)]
-#[asn1(tag="[PRIVATE 69]", asn1_type="SEQUENCE")]
+#[asn1(tag="[PRIVATE 69]", asn1_type="SEQUENCE", log)]
 struct C(u64);
 
 // ber_alias_serialize!(C ::= u64);
 // ber_alias_deserialize!(C ::= u64);
-ber_alias_serialize!(A ::= u64);
-ber_alias_deserialize!(A ::= u64);
 
 #[derive(Debug, PartialEq)]
 enum Choice {

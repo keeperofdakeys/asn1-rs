@@ -1,5 +1,8 @@
 #![feature(proc_macro, proc_macro_lib)]
+#![feature(trace_macros)]
 #![recursion_limit = "256"]
+// trace_macros!(true);
+
 
 extern crate proc_macro;
 extern crate syn;
@@ -26,13 +29,14 @@ pub fn asn1_info(input: TokenStream) -> TokenStream {
   // Tag and asn1 type for this rust type.
   let mut tag = quote!(None);
   let mut asn1_type = ast.ident.as_ref().to_owned();
+  let mut _logging = false;
 
   // Parse attributes.
-  for attr in &ast.attrs {
-    if attr.name() != "asn1" { continue; }
+  for attr in &ast.attrs.iter().find(|e| e.name() != "asn1") {
     if let syn::MetaItem::List(_, ref items) = attr.value {
       for item in items {
         match *item {
+          syn::MetaItem::Word(ref _ident) if _ident == "log" => _logging = true,
           syn::MetaItem::NameValue(ref _name, syn::Lit::Str(ref value, _)) => {
             let name: &str = _name.as_ref();
             match name {
@@ -69,6 +73,21 @@ pub fn asn1_info(input: TokenStream) -> TokenStream {
     }
   };
   expanded.to_string().parse().expect("Failure parsing derived impl")
+}
+
+fn logging_enabled(ast: &syn::MacroInput) -> bool {
+  // Parse attributes.
+  for attr in &ast.attrs.iter().find(|e| e.name() == "asn1") {
+    if let syn::MetaItem::List(_, ref items) = attr.value {
+      for item in items {
+        match *item {
+          syn::MetaItem::Word(ref _ident) if _ident == "log" => return true,
+          _ => (),
+        };
+      }
+    }
+  }
+  false
 }
 
 #[proc_macro_derive(BerSerialize)]
