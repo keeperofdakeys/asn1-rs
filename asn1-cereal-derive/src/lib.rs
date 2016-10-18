@@ -1,5 +1,4 @@
-#![feature(proc_macro, proc_macro_lib)]
-#![feature(trace_macros)]
+#![feature(proc_macro, proc_macro_lib)] #![feature(trace_macros)]
 #![recursion_limit = "256"]
 // trace_macros!(true);
 
@@ -16,9 +15,11 @@ use proc_macro::TokenStream;
 
 use ::tag::parse_tag;
 use ::alias::{ber_alias_serialize, ber_alias_deserialize};
+use ::seq_of::{ber_sequence_of_serialize, ber_sequence_of_deserialize};
 
-mod seq;
 mod tag;
+mod seq;
+mod seq_of;
 mod alias;
 
 #[proc_macro_derive(Asn1Info)]
@@ -44,7 +45,7 @@ pub fn asn1_info(input: TokenStream) -> TokenStream {
               "asn1_type" => asn1_type = value.clone(),
               _ => (),
             };
-          }
+          },
           _ => (),
         };
       }
@@ -95,18 +96,44 @@ pub fn ber_serialize(input: TokenStream) -> TokenStream {
   let source = input.to_string();
   let ast = syn::parse_macro_input(&source).unwrap();
 
-  let body = &ast.body;
+  let body = ast.body.clone();
+  let mut form = None;
 
-  match body {
-    &syn::Body::Enum(_) => unimplemented!(),
-    &syn::Body::Struct(syn::VariantData::Tuple(ref fields)) => {
-      if fields.len() == 1 {
-        ber_alias_serialize(ast.clone())
-      } else {
-        unimplemented!()
+  for attr in &ast.attrs.iter().find(|e| e.name() == "asn1") {
+    if let syn::MetaItem::List(_, ref items) = attr.value {
+      for item in items {
+        match *item {
+          syn::MetaItem::NameValue(ref _name, syn::Lit::Str(ref value, _)) => {
+            let name: &str = _name.as_ref();
+            match name {
+              "form" => form = Some(value.clone()),
+              _ => (),
+            };
+          },
+          _ => (),
+        };
       }
-    },
-    _ => unimplemented!(),
+    }
+  }
+  
+  if let Some(form) = form {
+    match form.as_str() {
+      "seq of" | "sequence of" | "set of" => ber_sequence_of_serialize(ast),
+      "alias" => ber_alias_serialize(ast),
+      _ => panic!("Unknown serialize form {}", form),
+    }
+  } else {
+    match body {
+      syn::Body::Enum(_) => unimplemented!(),
+      syn::Body::Struct(syn::VariantData::Tuple(fields)) => {
+        if fields.len() == 1 {
+          ber_alias_serialize(ast)
+        } else {
+          unimplemented!()
+        }
+      },
+      _ => unimplemented!(),
+    }
   }
 }
 
@@ -115,17 +142,43 @@ pub fn ber_deserialize(input: TokenStream) -> TokenStream {
   let source = input.to_string();
   let ast = syn::parse_macro_input(&source).expect("Couldn't parse input TokenSteam into AST");
 
-  let body = &ast.body;
+  let body = ast.body.clone();
+  let mut form = None;
 
-  match body {
-    &syn::Body::Enum(_) => unimplemented!(),
-    &syn::Body::Struct(syn::VariantData::Tuple(ref fields)) => {
-      if fields.len() == 1 {
-        ber_alias_deserialize(ast.clone())
-      } else {
-        unimplemented!()
+  for attr in &ast.attrs.iter().find(|e| e.name() == "asn1") {
+    if let syn::MetaItem::List(_, ref items) = attr.value {
+      for item in items {
+        match *item {
+          syn::MetaItem::NameValue(ref _name, syn::Lit::Str(ref value, _)) => {
+            let name: &str = _name.as_ref();
+            match name {
+              "form" => form = Some(value.clone()),
+              _ => (),
+            };
+          },
+          _ => (),
+        };
       }
-    },
-    _ => unimplemented!(),
+    }
+  }
+  
+  if let Some(form) = form {
+    match form.as_str() {
+      "seq of" | "sequence of" | "set of" => ber_sequence_of_deserialize(ast),
+      "alias" => ber_alias_deserialize(ast),
+      _ => panic!("Unknown deserialize form {}", form),
+    }
+  } else {
+    match body {
+      syn::Body::Enum(_) => unimplemented!(),
+      syn::Body::Struct(syn::VariantData::Tuple(fields)) => {
+        if fields.len() == 1 {
+          ber_alias_deserialize(ast)
+        } else {
+          unimplemented!()
+        }
+      },
+      _ => unimplemented!(),
+    }
   }
 }
