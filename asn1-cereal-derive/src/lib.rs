@@ -10,12 +10,16 @@ extern crate quote;
 extern crate asn1_cereal;
 #[macro_use]
 extern crate nom;
+#[macro_use]
+extern crate post_expansion;
 
 use proc_macro::TokenStream;
 
 use ::tag::parse_tag;
 use ::alias::{ber_alias_serialize, ber_alias_deserialize};
 use ::seq_of::{ber_sequence_of_serialize, ber_sequence_of_deserialize};
+
+register_post_expansion!(PostExpansion_asn1info);
 
 mod tag;
 mod seq;
@@ -58,11 +62,7 @@ pub fn asn1_info(input: TokenStream) -> TokenStream {
   // Helper is provided for handling complex generic types correctly and effortlessly
   let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
 
-  let expanded = quote! {
-    // Preserve the input struct unmodified
-    #ast
-
-    // The generated impl
+  let derived = quote! {
     impl #impl_generics ::asn1_cereal::Asn1Info for #name #ty_generics #where_clause {
       fn asn1_tag() -> Option<::asn1_cereal::tag::Tag> {
         #tag
@@ -73,6 +73,12 @@ pub fn asn1_info(input: TokenStream) -> TokenStream {
       }
     }
   };
+
+  let stripped = post_expansion::strip_attrs_later(ast.clone(), &["asn1"], "asn1_info");
+  let expanded = quote!(
+    #stripped
+    #derived
+  );
   expanded.to_string().parse().expect("Failure parsing derived impl")
 }
 
