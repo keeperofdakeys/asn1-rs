@@ -19,7 +19,7 @@ use ::tag::parse_tag;
 use ::alias::{ber_alias_serialize, ber_alias_deserialize};
 use ::seq_of::{ber_sequence_of_serialize, ber_sequence_of_deserialize};
 
-register_post_expansion!(PostExpansion_asn1info);
+register_post_expansion!(PostExpansion_asn1);
 
 mod tag;
 mod seq;
@@ -74,7 +74,7 @@ pub fn asn1_info(input: TokenStream) -> TokenStream {
     }
   };
 
-  let stripped = post_expansion::strip_attrs_later(ast.clone(), &["asn1"], "asn1_info");
+  let stripped = post_expansion::strip_attrs_later(ast.clone(), &["asn1"], "asn1");
   let expanded = quote!(
     #stripped
     #derived
@@ -122,10 +122,10 @@ pub fn ber_serialize(input: TokenStream) -> TokenStream {
     }
   }
   
-  if let Some(form) = form {
+  let derived = if let Some(form) = form {
     match form.as_str() {
-      "seq of" | "sequence of" | "set of" => ber_sequence_of_serialize(ast),
-      "alias" => ber_alias_serialize(ast),
+      "seq of" | "sequence of" | "set of" => ber_sequence_of_serialize(&ast),
+      "alias" => ber_alias_serialize(&ast),
       _ => panic!("Unknown serialize form {}", form),
     }
   } else {
@@ -133,14 +133,21 @@ pub fn ber_serialize(input: TokenStream) -> TokenStream {
       syn::Body::Enum(_) => unimplemented!(),
       syn::Body::Struct(syn::VariantData::Tuple(fields)) => {
         if fields.len() == 1 {
-          ber_alias_serialize(ast)
+          ber_alias_serialize(&ast)
         } else {
           unimplemented!()
         }
       },
       _ => unimplemented!(),
     }
-  }
+  };
+
+  let stripped = post_expansion::strip_attrs_later(ast, &["asn1"], "asn1");
+  let expanded = quote!(
+    #stripped
+    #derived
+  );
+  expanded.to_string().parse().expect("Failure parsing derived impl")
 }
 
 #[proc_macro_derive(BerDeserialize)]
@@ -168,10 +175,10 @@ pub fn ber_deserialize(input: TokenStream) -> TokenStream {
     }
   }
   
-  if let Some(form) = form {
+  let derived = if let Some(form) = form {
     match form.as_str() {
-      "seq of" | "sequence of" | "set of" => ber_sequence_of_deserialize(ast),
-      "alias" => ber_alias_deserialize(ast),
+      "seq of" | "sequence of" | "set of" => ber_sequence_of_deserialize(&ast),
+      "alias" => ber_alias_deserialize(&ast),
       _ => panic!("Unknown deserialize form {}", form),
     }
   } else {
@@ -179,12 +186,19 @@ pub fn ber_deserialize(input: TokenStream) -> TokenStream {
       syn::Body::Enum(_) => unimplemented!(),
       syn::Body::Struct(syn::VariantData::Tuple(fields)) => {
         if fields.len() == 1 {
-          ber_alias_deserialize(ast)
+          ber_alias_deserialize(&ast)
         } else {
           unimplemented!()
         }
       },
       _ => unimplemented!(),
     }
-  }
+  };
+
+  let stripped = post_expansion::strip_attrs_later(ast, &["asn1"], "asn1");
+  let expanded = quote!(
+    #stripped
+    #derived
+  );
+  expanded.to_string().parse().expect("Failure parsing derived impl")
 }

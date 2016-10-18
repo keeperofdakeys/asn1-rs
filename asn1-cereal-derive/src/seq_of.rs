@@ -1,14 +1,11 @@
-use proc_macro::TokenStream;
 use quote::Tokens;
 use syn;
 
-pub fn ber_sequence_of_serialize(ast: syn::MacroInput) -> TokenStream {
+pub fn ber_sequence_of_serialize(ast: &syn::MacroInput) -> Tokens {
   let name = &ast.ident;
   let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
 
-  let expanded = quote! {
-    #ast
-
+  quote! {
     impl #impl_generics ::asn1_cereal::BerSerialize for #name #ty_generics #where_clause {
       fn serialize_value<E: ::asn1_cereal::BerEncRules, W: ::std::io::Write>
           (&self, e: E, writer: &mut W) -> Result<(), ::asn1_cereal::err::EncodeError> {
@@ -19,18 +16,15 @@ pub fn ber_sequence_of_serialize(ast: syn::MacroInput) -> TokenStream {
         Ok(())
       }
     }
-  };
-  expanded.to_string().parse().expect("Failure parsing derived impl")
+  }
 }
 
 
-pub fn ber_sequence_of_deserialize(ast: syn::MacroInput) -> TokenStream {
+pub fn ber_sequence_of_deserialize(ast: &syn::MacroInput) -> Tokens {
   let name = &ast.ident;
   let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
 
-  let expanded = quote! {
-    #ast
-
+  quote! {
     impl #impl_generics ::asn1_cereal::BerDeserialize for #name #ty_generics #where_clause {
       fn deserialize_with_tag<E: ::asn1_cereal::BerEncRules, I: Iterator<Item=::std::io::Result<u8>>>
           (e: E, reader: &mut I, tag: ::asn1_cereal::tag::Tag, len: ::asn1_cereal::tag::Len) ->
@@ -98,6 +92,5 @@ pub fn ber_sequence_of_deserialize(ast: syn::MacroInput) -> TokenStream {
         Ok(try!(v))
       }
     }
-  };
-  expanded.to_string().parse().expect("Failure parsing derived impl")
+  }
 }

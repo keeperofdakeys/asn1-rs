@@ -1,10 +1,9 @@
-use proc_macro::TokenStream;
 use quote::Tokens;
 use syn;
 
 use logging_enabled;
 
-pub fn ber_alias_serialize(ast: syn::MacroInput) -> TokenStream {
+pub fn ber_alias_serialize(ast: &syn::MacroInput) -> Tokens {
   let name = &ast.ident;
   let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
   let logging = logging_enabled(&ast);
@@ -15,9 +14,7 @@ pub fn ber_alias_serialize(ast: syn::MacroInput) -> TokenStream {
     implicit_msg = quote!(debug!("Skipping encoding of implicit tag");)
   }
 
-  let expanded = quote! {
-    #ast
-
+  quote! {
     impl #impl_generics ::asn1_cereal::BerSerialize for #name #ty_generics #where_clause {
       fn _serialize_enc<E: ::asn1_cereal::BerEncRules, W: std::io::Write>
           (&self, e: E, writer: &mut W) -> Option<Result<(), ::asn1_cereal::err::EncodeError>> {
@@ -36,11 +33,10 @@ pub fn ber_alias_serialize(ast: syn::MacroInput) -> TokenStream {
         self.0.serialize_enc(e, writer)
       }
     }
-  };
-  expanded.to_string().parse().expect("Failure parsing derived impl")
+  }
 }
 
-pub fn ber_alias_deserialize(ast: syn::MacroInput) -> TokenStream {
+pub fn ber_alias_deserialize(ast: &syn::MacroInput) -> Tokens {
   let name = &ast.ident;
   let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
   let logging = logging_enabled(&ast);
@@ -53,9 +49,7 @@ pub fn ber_alias_deserialize(ast: syn::MacroInput) -> TokenStream {
     implicit_msg = quote!(debug!("Skipping decoding of implicit tag"););
   }
 
-  let expanded = quote! {
-    #ast
-
+  quote! {
     impl #impl_generics ::asn1_cereal::BerDeserialize for #name #ty_generics #where_clause {
       fn _deserialize_with_tag<E: ::asn1_cereal::BerEncRules, I: Iterator<Item=std::io::Result<u8>>>
           (e: E, reader: &mut I, tag: ::asn1_cereal::tag::Tag, len: ::asn1_cereal::tag::Len)
@@ -93,6 +87,5 @@ pub fn ber_alias_deserialize(ast: syn::MacroInput) -> TokenStream {
         Ok(#name(try!(::asn1_cereal::BerDeserialize::deserialize_enc(e, reader))))
       }
     }
-  };
-  expanded.to_string().parse().expect("Failure parsing derived impl")
+  }
 }
