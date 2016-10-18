@@ -9,11 +9,11 @@ pub fn ber_alias_serialize(ast: syn::MacroInput) -> TokenStream {
   let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
   let logging = logging_enabled(&ast);
 
-  let implicit_msg = if logging {
-    quote!(debug!("Skipping encoding of implicit tag");)
-  } else {
-    Tokens::new()
-  };
+  let mut implicit_msg = Tokens::new();
+
+  if logging {
+    implicit_msg = quote!(debug!("Skipping encoding of implicit tag");)
+  }
 
   let expanded = quote! {
     #ast
@@ -45,18 +45,13 @@ pub fn ber_alias_deserialize(ast: syn::MacroInput) -> TokenStream {
   let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
   let logging = logging_enabled(&ast);
 
-  let no_tag_msg = if logging {
-    quote!(debug!("Skipping decoding of empty tag");)
-  } else {
-    Tokens::new()
-  };
+  let mut no_tag_msg = Tokens::new();
+  let mut implicit_msg = Tokens::new();
 
-  let implicit_msg = if logging {
-    quote!(debug!("Skipping decoding of implicit tag");)
-  } else {
-    Tokens::new()
-  };
-
+  if logging {
+    no_tag_msg = quote!(debug!("Skipping decoding of empty tag"););
+    implicit_msg = quote!(debug!("Skipping decoding of implicit tag"););
+  }
 
   let expanded = quote! {
     #ast
