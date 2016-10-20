@@ -6,7 +6,6 @@
 // #![feature(plugin)]
 // #![plugin(afl_plugin)]
 #![feature(proc_macro)]
-#![feature(custom_attribute)]
 
 #[macro_use]
 extern crate asn1_cereal;
@@ -36,13 +35,13 @@ fn main() {
 
   let mut buffer: Vec<u8> = Vec::new();
   let mut output = io::BufWriter::new(io::stdout());
-  let enc = BER;
+  let enc = DER;
 
   let seq = IntSequence {
     a: 3,
     b: vec![4],
     c: Some(SomeString("Hello".into())),
-    d: Choice::A(4),
+    d: Choice::Str("Hi".into()),
     e: C(54),
   };
 
@@ -68,25 +67,19 @@ fn main() {
 }
 
 #[derive(Asn1Info, BerSerialize, BerDeserialize, Debug, PartialEq)]
-#[derive(Asn1Info, Debug, PartialEq)]
+// #[derive(Debug, PartialEq)]
 #[asn1(tag="[PRIVATE 69]", asn1_type="SEQUENCE", log)]
 struct C(u64);
 
 // ber_alias_serialize!(C ::= u64);
 // ber_alias_deserialize!(C ::= u64);
 
-#[derive(Debug, PartialEq)]
+#[derive(Asn1Info, BerSerialize, BerDeserialize, Debug, PartialEq)]
+#[asn1(asn1_type="Choice", log)]
 enum Choice {
   A(i32),
   Str(String),
 }
-
-ber_choice!(
-  Choice,
-  "Choice",
-  A, i32;
-  Str, String;
-);
 
 #[derive(Debug, PartialEq)]
 struct SomeString(String);
