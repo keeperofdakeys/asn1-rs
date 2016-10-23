@@ -18,6 +18,7 @@ use proc_macro::TokenStream;
 use ::tag::parse_tag;
 use ::alias::{ber_alias_serialize, ber_alias_deserialize};
 use ::seq_of::{ber_sequence_of_serialize, ber_sequence_of_deserialize};
+use ::seq::{ber_sequence_serialize, ber_sequence_deserialize};
 use ::choice::{ber_choice_serialize, ber_choice_deserialize};
 
 register_post_expansion!(PostExpansion_asn1);
@@ -129,19 +130,23 @@ pub fn ber_serialize(input: TokenStream) -> TokenStream {
       "seq of" | "sequence of" | "set of" => ber_sequence_of_serialize(&ast),
       "alias" => ber_alias_serialize(&ast),
       "choice" => ber_choice_serialize(&ast),
+      "seq" | "sequence" => ber_sequence_serialize(&ast),
       _ => panic!("Unknown serialize form {}", form),
     }
   } else {
     match body {
       syn::Body::Enum(_) => {
-        ber_choice_deserialize(&ast)
+        ber_choice_serialize(&ast)
       },
       syn::Body::Struct(syn::VariantData::Tuple(fields)) => {
         if fields.len() == 1 {
           ber_alias_serialize(&ast)
         } else {
-          unimplemented!()
+          ber_sequence_serialize(&ast)
         }
+      },
+      syn::Body::Struct(syn::VariantData::Struct(fields)) => {
+        ber_sequence_serialize(&ast)
       },
       _ => unimplemented!(),
     }
@@ -185,19 +190,23 @@ pub fn ber_deserialize(input: TokenStream) -> TokenStream {
       "seq of" | "sequence of" | "set of" => ber_sequence_of_deserialize(&ast),
       "alias" => ber_alias_deserialize(&ast),
       "choice" => ber_choice_deserialize(&ast),
+      "seq" | "sequence" => ber_sequence_deserialize(&ast),
       _ => panic!("Unknown deserialize form {}", form),
     }
   } else {
     match body {
       syn::Body::Enum(_) => {
-        ber_choice_serialize(&ast)
+        ber_choice_deserialize(&ast)
       },
       syn::Body::Struct(syn::VariantData::Tuple(fields)) => {
         if fields.len() == 1 {
           ber_alias_deserialize(&ast)
         } else {
-          unimplemented!()
+          ber_sequence_deserialize(&ast)
         }
+      },
+      syn::Body::Struct(syn::VariantData::Struct(fields)) => {
+        ber_sequence_deserialize(&ast)
       },
       _ => unimplemented!(),
     }

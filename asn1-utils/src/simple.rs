@@ -35,14 +35,14 @@ fn main() {
 
   let mut buffer: Vec<u8> = Vec::new();
   let mut output = io::BufWriter::new(io::stdout());
-  let enc = DER;
+  let enc = BER;
 
   let seq = IntSequence {
     a: 3,
     b: vec![4],
-    c: Some(SomeString("Hello".into())),
+    c: Some(SomeString { a: "Hello".into() }),
     d: Choice::Str("Hi".into()),
-    e: C(54),
+    e: C(56),
   };
 
   if opts.dump {
@@ -68,7 +68,7 @@ fn main() {
 
 #[derive(Asn1Info, BerSerialize, BerDeserialize, Debug, PartialEq)]
 // #[derive(Debug, PartialEq)]
-#[asn1(tag="[PRIVATE 69]", asn1_type="SEQUENCE", log)]
+#[asn1(tag="[PRIVATE 69]", asn1_type="SEQUENCE", log, form="alias")]
 struct C(u64);
 
 // ber_alias_serialize!(C ::= u64);
@@ -81,13 +81,11 @@ enum Choice {
   Str(String),
 }
 
-#[derive(Debug, PartialEq)]
-struct SomeString(String);
-
-ber_alias!(
-  SomeString ::= [PRIVATE 1] String,
-  "SOMESTRING"
-);
+#[derive(Asn1Info, BerSerialize, BerDeserialize, Debug, PartialEq)]
+#[asn1(asn1_type="SOMESTRING", tag="[APPLICATION 15]", log, form="sequence")]
+struct SomeString {
+  a: String
+}
 
 #[derive(Debug, PartialEq)]
 struct IntSequence {
