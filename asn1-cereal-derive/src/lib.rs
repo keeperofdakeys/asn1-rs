@@ -39,7 +39,7 @@ pub fn asn1_info(input: TokenStream) -> TokenStream {
   let mut _logging = false;
 
   // Parse attributes.
-  for attr in &ast.attrs.iter().find(|e| e.name() != "asn1") {
+  for attr in &ast.attrs.iter().find(|e| e.name() == "asn1") {
     if let syn::MetaItem::List(_, ref items) = attr.value {
       for item in items {
         match *item {
