@@ -110,9 +110,9 @@ pub trait BerDeserialize: Asn1Info + Sized {
 
     if Some(tag) != Self::asn1_tag() {
       if let Some(our_tag) = Self::asn1_tag() {
-        warn!("Expected tag {}, but found tag {}", tag, our_tag);
+        warn!("Expected tag {}, but found tag {}", our_tag, tag);
       } else {
-        warn!("Expected tag {}, but found no tag", tag);
+        warn!("Expected no tag, but found tag {}", tag);
       }
       return Err(err::DecodeError::TagTypeMismatch);
     }
