@@ -1,6 +1,27 @@
 //! Encoding and Decoding errors that this crate can produce.
 
 use std::io;
+use tag::{Tag, Type};
+use std::error::Error;
+
+#[allow(dead_code)]
+/// An error that occurs while decoding an ASN.1 element.
+pub struct DecodeError2 {
+  /// If relevant, the tag for the element being decoded when the error occured.
+  tag: Option<Tag>,
+  /// If relevant, the ASN.1 type for the element being decoced when the error occured.
+  asn1_type: Option<Type>,
+  /// Optionally, an error that caused this error.
+  inner: Option<Box<Error>>,
+  /// Optionally, a string containing more information about this error.
+  more: Option<&'static str>,
+}
+
+#[allow(dead_code)]
+struct TypeInfo {
+  tag: Option<Tag>,
+  asn1_type: Type,
+}
 
 #[derive(Debug)]
 /// Errors that can occur while decoding an ASN.1 element.
@@ -38,6 +59,8 @@ impl From<io::Error> for DecodeError {
 pub enum EncodeError {
   /// Generic IO Error.
   IO(io::Error),
+  /// Custom encoding error.
+  Custom(&'static str),
 }
 
 impl From<io::Error> for EncodeError {

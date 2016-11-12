@@ -1,5 +1,4 @@
-// #![feature(trace_macros)]
-
+#![feature(trace_macros)]
 #![recursion_limit = "10240"]
 // trace_macros!(true);
 
@@ -67,12 +66,8 @@ fn main() {
 }
 
 #[derive(Asn1Info, BerSerialize, BerDeserialize, Debug, PartialEq)]
-// #[derive(Debug, PartialEq)]
 #[asn1(tag="[PRIVATE 69]", asn1_type="SEQUENCE", log, form="alias")]
 struct C(u64);
-
-// ber_alias_serialize!(C ::= u64);
-// ber_alias_deserialize!(C ::= u64);
 
 #[derive(Asn1Info, BerSerialize, BerDeserialize, Debug, PartialEq)]
 #[asn1(asn1_type="Choice", log)]

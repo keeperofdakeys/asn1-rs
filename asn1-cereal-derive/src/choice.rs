@@ -15,7 +15,7 @@ pub fn ber_choice_serialize(ast: &syn::MacroInput) -> Tokens {
     let ident = &v.ident;
     quote!(#name::#ident(ref item))
   }).collect();
-  let match_action: Vec<_> = fields.iter().map(|v| {
+  let match_action: Vec<_> = fields.iter().map(|_v| {
     // TODO: Handle asn1 attributes
     quote! {
       if false {

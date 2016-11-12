@@ -1,5 +1,9 @@
 #[macro_use]
 extern crate asn1_cereal;
+#[macro_use] extern crate log;
+extern crate env_logger;
+
+use log::LogLevel;
 
 use asn1_cereal::{BerSerialize, BerDeserialize, DER, BER, BERAlt};
 
@@ -15,6 +19,7 @@ ber_sequence!(
 );
 
 fn main() {
+  env_logger::init().unwrap();
   let bytes: &[u8] = &[
     0x30, 0x82, 0x04, 0x02, 0x30, 0x82, 0x02, 0xea, 0xa0, 0x03, 0x02, 0x01
   ];

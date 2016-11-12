@@ -1,4 +1,5 @@
-#![feature(proc_macro, proc_macro_lib)] #![feature(trace_macros)]
+#![feature(proc_macro, proc_macro_lib)]
+#![feature(trace_macros)]
 #![recursion_limit = "256"]
 // trace_macros!(true);
 
@@ -10,8 +11,6 @@ extern crate quote;
 extern crate asn1_cereal;
 #[macro_use]
 extern crate nom;
-#[macro_use]
-extern crate post_expansion;
 
 use proc_macro::TokenStream;
 
@@ -21,15 +20,13 @@ use ::seq_of::{ber_sequence_of_serialize, ber_sequence_of_deserialize};
 use ::seq::{ber_sequence_serialize, ber_sequence_deserialize};
 use ::choice::{ber_choice_serialize, ber_choice_deserialize};
 
-register_post_expansion!(PostExpansion_asn1);
-
 mod tag;
 mod seq;
 mod seq_of;
 mod alias;
 mod choice;
 
-#[proc_macro_derive(Asn1Info)]
+#[proc_macro_derive(Asn1Info, attributes(asn1))]
 pub fn asn1_info(input: TokenStream) -> TokenStream {
   let source = input.to_string();
   let ast = syn::parse_macro_input(&source).expect("Couldn't parse input TokenSteam into AST");
@@ -77,12 +74,7 @@ pub fn asn1_info(input: TokenStream) -> TokenStream {
     }
   };
 
-  let stripped = post_expansion::strip_attrs_later(ast.clone(), &["asn1"], "asn1");
-  let expanded = quote!(
-    #stripped
-    #derived
-  );
-  expanded.to_string().parse().expect("Failure parsing derived impl")
+  derived.to_string().parse().expect("Failure parsing derived impl")
 }
 
 fn logging_enabled(ast: &syn::MacroInput) -> bool {
@@ -100,7 +92,7 @@ fn logging_enabled(ast: &syn::MacroInput) -> bool {
   false
 }
 
-#[proc_macro_derive(BerSerialize)]
+#[proc_macro_derive(BerSerialize, attributes(asn1))]
 pub fn ber_serialize(input: TokenStream) -> TokenStream {
   let source = input.to_string();
   let ast = syn::parse_macro_input(&source).unwrap();
@@ -145,22 +137,17 @@ pub fn ber_serialize(input: TokenStream) -> TokenStream {
           ber_sequence_serialize(&ast)
         }
       },
-      syn::Body::Struct(syn::VariantData::Struct(fields)) => {
+      syn::Body::Struct(syn::VariantData::Struct(_fields)) => {
         ber_sequence_serialize(&ast)
       },
       _ => unimplemented!(),
     }
   };
 
-  let stripped = post_expansion::strip_attrs_later(ast, &["asn1"], "asn1");
-  let expanded = quote!(
-    #stripped
-    #derived
-  );
-  expanded.to_string().parse().expect("Failure parsing derived impl")
+  derived.to_string().parse().expect("Failure parsing derived impl")
 }
 
-#[proc_macro_derive(BerDeserialize)]
+#[proc_macro_derive(BerDeserialize, attributes(asn1))]
 pub fn ber_deserialize(input: TokenStream) -> TokenStream {
   let source = input.to_string();
   let ast = syn::parse_macro_input(&source).expect("Couldn't parse input TokenSteam into AST");
@@ -205,17 +192,12 @@ pub fn ber_deserialize(input: TokenStream) -> TokenStream {
           ber_sequence_deserialize(&ast)
         }
       },
-      syn::Body::Struct(syn::VariantData::Struct(fields)) => {
+      syn::Body::Struct(syn::VariantData::Struct(_fields)) => {
         ber_sequence_deserialize(&ast)
       },
       _ => unimplemented!(),
     }
   };
 
-  let stripped = post_expansion::strip_attrs_later(ast, &["asn1"], "asn1");
-  let expanded = quote!(
-    #stripped
-    #derived
-  );
-  expanded.to_string().parse().expect("Failure parsing derived impl")
+  derived.to_string().parse().expect("Failure parsing derived impl")
 }
