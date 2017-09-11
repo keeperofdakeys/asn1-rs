@@ -1,4 +1,3 @@
-#![feature(proc_macro, proc_macro_lib)]
 #![feature(trace_macros)]
 #![recursion_limit = "256"]
 // trace_macros!(true);
@@ -200,4 +199,8 @@ pub fn ber_deserialize(input: TokenStream) -> TokenStream {
   };
 
   derived.to_string().parse().expect("Failure parsing derived impl")
+}
+
+#[test]
+fn test() {
 }
