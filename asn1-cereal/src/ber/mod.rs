@@ -3,4 +3,3 @@
 pub mod stream;
 pub mod enc;
 pub mod serial;
-pub mod map;
