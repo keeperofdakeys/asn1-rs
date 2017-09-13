@@ -25,6 +25,8 @@ pub fn ber_sequence_serialize(ast: &syn::MacroInput) -> Tokens {
       };
       _count += 1;
 
+      // FIXME: Implicit tags don't happen here, they happen at the
+      // lower level.
       if E::tag_rules() == ::asn1_cereal::ber::enc::TagEnc::Implicit {
         try!(::asn1_cereal::BerSerialize::serialize_enc(&self.#ident, e, writer));
       } else {
@@ -79,6 +81,8 @@ pub fn ber_sequence_deserialize(ast: &syn::MacroInput) -> Tokens {
         };
         _count += 1;
 
+        // FIXME: THis is not how implicit tagging works, the inner
+        // tag is the one that may be missing.
         if E::tag_rules() == ::asn1_cereal::ber::enc::TagEnc::Implicit && this_tag == our_tag {
           return Err(::asn1_cereal::err::DecodeError::ExplicitTag);
         }

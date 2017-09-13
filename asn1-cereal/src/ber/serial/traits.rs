@@ -108,6 +108,9 @@ pub trait BerDeserialize: Asn1Info + Sized {
       return r;
     }
 
+    // FIXME: This is not how implicit tagging works, the tag we
+    // receive may *not* match our tag. If this is implicit tagging,
+    // we probably don't to error.
     if Some(tag) != Self::asn1_tag() {
       if let Some(our_tag) = Self::asn1_tag() {
         warn!("Expected tag {}, but found tag {}", our_tag, tag);
