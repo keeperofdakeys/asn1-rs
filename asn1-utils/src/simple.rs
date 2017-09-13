@@ -1,10 +1,10 @@
-#![feature(trace_macros)]
+// #![feature(trace_macros)]
 #![recursion_limit = "10240"]
 // trace_macros!(true);
 
 // #![feature(plugin)]
 // #![plugin(afl_plugin)]
-#![feature(proc_macro)]
+// #![feature(proc_macro)]
 
 #[macro_use]
 extern crate asn1_cereal;
