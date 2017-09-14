@@ -25,7 +25,13 @@ pub fn ber_choice_serialize(ast: &syn::MacroInput) -> Tokens {
         // let len: ::asn1_cereal::tag::Len = Some(bytes.len() as ::asn1_cereal::tag::LenNum).into();
         // try!(writer.write_all(&mut bytes));
       } else {
-        try!(item.serialize_enc(e, writer));
+        // FIXME: Does implicit tagging + CHOICE mean always explicit tag?
+        // Maybe not with context-specific tags?
+        // if E::tag_rules() == ::asn1_cereal::ber::enc::TagEnc::Implicit {
+        //   try!(item.serialize_value(e, writer));
+        // } else {
+          try!(item.serialize_enc(e, writer));
+        // }
       }
     }
   }).collect();
@@ -73,7 +79,13 @@ pub fn ber_choice_deserialize(ast: &syn::MacroInput) -> Tokens {
     // TODO: Handle asn1 attributes
     quote! {
       Ok(#name::#ident(
-        try!(::asn1_cereal::BerDeserialize::deserialize_with_tag(e, reader, tag, len))
+        // FIXME: Does implicit tagging + CHOICE mean always explicit tag?
+        // Maybe not with context-specific tags?
+        // if E::tag_rules() == ::asn1_cereal::ber::enc::TagEnc::Implicit {
+        //   try!(::asn1_cereal::BerDeserialize::deserialize_value(e, reader, len))
+        // } else {
+          try!(::asn1_cereal::BerDeserialize::deserialize_with_tag(e, reader, tag, len))
+        // }
       ))
     }
   }).collect();

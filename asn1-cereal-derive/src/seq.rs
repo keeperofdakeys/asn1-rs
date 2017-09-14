@@ -25,17 +25,15 @@ pub fn ber_sequence_serialize(ast: &syn::MacroInput) -> Tokens {
       };
       _count += 1;
 
-      // FIXME: Implicit tags don't happen here, they happen at the
-      // lower level.
       if E::tag_rules() == ::asn1_cereal::ber::enc::TagEnc::Implicit {
-        try!(::asn1_cereal::BerSerialize::serialize_enc(&self.#ident, e, writer));
+        try!(::asn1_cereal::BerSerialize::serialize_value(&self.#ident, e, &mut bytes));
       } else {
         try!(::asn1_cereal::BerSerialize::serialize_enc(&self.#ident, e, &mut bytes));
-        let len: ::asn1_cereal::tag::Len = Some(bytes.len() as ::asn1_cereal::tag::LenNum).into();
-        try!(::asn1_cereal::tag::write_taglen(tag, len, writer));
-        try!(writer.write_all(&mut bytes));
-        bytes.clear();
       }
+      let len: ::asn1_cereal::tag::Len = Some(bytes.len() as ::asn1_cereal::tag::LenNum).into();
+      try!(::asn1_cereal::tag::write_taglen(tag, len, writer));
+      try!(writer.write_all(&mut bytes));
+      bytes.clear();
     }
   }).collect();
 
@@ -81,24 +79,18 @@ pub fn ber_sequence_deserialize(ast: &syn::MacroInput) -> Tokens {
         };
         _count += 1;
 
-        // FIXME: THis is not how implicit tagging works, the inner
-        // tag is the one that may be missing.
-        if E::tag_rules() == ::asn1_cereal::ber::enc::TagEnc::Implicit && this_tag == our_tag {
-          return Err(::asn1_cereal::err::DecodeError::ExplicitTag);
-        }
-
         let len = try!(::asn1_cereal::tag::Len::read_len(reader));
 
-        // If the tag matches our tag, decode the len and call the normal deserialize function.
-        if this_tag == our_tag {
-          // We don't have anything to do with the len, technically we should use it to
-          // check the length decoded.
-          let _ = len;
-          try!(::asn1_cereal::BerDeserialize::deserialize_enc(e, reader))
-        // Otherwise decode it as the inner type. (We give the tag that we
-        // decoded, and the function will decode the length itself).
+        // TODO: Handle entries without a context specific tag.
+        if this_tag != our_tag {
+          return Err(::asn1_cereal::err::DecodeError::TagTypeMismatch);
+        }
+
+        // If we are decoding with an implicit tag, deserialize value directly.
+        if E::tag_rules() == ::asn1_cereal::ber::enc::TagEnc::Implicit {
+          try!(::asn1_cereal::BerDeserialize::deserialize_value(e, reader, len))
         } else {
-          try!(::asn1_cereal::BerDeserialize::deserialize_with_tag(e, reader, this_tag, len))
+          try!(::asn1_cereal::BerDeserialize::deserialize_enc(e, reader))
         }
       };
     }
