@@ -61,6 +61,12 @@ pub fn asn1_info(input: TokenStream) -> TokenStream {
   // Helper is provided for handling complex generic types correctly and effortlessly
   let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
 
+  // FIXME: We need the encoding settings here.
+  let alias_constructed = quote! {
+    fn asn1_constructed() -> bool {
+    }
+  };
+
   let derived = quote! {
     impl #impl_generics ::asn1_cereal::Asn1Info for #name #ty_generics #where_clause {
       fn asn1_tag() -> Option<::asn1_cereal::tag::Tag> {
