@@ -17,13 +17,16 @@ pub fn ber_sequence_serialize(ast: &syn::MacroInput) -> Tokens {
 
   let actions: Vec<_> = fields.iter().map(|v| {
     let ident = &v.ident.as_ref().expect("Requires named idents");
+    let ty = &v.ty;
     quote! {
       let tag = ::asn1_cereal::tag::Tag {
         class: ::asn1_cereal::tag::Class::ContextSpecific,
         tagnum: _count,
-        constructed: true,
+        constructed: <#ty as ::asn1_cereal::Asn1Info>::asn1_constructed(),
       };
       _count += 1;
+
+      // FIXME: We should be conditionally setting the constructed flag.
 
       if E::tag_rules() == ::asn1_cereal::ber::enc::TagEnc::Implicit {
         try!(::asn1_cereal::BerSerialize::serialize_value(&self.#ident, e, &mut bytes));
@@ -69,13 +72,14 @@ pub fn ber_sequence_deserialize(ast: &syn::MacroInput) -> Tokens {
   let build: Vec<_> = fields.iter().map(|v| {
     let ident = &v.ident;
     let f_ident: syn::Ident = format!("field_{}", ident.as_ref().expect("Requires named idents")).into();
+    let ty = &v.ty;
     quote! {
       let #f_ident = {
         let this_tag = try!(::asn1_cereal::tag::Tag::read_tag(reader));
         let our_tag = ::asn1_cereal::tag::Tag {
           class: ::asn1_cereal::tag::Class::ContextSpecific,
           tagnum: _count,
-          constructed: true,
+          constructed: <#ty as ::asn1_cereal::Asn1Info>::asn1_constructed(),
         };
         _count += 1;
 

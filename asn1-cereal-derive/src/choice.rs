@@ -27,6 +27,7 @@ pub fn ber_choice_serialize(ast: &syn::MacroInput) -> Tokens {
       } else {
         // FIXME: Does implicit tagging + CHOICE mean always explicit tag?
         // Maybe not with context-specific tags?
+        // FIXME: We should be conditionally setting the constructed flag.
         // if E::tag_rules() == ::asn1_cereal::ber::enc::TagEnc::Implicit {
         //   try!(item.serialize_value(e, writer));
         // } else {
@@ -81,6 +82,7 @@ pub fn ber_choice_deserialize(ast: &syn::MacroInput) -> Tokens {
       Ok(#name::#ident(
         // FIXME: Does implicit tagging + CHOICE mean always explicit tag?
         // Maybe not with context-specific tags?
+        // FIXME: We should be conditionally setting the constructed flag.
         // if E::tag_rules() == ::asn1_cereal::ber::enc::TagEnc::Implicit {
         //   try!(::asn1_cereal::BerDeserialize::deserialize_value(e, reader, len))
         // } else {

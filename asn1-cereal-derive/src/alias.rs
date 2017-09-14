@@ -18,6 +18,9 @@ pub fn ber_alias_serialize(ast: &syn::MacroInput) -> Tokens {
     impl #impl_generics ::asn1_cereal::BerSerialize for #name #ty_generics #where_clause {
       fn serialize_value<E: ::asn1_cereal::BerEncRules, W: std::io::Write>
           (&self, e: E, writer: &mut W) -> Result<(), ::asn1_cereal::err::EncodeError> {
+
+        // FIXME: We should be conditionally setting the constructed flag.
+
         if E::tag_rules() == ::asn1_cereal::ber::enc::TagEnc::Implicit {
           #implicit_msg
           self.0.serialize_value(e, writer)
