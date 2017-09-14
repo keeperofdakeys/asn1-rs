@@ -72,7 +72,8 @@ pub trait BerSerialize: Asn1Info {
     None
   }
 
-  /// Serialise a value into ASN.1 data, without a tag (implicit tagging).
+  /// Serialise a value into ASN.1 data, without a tag. Will be called directly
+  /// when encoding an implicit tag.
   fn serialize_value<E: enc::BerEncRules, W: io::Write>
     (&self, e: E, writer: &mut W) -> Result<(), err::EncodeError>;
 }
@@ -108,9 +109,6 @@ pub trait BerDeserialize: Asn1Info + Sized {
       return r;
     }
 
-    // FIXME: This is not how implicit tagging works, the tag we
-    // receive may *not* match our tag. If this is implicit tagging,
-    // we probably don't to error.
     if Some(tag) != Self::asn1_tag() {
       if let Some(our_tag) = Self::asn1_tag() {
         warn!("Expected tag {}, but found tag {}", our_tag, tag);
@@ -155,7 +153,7 @@ pub trait BerDeserialize: Asn1Info + Sized {
   }
 
   /// Deserialize an ASN.1 value from a BER stream, after having the tag and length
-  /// decoded.
+  /// decoded. Will be called directly when decoding an implici tag.
   ///
   /// The data length must be explicitly passed to this function. For primitive types,
   /// an error will be returned if this length is Indefinite.
