@@ -40,6 +40,10 @@ pub fn asn1_info(input: TokenStream) -> TokenStream {
   for attr in &ast.attrs.iter().find(|e| e.name() == "asn1") {
     if let syn::MetaItem::List(_, ref items) = attr.value {
       for item in items {
+        let item = match *item {
+          syn::NestedMetaItem::MetaItem(ref item) => item,
+          _ => panic!(),
+        };
         match *item {
           syn::MetaItem::Word(ref _ident) if _ident == "log" => _logging = true,
           syn::MetaItem::NameValue(ref _name, syn::Lit::Str(ref value, _)) => {
@@ -92,6 +96,10 @@ fn logging_enabled(ast: &syn::MacroInput) -> bool {
   for attr in &ast.attrs.iter().find(|e| e.name() == "asn1") {
     if let syn::MetaItem::List(_, ref items) = attr.value {
       for item in items {
+        let item = match *item {
+          syn::NestedMetaItem::MetaItem(ref item) => item,
+          _ => panic!(),
+        };
         match *item {
           syn::MetaItem::Word(ref _ident) if _ident == "log" => return true,
           _ => (),
@@ -113,6 +121,10 @@ pub fn ber_serialize(input: TokenStream) -> TokenStream {
   for attr in &ast.attrs.iter().find(|e| e.name() == "asn1") {
     if let syn::MetaItem::List(_, ref items) = attr.value {
       for item in items {
+        let item = match *item {
+          syn::NestedMetaItem::MetaItem(ref item) => item,
+          _ => panic!(),
+        };
         match *item {
           syn::MetaItem::NameValue(ref _name, syn::Lit::Str(ref value, _)) => {
             let name: &str = _name.as_ref();
@@ -168,6 +180,10 @@ pub fn ber_deserialize(input: TokenStream) -> TokenStream {
   for attr in &ast.attrs.iter().find(|e| e.name() == "asn1") {
     if let syn::MetaItem::List(_, ref items) = attr.value {
       for item in items {
+        let item = match *item {
+          syn::NestedMetaItem::MetaItem(ref item) => item,
+          _ => panic!(),
+        };
         match *item {
           syn::MetaItem::NameValue(ref _name, syn::Lit::Str(ref value, _)) => {
             let name: &str = _name.as_ref();
