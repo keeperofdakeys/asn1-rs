@@ -138,7 +138,7 @@ pub fn ber_serialize(input: TokenStream) -> TokenStream {
       }
     }
   }
-  
+
   let derived = if let Some(form) = form {
     match form.as_str() {
       "seq of" | "sequence of" | "set of" => ber_sequence_of_serialize(&ast),
@@ -197,7 +197,7 @@ pub fn ber_deserialize(input: TokenStream) -> TokenStream {
       }
     }
   }
-  
+
   let derived = if let Some(form) = form {
     match form.as_str() {
       "seq of" | "sequence of" | "set of" => ber_sequence_of_deserialize(&ast),

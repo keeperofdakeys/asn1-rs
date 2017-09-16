@@ -102,7 +102,7 @@ impl BerEncRules for BER {
 /// This set of rules creates a valid BER stream, but will use
 /// implicit tags where possible, and indefinite length encoding
 /// for all constructed elements.
-/// 
+///
 /// Since definite length encoding must generate the element
 /// data before the tag, and indefinite length encoding does not, this
 /// is the ideal set of rules for large ASN.1 streams.

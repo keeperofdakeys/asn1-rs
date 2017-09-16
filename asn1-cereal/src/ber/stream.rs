@@ -55,7 +55,7 @@ pub trait StreamDecodee {
     ParseResult::Stop
   }
 
-  /// This function would be called when a fatal decoding error occurs, however 
+  /// This function would be called when a fatal decoding error occurs, however
   /// currently nothing calls this.
   fn error(_: err::DecodeError) {
   }
