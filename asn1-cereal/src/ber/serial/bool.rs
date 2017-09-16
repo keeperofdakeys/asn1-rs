@@ -7,7 +7,7 @@ use tag;
 use err;
 use byte::{read_byte, write_byte};
 
-asn1_info!(bool, [UNIVERSAL 1], "BOOLEAN");
+asn1_info!(bool, [PRIM UNIVERSAL 1], "BOOLEAN");
 
 impl BerSerialize for bool {
   fn serialize_value<E: ::BerEncRules, W: io::Write>

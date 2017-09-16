@@ -8,23 +8,11 @@
 
 use std::io;
 
-use ::{BerSerialize, BerDeserialize, Asn1Info};
+use ::{BerSerialize, BerDeserialize};
 use tag;
 use err;
 
-impl Asn1Info for String {
-  fn asn1_tag() -> Option<tag::Tag> {
-    Some(tag::Tag {
-      class: tag::Class::Universal,
-      tagnum: 19u8.into(),
-      constructed: false,
-    })
-  }
-
-  fn asn1_type() -> tag::Type {
-    tag::Type::from("OCTET STRING")
-  }
-}
+asn1_info!(String, [PRIM UNIVERSAL 19], "OCTET STRING");
 
 impl BerSerialize for String {
   fn serialize_value<E: ::BerEncRules, W: io::Write>

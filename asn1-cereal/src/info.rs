@@ -104,6 +104,12 @@ macro_rules! asn1_spec_tag {
   ([$tagnum:expr]) => (
     asn1_spec_tag!([CONTEXT $tagnum]);
   );
+  ([PRIM $($args:tt)*]) => (
+    $crate::tag::Tag {
+      constructed: false,
+      .. asn1_spec_tag!([$($args)*])
+    }
+  );
   ([UNIVERSAL $tagnum:expr]) => (
     $crate::tag::Tag {
       class: $crate::tag::Class::Universal,

@@ -13,7 +13,7 @@ use err;
 /// (Use this instead of Vec<u8>, since Vec is used for SEQUENCE OF).
 pub struct OctetString(Vec<u8>);
 
-asn1_info!(OctetString, [UNIVERSAL 4], "OCTET STRING");
+asn1_info!(OctetString, [PRIM UNIVERSAL 4], "OCTET STRING");
 
 impl BerSerialize for OctetString {
   fn serialize_value<E: ::BerEncRules, W: io::Write>
