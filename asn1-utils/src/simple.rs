@@ -34,14 +34,15 @@ fn main() {
 
   let mut buffer: Vec<u8> = Vec::new();
   let mut output = io::BufWriter::new(io::stdout());
-  let enc = BER;
+  let enc = DER;
 
   let seq = IntSequence {
     a: 3,
     b: vec![4],
-    c: Some(SomeString { a: "Hello".into() }),
+    c: SomeString { a: "Hello".into() },
     d: Choice::Str("Hi".into()),
     e: C(56),
+    f: true,
   };
 
   if opts.dump {
@@ -82,24 +83,16 @@ struct SomeString {
   a: String
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Asn1Info, BerSerialize, BerDeserialize, Debug, PartialEq)]
+#[asn1(asn1_type="INTSEQ", tag="[APPLICATION 16]", log, form="sequence")]
 struct IntSequence {
   a: u64,
   b: Vec<i32>,
-  c: Option<SomeString>,
+  c: SomeString,
   d: Choice,
   e: C,
+  f: bool
 }
-
-ber_sequence!(
-  IntSequence,
-  "INTSEQ",
-  a (DEFAULT 4);
-  b;
-  c (OPTIONAL);
-  d;
-  e;
-);
 
 struct ProgOpts {
   dump: bool,

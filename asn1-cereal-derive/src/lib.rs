@@ -14,7 +14,7 @@ extern crate nom;
 use proc_macro::TokenStream;
 
 use ::tag::parse_tag;
-use ::alias::{ber_alias_serialize, ber_alias_deserialize};
+use ::alias::{asn1_alias_info_constructed, ber_alias_serialize, ber_alias_deserialize};
 use ::seq_of::{ber_sequence_of_serialize, ber_sequence_of_deserialize};
 use ::seq::{ber_sequence_serialize, ber_sequence_deserialize};
 use ::choice::{ber_choice_serialize, ber_choice_deserialize};
@@ -34,6 +34,7 @@ pub fn asn1_info(input: TokenStream) -> TokenStream {
   let mut tag = quote!(None);
   let mut asn1_type = ast.ident.as_ref().to_owned();
   let mut _logging = false;
+  let mut form = None;
 
   // Parse attributes.
   for attr in &ast.attrs.iter().find(|e| e.name() == "asn1") {
@@ -45,6 +46,7 @@ pub fn asn1_info(input: TokenStream) -> TokenStream {
             let name: &str = _name.as_ref();
             match name {
               "tag" => tag = parse_tag(value.as_bytes()).unwrap().1,
+              "form" => form = Some(value.clone()),
               "asn1_type" => asn1_type = value.clone(),
               _ => (),
             };
@@ -62,10 +64,11 @@ pub fn asn1_info(input: TokenStream) -> TokenStream {
   let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
 
   // FIXME: We need the encoding settings here.
-  let alias_constructed = quote! {
-    fn asn1_constructed() -> bool {
-    }
-  };
+  let mut asn1_constructed = quote!();
+
+  if form == Some("alias".into()) {
+    asn1_constructed = asn1_alias_info_constructed(&ast);
+  }
 
   let derived = quote! {
     impl #impl_generics ::asn1_cereal::Asn1Info for #name #ty_generics #where_clause {
@@ -76,6 +79,8 @@ pub fn asn1_info(input: TokenStream) -> TokenStream {
       fn asn1_type() -> ::asn1_cereal::tag::Type {
         #asn1_type.to_owned()
       }
+
+      #asn1_constructed
     }
   };
 

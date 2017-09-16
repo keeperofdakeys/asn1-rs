@@ -22,7 +22,7 @@ pub fn ber_sequence_serialize(ast: &syn::MacroInput) -> Tokens {
       let tag = ::asn1_cereal::tag::Tag {
         class: ::asn1_cereal::tag::Class::ContextSpecific,
         tagnum: _count,
-        constructed: <#ty as ::asn1_cereal::Asn1Info>::asn1_constructed(),
+        constructed: <#ty as ::asn1_cereal::Asn1Info>::asn1_constructed(e),
       };
       _count += 1;
 
@@ -79,7 +79,7 @@ pub fn ber_sequence_deserialize(ast: &syn::MacroInput) -> Tokens {
         let our_tag = ::asn1_cereal::tag::Tag {
           class: ::asn1_cereal::tag::Class::ContextSpecific,
           tagnum: _count,
-          constructed: <#ty as ::asn1_cereal::Asn1Info>::asn1_constructed(),
+          constructed: <#ty as ::asn1_cereal::Asn1Info>::asn1_constructed(e),
         };
         _count += 1;
 

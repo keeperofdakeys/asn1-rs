@@ -3,6 +3,32 @@ use syn;
 
 use logging_enabled;
 
+pub fn asn1_alias_info_constructed(ast: &syn::MacroInput) -> Tokens {
+  let fields = if let syn::Body::Struct(ref body) = ast.body {
+    match *body {
+      syn::VariantData::Tuple(ref fields)
+        if fields.len() == 1 => fields,
+      _ => panic!("Expected a tuple struct with 1 fields for alias"),
+    }
+  } else {
+    panic!("Expected a struct for alias");
+  };
+  let inner_ty = &fields[0].ty;
+
+  quote! {
+    fn asn1_constructed<E: ::asn1_cereal::BerEncRules>(e: E) -> bool {
+      let tag = Self::asn1_tag();
+      if E::tag_rules() == ::asn1_cereal::ber::enc::TagEnc::Implicit ||
+         tag.is_none() {
+
+        <#inner_ty as ::asn1_cereal::Asn1Info>::asn1_constructed(e)
+      } else {
+        tag.map_or(false, |t| t.constructed)
+      }
+    }
+  }
+}
+
 pub fn ber_alias_serialize(ast: &syn::MacroInput) -> Tokens {
   let name = &ast.ident;
   let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();

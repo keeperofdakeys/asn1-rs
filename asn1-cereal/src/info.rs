@@ -11,7 +11,7 @@ pub trait Asn1Info {
   /// Find out whether this ASN.1 type would be constructed. For Explicit tagging this will match
   /// the `asn1_tag` function. For Implicit tagging, this will return whether the underlying type
   /// is constructed.
-  fn asn1_constructed() -> bool {
+  fn asn1_constructed<E: ::BerEncRules>(_e: E) -> bool {
     Self::asn1_tag().map_or(false, |t| t.constructed)
   }
 }
