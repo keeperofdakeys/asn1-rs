@@ -34,7 +34,7 @@ fn main() {
 
   let mut buffer: Vec<u8> = Vec::new();
   let mut output = io::BufWriter::new(io::stdout());
-  let enc = DER;
+  let enc = BERAlt;
 
   let seq = IntSequence {
     a: 3,
@@ -71,7 +71,7 @@ fn main() {
 struct C(u64);
 
 #[derive(Asn1Info, BerSerialize, BerDeserialize, Debug, PartialEq)]
-#[asn1(asn1_type="Choice", log)]
+#[asn1(tag="[APPLICATION 23]", asn1_type="Choice", log, form="choice")]
 enum Choice {
   A(i32),
   Str(String),
