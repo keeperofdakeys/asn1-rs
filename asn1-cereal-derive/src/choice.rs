@@ -50,7 +50,6 @@ pub fn ber_choice_serialize(ast: &syn::MacroInput) -> Tokens {
   }
 }
 
-
 pub fn ber_choice_deserialize(ast: &syn::MacroInput) -> Tokens {
   let name = &ast.ident;
   let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
