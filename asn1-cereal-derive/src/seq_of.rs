@@ -26,9 +26,8 @@ pub fn ber_sequence_of_deserialize(ast: &syn::MacroInput) -> Tokens {
 
   quote! {
     impl #impl_generics ::asn1_cereal::BerDeserialize for #name #ty_generics #where_clause {
-      fn deserialize_with_tag<E: ::asn1_cereal::BerEncRules, I: Iterator<Item=::std::io::Result<u8>>>
-          (e: E, reader: &mut I, tag: ::asn1_cereal::tag::Tag, len: ::asn1_cereal::tag::Len) ->
-          Result<Self, ::asn1_cereal::err::DecodeError> {
+      fn deserialize_value<E: ::asn1_cereal::BerEncRules, I: Iterator<Item=::std::io::Result<u8>>>
+          (e: E, reader: &mut I, len: tag::Len) -> Result<Self, ::asn1_cereal::err::DecodeError> {
         struct SeqOfDecoder<T, F, J: Iterator<Item=::std::io::Result<u8>>> {
           len: ::asn1_cereal::tag::Len,
           reader: ::asn1_cereal::byte::ByteReader<J>,
@@ -70,11 +69,6 @@ pub fn ber_sequence_of_deserialize(ast: &syn::MacroInput) -> Tokens {
 
             Some(::asn1_cereal::BerDeserialize::deserialize_value(self.e, &mut self.reader, len))
           }
-        }
-
-
-        if Some(tag) != <Self as ::asn1_cereal::Asn1Info>::asn1_tag() {
-          return Err(::asn1_cereal::err::DecodeError::TagTypeMismatch);
         }
 
         if len == ::asn1_cereal::tag::Len::Indef &&

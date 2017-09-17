@@ -74,9 +74,8 @@ macro_rules! ber_sequence_of_serialize {
 /// SEQUENCE/SET OF.
 macro_rules! ber_sequence_of_deserialize {
   (impl: $rs_type:ty) => (
-    fn deserialize_with_tag<E: $crate::BerEncRules, I: Iterator<Item=::std::io::Result<u8>>>
-        (e: E, reader: &mut I, tag: $crate::tag::Tag, len: $crate::tag::Len) ->
-        Result<Self, $crate::err::DecodeError> {
+    fn deserialize_value<E: $crate::BerEncRules, I: Iterator<Item=::std::io::Result<u8>>>
+        (e: E, reader: &mut I, len: $crate::tag::Len) -> Result<Self, $crate::err::DecodeError> {
       struct SeqOfDecoder<T, F, J: Iterator<Item=::std::io::Result<u8>>> {
         len: $crate::tag::Len,
         reader: $crate::byte::ByteReader<J>,
@@ -117,11 +116,6 @@ macro_rules! ber_sequence_of_deserialize {
 
           Some($crate::BerDeserialize::deserialize_value(self.e, &mut self.reader, len))
         }
-      }
-
-
-      if Some(tag) != <Self as $crate::Asn1Info>::asn1_tag() {
-        return Err($crate::err::DecodeError::TagTypeMismatch);
       }
 
       if len == $crate::tag::Len::Indef &&
