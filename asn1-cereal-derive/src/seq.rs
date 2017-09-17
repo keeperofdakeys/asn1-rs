@@ -19,16 +19,20 @@ pub fn ber_sequence_serialize(ast: &syn::MacroInput) -> Tokens {
     let ident = &v.ident.as_ref().expect("Requires named idents");
     let ty = &v.ty;
     quote! {
+      let is_implicit = E::tag_rules() == ::asn1_cereal::ber::enc::TagEnc::Implicit;
       let tag = ::asn1_cereal::tag::Tag {
         class: ::asn1_cereal::tag::Class::ContextSpecific,
         tagnum: _count,
-        constructed: <#ty as ::asn1_cereal::Asn1Info>::asn1_constructed(e),
+        constructed:
+          if is_implicit {
+            <#ty as ::asn1_cereal::Asn1Info>::asn1_constructed(e)
+          } else {
+            true
+          },
       };
       _count += 1;
 
-      // FIXME: We should be conditionally setting the constructed flag.
-
-      if E::tag_rules() == ::asn1_cereal::ber::enc::TagEnc::Implicit {
+      if is_implicit {
         try!(::asn1_cereal::BerSerialize::serialize_value(&self.#ident, e, &mut bytes));
       } else {
         try!(::asn1_cereal::BerSerialize::serialize_enc(&self.#ident, e, &mut bytes));
@@ -76,10 +80,16 @@ pub fn ber_sequence_deserialize(ast: &syn::MacroInput) -> Tokens {
     quote! {
       let #f_ident = {
         let this_tag = try!(::asn1_cereal::tag::Tag::read_tag(reader));
+        let is_implicit = E::tag_rules() == ::asn1_cereal::ber::enc::TagEnc::Implicit;
         let our_tag = ::asn1_cereal::tag::Tag {
           class: ::asn1_cereal::tag::Class::ContextSpecific,
           tagnum: _count,
-          constructed: <#ty as ::asn1_cereal::Asn1Info>::asn1_constructed(e),
+          constructed:
+            if is_implicit {
+              <#ty as ::asn1_cereal::Asn1Info>::asn1_constructed(e)
+            } else {
+              true
+            },
         };
         _count += 1;
 
@@ -91,7 +101,7 @@ pub fn ber_sequence_deserialize(ast: &syn::MacroInput) -> Tokens {
         }
 
         // If we are decoding with an implicit tag, deserialize value directly.
-        if E::tag_rules() == ::asn1_cereal::ber::enc::TagEnc::Implicit {
+        if is_implicit {
           try!(::asn1_cereal::BerDeserialize::deserialize_value(e, reader, len))
         } else {
           try!(::asn1_cereal::BerDeserialize::deserialize_enc(e, reader))
