@@ -1,13 +1,9 @@
-#[macro_use]
 extern crate asn1_cereal;
-#[macro_use] extern crate log;
 extern crate env_logger;
 #[macro_use]
 extern crate asn1_cereal_derive;
 
-use log::LogLevel;
-
-use asn1_cereal::{BerSerialize, BerDeserialize, DER, BER, BERAlt};
+use asn1_cereal::{BerDeserialize, DER};
 
 #[derive(Debug, Asn1Info, BerSerialize, BerDeserialize)]
 pub struct Blah {

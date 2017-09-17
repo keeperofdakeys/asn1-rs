@@ -1,6 +1,8 @@
 use quote::Tokens;
 use syn;
 
+// FIXME: Documenation
+
 pub fn ber_choice_serialize(ast: &syn::MacroInput) -> Tokens {
   let name = &ast.ident;
   let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
@@ -94,7 +96,7 @@ pub fn ber_choice_deserialize(ast: &syn::MacroInput) -> Tokens {
   quote! {
     impl #impl_generics ::asn1_cereal::BerDeserialize for #name #ty_generics #where_clause {
       fn deserialize_value<E: ::asn1_cereal::BerEncRules, I: Iterator<Item=::std::io::Result<u8>>>
-          (e: E, reader: &mut I, len: ::asn1_cereal::tag::Len) ->
+          (e: E, reader: &mut I, _len: ::asn1_cereal::tag::Len) ->
           Result<Self, ::asn1_cereal::err::DecodeError> {
         let (tag, len) = ::asn1_cereal::tag::read_taglen(reader)?;
         match tag {

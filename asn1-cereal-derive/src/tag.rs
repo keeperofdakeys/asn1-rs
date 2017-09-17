@@ -5,6 +5,8 @@ use std::str::from_utf8;
 
 use asn1_cereal::tag;
 
+// FIXME: Documenation
+
 
 /// Parse a string as an ASN.1 tag definition.
 ///

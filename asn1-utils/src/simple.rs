@@ -1,12 +1,10 @@
 // #![feature(trace_macros)]
-#![recursion_limit = "10240"]
 // trace_macros!(true);
 
 // #![feature(plugin)]
 // #![plugin(afl_plugin)]
 // #![feature(proc_macro)]
 
-#[macro_use]
 extern crate asn1_cereal;
 #[macro_use]
 extern crate asn1_cereal_derive;
@@ -16,17 +14,9 @@ extern crate env_logger;
 // extern crate afl;
 
 use std::io;
-use std::io::Read;
 
 use asn1_cereal::{BerSerialize, BerDeserialize, DER, BER, BERAlt};
 use argparse::{ArgumentParser, StoreTrue};
-
-// fn main() {
-//   afl::handle_bytes(|b| {
-//     let a = IntSequence::deserialize_enc(enc, b.iter().map(|b| Ok(b) as std::io::Result<_>));
-//     println!("{:?}", a);
-//   })
-// }
 
 fn main() {
   let opts = parse_args();
@@ -34,7 +24,7 @@ fn main() {
 
   let mut buffer: Vec<u8> = Vec::new();
   let mut output = io::BufWriter::new(io::stdout());
-  let enc = BERAlt;
+  let enc = BER;
 
   let seq = IntSequence {
     a: 3,

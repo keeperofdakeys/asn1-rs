@@ -1,30 +1,3 @@
-//! Macros to generate the implementation of the serialization traits for Rust
-//! iterators, as ASN.1 sequence of.
-//!
-//! This macro has already been implemented for `Vec` and `HashSet`, using the tags
-//! SEQUENCE OF and SET OF respectively.
-
-#[macro_export]
-/// Generate a SEQUENCE OF implementation for an iterator type. `asn1_info!` must
-/// be called manually.
-///
-/// ```rust,ignore
-/// // Assuming A implements IntoIterator and FromIterator.
-///
-/// asn1_info!(A, [PRIVATE 5], "A");
-///
-///
-/// ber_sequence_of!(A);
-///
-///  // OR
-///
-/// ber_sequence_of_serialize!(A);
-/// ber_sequence_of_deserialize!(A);
-///
-///
-/// // If A has a generic, you can instead do.
-/// ber_sequence_of!(A<T> => T);
-/// ```
 macro_rules! ber_sequence_of {
   ($($token:tt)*) => (
     ber_sequence_of_serialize!($($token)*);
@@ -32,7 +5,6 @@ macro_rules! ber_sequence_of {
   );
 }
 
-#[macro_export]
 /// Implement BerSerialize for a type, by iterating over each element, and
 /// calling serialize_enc on each element.
 ///

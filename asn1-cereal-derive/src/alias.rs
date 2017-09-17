@@ -3,6 +3,8 @@ use syn;
 
 use logging_enabled;
 
+// FIXME: Documenation
+
 pub fn asn1_alias_info_constructed(ast: &syn::MacroInput) -> Tokens {
   let fields = if let syn::Body::Struct(ref body) = ast.body {
     match *body {

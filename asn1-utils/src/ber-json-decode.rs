@@ -1,6 +1,5 @@
 extern crate asn1_cereal;
 extern crate argparse;
-extern crate serde;
 extern crate serde_json;
 
 use asn1_cereal::{tag, byte};
