@@ -19,9 +19,6 @@ fn main() {
   let opts = parse_args();
 
   let path = Path::new(opts.file.as_ref().unwrap());
-  if !path.is_file() {
-    panic!("Supplied file does not exist");
-  }
 
   // Create a buffered reader from the file.
   let reader = io::BufReader::new(fs::File::open(path).unwrap()).bytes();
