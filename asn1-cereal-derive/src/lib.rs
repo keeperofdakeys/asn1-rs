@@ -33,7 +33,7 @@ pub fn asn1_info(input: TokenStream) -> TokenStream {
   let ast = syn::parse_macro_input(&source).expect("Couldn't parse input TokenSteam into AST");
 
   // Tag and asn1 type for this rust type.
-  let mut tag = quote!(None);
+  let mut tag = None;
   let mut asn1_type = ast.ident.as_ref().to_owned();
   let mut _logging = false;
   let mut form = None;
@@ -51,7 +51,7 @@ pub fn asn1_info(input: TokenStream) -> TokenStream {
           syn::MetaItem::NameValue(ref _name, syn::Lit::Str(ref value, _)) => {
             let name: &str = _name.as_ref();
             match name {
-              "tag" => tag = parse_tag(value.as_bytes()).unwrap().1,
+              "tag" => tag = Some(parse_tag(value.as_bytes()).unwrap().1),
               "form" => form = Some(value.clone()),
               "asn1_type" => asn1_type = value.clone(),
               _ => (),
@@ -75,6 +75,33 @@ pub fn asn1_info(input: TokenStream) -> TokenStream {
   if form == Some("alias".into()) {
     asn1_constructed = asn1_alias_info_constructed(&ast);
   }
+
+  if form == Some("choice".into()) && tag.is_some() {
+    panic!("A choice must not have a tag defined");
+  }
+
+  let default_tag_num = if let Some(form) = form {
+    match form.as_str() {
+      "sequence" | "seq of" => Some(16),
+      "set" | "set of" => Some(17),
+      "choice" | "alias" => None,
+      _ => None,
+    }
+  } else {
+    None
+  };
+
+  let tag = match (tag, default_tag_num) {
+    (Some(t), _) => quote!(#t),
+    (_, Some(n)) => quote!(
+      Some(::asn1_cereal::tag::Tag {
+        class: ::asn1_cereal::tag::Class::Universal,
+        tagnum: #n.into(),
+        constructed: true,
+      })
+    ),
+    _ => quote!(None),
+  };
 
   let derived = quote! {
     impl #impl_generics ::asn1_cereal::Asn1Info for #name #ty_generics #where_clause {
@@ -143,7 +170,7 @@ pub fn ber_serialize(input: TokenStream) -> TokenStream {
 
   let derived = if let Some(form) = form {
     match form.as_str() {
-      "seq of" | "sequence of" | "set of" => ber_sequence_of_serialize(&ast),
+      "sequence of" | "seq of" | "set of" => ber_sequence_of_serialize(&ast),
       "alias" => ber_alias_serialize(&ast),
       "choice" => ber_choice_serialize(&ast),
       "seq" | "sequence" => ber_sequence_serialize(&ast),

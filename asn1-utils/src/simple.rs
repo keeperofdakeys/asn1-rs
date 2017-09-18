@@ -61,7 +61,7 @@ fn main() {
 struct C(u64);
 
 #[derive(Asn1Info, BerSerialize, BerDeserialize, Debug, PartialEq)]
-#[asn1(tag="[APPLICATION 23]", asn1_type="Choice", log, form="choice")]
+#[asn1(asn1_type="Choice", log, form="choice")]
 enum Choice {
   A(i32),
   Str(String),

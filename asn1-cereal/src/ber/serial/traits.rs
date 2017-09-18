@@ -42,6 +42,7 @@ pub trait BerSerialize: Asn1Info {
     };
 
     try!(tag.write_tag(writer));
+    trace!("Encoding with tag {}", tag);
 
     // If this is indefinite length and constructed, write the data directly.
     if E::len_rules() == enc::LenEnc::Indefinite &&
@@ -105,17 +106,19 @@ pub trait BerDeserialize: Asn1Info + Sized {
   fn deserialize_with_tag<E: enc::BerEncRules, I: Iterator<Item=io::Result<u8>>>
       (e: E, reader: &mut I, tag: tag::Tag, len: tag::Len) -> Result<Self, err::DecodeError> {
     debug!("Decoding the type {}", Self::asn1_type());
+    trace!("Decoding with tag {}", tag);
     if let Some(r) = Self::_deserialize_with_tag(e, reader, tag, len) {
       return r;
     }
 
-    if Some(tag) != Self::asn1_tag() {
-      if let Some(our_tag) = Self::asn1_tag() {
+    // If we have a tag, ensure the given tag matches.
+    if let Some(our_tag) = Self::asn1_tag() {
+      if tag != our_tag {
         warn!("Expected tag {}, but found tag {}", our_tag, tag);
-      } else {
-        warn!("Expected no tag, but found tag {}", tag);
+        return Err(err::DecodeError::TagTypeMismatch);
       }
-      return Err(err::DecodeError::TagTypeMismatch);
+    } else {
+      debug!("Decoding type with no tag");
     }
 
     // Handle any indefinite length error conditions.
@@ -158,8 +161,5 @@ pub trait BerDeserialize: Asn1Info + Sized {
   /// The data length must be explicitly passed to this function. For primitive types,
   /// an error will be returned if this length is Indefinite.
   fn deserialize_value<E: enc::BerEncRules, I: Iterator<Item=io::Result<u8>>>
-    (e: E, reader: &mut I, len: tag::Len) -> Result<Self, err::DecodeError> {
-    let (_, _, _) = (e, reader, len);
-    panic!("deserialize_value must be implemented for types that require it");
-  }
+    (e: E, reader: &mut I, len: tag::Len) -> Result<Self, err::DecodeError>;
 }
