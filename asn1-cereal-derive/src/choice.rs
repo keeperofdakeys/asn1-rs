@@ -87,7 +87,7 @@ pub fn ber_choice_deserialize(ast: &syn::MacroInput) -> Tokens {
         // if E::tag_rules() == ::asn1_cereal::ber::enc::TagEnc::Implicit {
         //   try!(::asn1_cereal::BerDeserialize::deserialize_value(e, reader, len))
         // } else {
-          try!(::asn1_cereal::BerDeserialize::deserialize_with_tag(e, reader, tag, len))
+        try!(::asn1_cereal::BerDeserialize::deserialize_with_tag(e, reader, tag, len))
         // }
       ))
     }
@@ -95,14 +95,22 @@ pub fn ber_choice_deserialize(ast: &syn::MacroInput) -> Tokens {
 
   quote! {
     impl #impl_generics ::asn1_cereal::BerDeserialize for #name #ty_generics #where_clause {
+      fn _deserialize_with_tag<E: ::asn1_cereal::BerEncRules, I: Iterator<Item=::std::io::Result<u8>>>
+          (e: E, reader: &mut I, tag: ::asn1_cereal::tag::Tag, len: ::asn1_cereal::tag::Len) ->
+          Option<Result<Self, ::asn1_cereal::err::DecodeError>> {
+        let mut res = ||
+          match tag {
+            #(#match_pattern => #match_action),*,
+            _ => panic!("Choice: Unknown tag {}", tag),
+          };
+        Some(res())
+      }
+
       fn deserialize_value<E: ::asn1_cereal::BerEncRules, I: Iterator<Item=::std::io::Result<u8>>>
           (e: E, reader: &mut I, _len: ::asn1_cereal::tag::Len) ->
           Result<Self, ::asn1_cereal::err::DecodeError> {
         let (tag, len) = ::asn1_cereal::tag::read_taglen(reader)?;
-        match tag {
-          #(#match_pattern => #match_action),*,
-          _ => unimplemented!(),
-        }
+        Self::_deserialize_with_tag(e, reader, tag, len).unwrap()
       }
     }
   }
