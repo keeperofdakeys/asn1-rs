@@ -9,7 +9,8 @@ extern crate asn1_cereal;
 #[macro_use]
 extern crate asn1_cereal_derive;
 extern crate argparse;
-#[macro_use] extern crate log;
+#[macro_use]
+extern crate log;
 extern crate env_logger;
 // extern crate afl;
 

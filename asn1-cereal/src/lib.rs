@@ -19,19 +19,17 @@
 //!
 //! # Example
 //!
-//! ```
-//! #[macro_use] extern crate asn1_cereal; fn main() {
+//! ```rust
+//! #[macro_use]
+//! extern crate asn1_cereal_derive;
+//! extern crate asn1_cereal;
+//! fn main() {
+//!   #[derive(Asn1Info, BerSerialize, BerDeserialize)]
+//!   #[asn1(asn1_type="SHORT_SEQUENCE", tag="[APPLICATION 8]")]
 //!   struct ShortSequence {
 //!     z: u64,
 //!     y: u32,
 //!   }
-//!
-//!   ber_sequence!(
-//!     ShortSequence,
-//!     "SHORT_SEQUENCE",
-//!     z;
-//!     y;
-//!   );
 //!
 //!   use asn1_cereal::BerSerialize;
 //!
@@ -39,7 +37,10 @@
 //!   let mut bytes: Vec<u8> = Vec::new();
 //!   BerSerialize::serialize(&data, &mut bytes).unwrap();
 //! }
+//!
 //! ```
+
+// FIXME: Documentation tests
 
 #![cfg_attr(feature="clippy", feature(plugin))]
 #![cfg_attr(feature="clippy", plugin(clippy))]
