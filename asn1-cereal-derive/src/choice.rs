@@ -72,7 +72,8 @@ pub fn ber_choice_deserialize(ast: &syn::MacroInput) -> Tokens {
     // TODO: Handle asn1 attributes
     quote! {
       tag @ ::asn1_cereal::tag::Tag { .. }
-        if tag == <#inner as ::asn1_cereal::Asn1Info>::asn1_tag().unwrap()
+        if tag == <#inner as ::asn1_cereal::Asn1Info>::asn1_tag()
+                    .expect("All types used for CHOICE must have a defined tag")
     }
   }).collect();
 

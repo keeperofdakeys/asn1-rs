@@ -12,4 +12,4 @@ proc-macro = true
 asn1-cereal = "0.2"
 syn = "0.11"
 quote = "0.3"
-nom = "1.2"
+nom = "^2"

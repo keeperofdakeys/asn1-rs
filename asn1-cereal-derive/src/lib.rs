@@ -51,7 +51,13 @@ pub fn asn1_info(input: TokenStream) -> TokenStream {
           syn::MetaItem::NameValue(ref _name, syn::Lit::Str(ref value, _)) => {
             let name: &str = _name.as_ref();
             match name {
-              "tag" => tag = Some(parse_tag(value.as_bytes()).unwrap().1),
+              "tag" => tag = {
+                let tag = parse_tag(value.as_bytes());
+                if !tag.is_done() {
+                  panic!("Failed to parse tag");
+                }
+                Some(tag.unwrap())
+              },
               "form" => form = Some(value.clone()),
               "asn1_type" => asn1_type = value.clone(),
               _ => (),
