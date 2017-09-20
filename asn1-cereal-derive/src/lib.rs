@@ -56,7 +56,7 @@ pub fn asn1_info(input: TokenStream) -> TokenStream {
                 if !tag.is_done() {
                   panic!("Failed to parse tag");
                 }
-                Some(tag.unwrap())
+                Some(tag.unwrap().1)
               },
               "form" => form = Some(value.clone()),
               "asn1_type" => asn1_type = value.clone(),
