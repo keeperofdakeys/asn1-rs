@@ -31,3 +31,17 @@ impl BerDeserialize for OctetString {
     Ok(OctetString(try!(bytes)))
   }
 }
+
+impl<T: ::Asn1Info> ::Asn1Info for Option<T> {
+  fn asn1_tag() -> Option<tag::Tag> {
+    <T as ::Asn1Info>::asn1_tag()
+  }
+
+  fn asn1_type() -> tag::Type {
+    <T as ::Asn1Info>::asn1_type()
+  }
+
+  fn asn1_constructed<E: ::BerEncRules>(e: E) -> bool {
+    <T as ::Asn1Info>::asn1_constructed(e)
+  }
+}

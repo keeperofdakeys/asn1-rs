@@ -27,7 +27,6 @@ impl<I: Iterator<Item=io::Result<u8>>> ByteReader<I> {
     }
   }
 
-  /*
   /// Create a new ByteReader from an Iterator, and add
   /// a maximum length that can be read from it.
   pub fn new_limit(reader: I, limit: u64) -> ByteReader<I> {
@@ -37,7 +36,16 @@ impl<I: Iterator<Item=io::Result<u8>>> ByteReader<I> {
       limit: Some(limit),
     }
   }
-  */
+
+  pub fn into_reader(self) -> I {
+    self.reader
+  }
+
+  /// Determine whether this ByteReader has reached its defined
+  /// limit. If not defined, `false` is returned.
+  pub fn reached_limit(&self) -> bool {
+    self.limit.map(|l| self.count >= l).unwrap_or(false)
+  }
 
   /// Read a byte, and translate Eof into an UnxpectedEof error.
   pub fn read(&mut self) -> io::Result<u8> {

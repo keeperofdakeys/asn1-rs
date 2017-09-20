@@ -33,7 +33,7 @@ fn main() {
     c: SomeString { a: "Hello".into() },
     d: Choice::Str("Hi".into()),
     e: C(56),
-    f: true,
+    f: None, // Some(false),
   };
 
   if opts.dump {
@@ -81,8 +81,9 @@ struct IntSequence {
   b: Vec<i32>,
   c: SomeString,
   d: Choice,
+  #[asn1(optional)]
+  f: Option<bool>,
   e: C,
-  f: bool
 }
 
 struct ProgOpts {
