@@ -81,9 +81,9 @@ struct IntSequence {
   b: Vec<i32>,
   c: SomeString,
   d: Choice,
+  e: C,
   #[asn1(optional)]
   f: Option<bool>,
-  e: C,
 }
 
 struct ProgOpts {

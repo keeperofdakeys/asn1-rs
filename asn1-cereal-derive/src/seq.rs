@@ -115,6 +115,7 @@ pub fn ber_sequence_deserialize(ast: &syn::MacroInput) -> Tokens {
     let ident = &v.ident;
     let f_ident: syn::Ident = format!("field_{}", ident.as_ref().expect("Requires named idents")).into();
     let ty = &v.ty;
+    let optional = field_is_optional(&v.attrs);
     let tag_decode = quote!(
       {
         _tag = None;
@@ -136,7 +137,7 @@ pub fn ber_sequence_deserialize(ast: &syn::MacroInput) -> Tokens {
     //
     //   }
     // );
-    let decode = if field_is_optional(&v.attrs) {
+    let decode = if optional {
       quote!(
         if this_tag == our_tag {
           Some(
@@ -158,8 +159,24 @@ pub fn ber_sequence_deserialize(ast: &syn::MacroInput) -> Tokens {
     // length, otherwise an OPTIONAL or DEFAULT as the final field means we'll
     // look beyond our element.
     // TODO: Make context-specific tags optional, implement default
+    let length_check =
+      quote!(
+        if reader.exceeded {
+          return Err(::asn1_cereal::err::DecodeError::GreaterLen);
+        }
+      );
+    let optional_length_check = if optional {
+      quote!(
+        if reader.reached_limit() {
+          None
+        } else
+      )
+    } else {
+      quote!()
+    };
     quote! {
-      let #f_ident = {
+      #length_check
+      let #f_ident = #optional_length_check {
         let this_tag = match _tag {
           Some(t) => t,
           None => {
@@ -201,6 +218,8 @@ pub fn ber_sequence_deserialize(ast: &syn::MacroInput) -> Tokens {
           (e: E, reader: &mut I, len: ::asn1_cereal::tag::Len) -> Result<Self, ::asn1_cereal::err::DecodeError> {
         let mut _count = 0u64;
         let mut _tag: Option<::asn1_cereal::tag::Tag> = None;
+        let mut byte_reader = ::asn1_cereal::byte::ByteReader::new(reader, len.into());
+        let reader = &mut byte_reader;
 
         #( #build )*
 
