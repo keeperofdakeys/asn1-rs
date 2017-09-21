@@ -98,7 +98,7 @@ macro_rules! ber_sequence_of_deserialize {
       let mut decoder = SeqOfDecoder {
         e: e,
         len: len.into(),
-        reader: $crate::byte::ByteReader::new(reader),
+        reader: $crate::byte::ByteReader::new(reader, None),
         _p: ::std::marker::PhantomData,
       };
       let v: Result<$rs_type, _> = ::std::iter::FromIterator::from_iter(decoder.by_ref());

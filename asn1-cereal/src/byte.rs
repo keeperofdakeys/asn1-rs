@@ -10,39 +10,36 @@ pub fn read_byte<I: Iterator<Item=io::Result<u8>>>(iter: &mut I) -> io::Result<u
   }
 }
 
-/// A reader to easily read a byte from a reader, while keeping a read count.
+/// A byte reader that will count how many bytes are read from it,
+/// and allows a limit to be defined. Any reads over the limit will
+/// return `None` upon `next()` being called, and set the exceeded
+/// flag.
 pub struct ByteReader<I: Iterator<Item=io::Result<u8>>> {
   reader: I,
   pub count: u64,
-  limit: Option<u64>,
+  pub limit: Option<u64>,
+  pub exceeded: bool,
 }
 
 impl<I: Iterator<Item=io::Result<u8>>> ByteReader<I> {
   /// Create a new ByteReader from an Iterator.
-  pub fn new(reader: I) -> ByteReader<I> {
+  pub fn new(reader: I, limit: Option<u64>) -> ByteReader<I> {
     ByteReader {
       reader: reader,
       count: 0,
-      limit: None
+      limit: limit,
+      exceeded: false
     }
   }
 
-  /// Create a new ByteReader from an Iterator, and add
-  /// a maximum length that can be read from it.
-  pub fn new_limit(reader: I, limit: u64) -> ByteReader<I> {
-    ByteReader {
-      reader: reader,
-      count: 0,
-      limit: Some(limit),
-    }
-  }
-
+  /// Trun this ByteReader back into the original reader used
+  /// to create it.
   pub fn into_reader(self) -> I {
     self.reader
   }
 
   /// Determine whether this ByteReader has reached its defined
-  /// limit. If not defined, `false` is returned.
+  /// limit. If no limit is defined, `false` is returned.
   pub fn reached_limit(&self) -> bool {
     self.limit.map(|l| self.count >= l).unwrap_or(false)
   }
@@ -57,23 +54,20 @@ impl<I: Iterator<Item=io::Result<u8>>> Iterator for ByteReader<I> {
   type Item = io::Result<u8>;
 
   fn next(&mut self) -> Option<Self::Item> {
-    let val = self.reader.next();
-    if val.is_some() {
-      self.count += 1;
-      // Return None if we've exceeded our limit.
-      if let Some(l) = self.limit {
-        if l > self.count {
-          return None;
-        }
-      }
+    // If we've read limit or more bytes, set exceeded flag
+    // and return None.
+    if self.limit.map(|l| self.count >= l).unwrap_or(false) {
+      self.exceeded = true;
+      return None;
     }
-    val
+    self.count += 1;
+    self.reader.next()
   }
 }
 
 impl<I: Iterator<Item=io::Result<u8>>> From<I> for ByteReader<I> {
   fn from(iter: I) -> Self {
-    ByteReader::new(iter)
+    ByteReader::new(iter, None)
   }
 }
 
