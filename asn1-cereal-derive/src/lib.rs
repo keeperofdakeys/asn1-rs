@@ -15,17 +15,18 @@ extern crate nom;
 
 use proc_macro::TokenStream;
 
-use ::tag::parse_tag;
 use ::alias::{asn1_alias_info_constructed, ber_alias_serialize, ber_alias_deserialize};
-use ::seq_of::{ber_sequence_of_serialize, ber_sequence_of_deserialize};
-use ::seq::{ber_sequence_serialize, ber_sequence_deserialize};
 use ::choice::{ber_choice_serialize, ber_choice_deserialize};
+use ::seq::{ber_sequence_serialize, ber_sequence_deserialize};
+use ::seq_of::{ber_sequence_of_serialize, ber_sequence_of_deserialize};
+use ::tag::parse_tag;
 
-mod tag;
-mod seq;
-mod seq_of;
 mod alias;
 mod choice;
+mod field;
+mod seq;
+mod seq_of;
+mod tag;
 
 #[proc_macro_derive(Asn1Info, attributes(asn1))]
 pub fn asn1_info(input: TokenStream) -> TokenStream {

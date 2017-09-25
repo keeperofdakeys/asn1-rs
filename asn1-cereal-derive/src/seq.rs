@@ -1,25 +1,9 @@
 use quote::Tokens;
 use syn;
 
-// FIXME: Documenation
+use field;
 
-fn field_is_optional(attrs: &[syn::Attribute]) -> bool {
-  for attr in attrs.iter().find(|e| e.name() == "asn1") {
-    if let syn::MetaItem::List(_, ref items) = attr.value {
-      for item in items {
-        if let syn::NestedMetaItem::MetaItem(ref item) = *item {
-          match *item {
-            syn::MetaItem::Word(ref _ident)
-              if _ident == "optional"
-                => return true,
-            _ => (),
-          };
-        }
-      }
-    }
-  }
-  return false;
-}
+// FIXME: Documenation
 
 pub fn ber_sequence_serialize(ast: &syn::MacroInput) -> Tokens {
   let name = &ast.ident;
@@ -38,6 +22,7 @@ pub fn ber_sequence_serialize(ast: &syn::MacroInput) -> Tokens {
   let actions: Vec<_> = fields.iter().map(|v| {
     let ident = &v.ident.as_ref().expect("Requires named idents");
     let ty = &v.ty;
+    let field = field::Field::parse(&v.attrs);
     let tag_encode = quote!(
       if is_implicit {
         try!(::asn1_cereal::BerSerialize::serialize_value(value, e, &mut bytes));
@@ -50,7 +35,7 @@ pub fn ber_sequence_serialize(ast: &syn::MacroInput) -> Tokens {
       try!(writer.write_all(&mut bytes));
       bytes.clear();
     );
-    let encode = if field_is_optional(&v.attrs) {
+    let encode = if field.optional {
       quote!(
         if let &Some(ref value) = &self.#ident {
           #tag_encode
@@ -65,6 +50,7 @@ pub fn ber_sequence_serialize(ast: &syn::MacroInput) -> Tokens {
     quote! {
       let is_implicit =
         E::tag_rules() == ::asn1_cereal::ber::enc::TagEnc::Implicit;
+
       let tag = ::asn1_cereal::tag::Tag {
         class: ::asn1_cereal::tag::Class::ContextSpecific,
         tagnum: _count,
@@ -115,7 +101,7 @@ pub fn ber_sequence_deserialize(ast: &syn::MacroInput) -> Tokens {
     let ident = &v.ident;
     let f_ident: syn::Ident = format!("field_{}", ident.as_ref().expect("Requires named idents")).into();
     let ty = &v.ty;
-    let optional = field_is_optional(&v.attrs);
+    let field = field::Field::parse(&v.attrs);
     let tag_decode = quote!(
       {
         _tag = None;
@@ -137,7 +123,7 @@ pub fn ber_sequence_deserialize(ast: &syn::MacroInput) -> Tokens {
     //
     //   }
     // );
-    let decode = if optional {
+    let decode = if field.optional {
       quote!(
         if this_tag == our_tag {
           Some(
@@ -165,7 +151,7 @@ pub fn ber_sequence_deserialize(ast: &syn::MacroInput) -> Tokens {
           return Err(::asn1_cereal::err::DecodeError::GreaterLen);
         }
       );
-    let optional_length_check = if optional {
+    let optional_length_check = if field.optional {
       quote!(
         if reader.reached_limit() {
           None
